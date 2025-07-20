@@ -13,6 +13,13 @@ class Flow extends Model
         'kelengkapan', 
         'waktu', 
         'output', 
-        'keterangan'
+        'keterangan',
+        'symbols',
+        'return_to'
+    ];
+
+    protected $casts = [
+        'symbols' => 'array',
+        'return_to' => 'array'
     ];
 }

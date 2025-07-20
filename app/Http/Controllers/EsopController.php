@@ -138,6 +138,24 @@ class EsopController extends Controller
                     continue;
                 }
 
+                // Ambil data symbols untuk flow ini
+                $symbols = [];
+                foreach ($request->all() as $symbolKey => $symbolValue) {
+                    if (str_starts_with($symbolKey, "symbol_{$index}_") && !empty($symbolValue)) {
+                        $pelaksanaIndex = str_replace("symbol_{$index}_", '', $symbolKey);
+                        $symbols[$pelaksanaIndex] = $symbolValue;
+                    }
+                }
+
+                // Ambil data return_to untuk flow ini
+                $returnTo = [];
+                foreach ($request->all() as $returnKey => $returnValue) {
+                    if (str_starts_with($returnKey, "return_to_{$index}_") && !empty($returnValue)) {
+                        $pelaksanaIndex = str_replace("return_to_{$index}_", '', $returnKey);
+                        $returnTo[$pelaksanaIndex] = (int) $returnValue;
+                    }
+                }
+
                 Flow::create([
                     'esop_id' => $id,
                     'no_urutan' => $index,
@@ -146,6 +164,8 @@ class EsopController extends Controller
                     'waktu' => $request->input("waktu_$index"),
                     'output' => $request->input("output_$index"),
                     'keterangan' => $request->input("keterangan_$index"),
+                    'symbols' => !empty($symbols) ? $symbols : null,
+                    'return_to' => !empty($returnTo) ? $returnTo : null,
                 ]);
             }
         }
