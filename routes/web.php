@@ -19,6 +19,7 @@ use App\Http\Controllers\AuthController;
     Route::get('/sekretariat/perencanaan', [EsopController::class, 'perencanaanTampil'])->name('perencanaan.tampil');
 
     Route::get('/esop', [EsopController::class, 'esopTampil'])->name('esop.tampil');
+    Route::get('/esop/search', [EsopController::class, 'esopSearch'])->name('esop.search');
     Route::get('/esop/tambah', [EsopController::class, 'esopTambah'])->name('esop.tambah');
     Route::post('/esop/simpan', [EsopController::class, 'esopSimpan'])->name('esop.simpan');
     Route::get('/esop/edit/{id}', [EsopController::class, 'esopEdit'])->name('esop.edit');

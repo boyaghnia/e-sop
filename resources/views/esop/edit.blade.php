@@ -1,4 +1,100 @@
 <x-layout>
+    <style>
+        @media print {
+            /* Sembunyikan semua elemen kecuali tabel */
+            body * {
+                visibility: hidden;
+            }
+
+            /* Tampilkan hanya tabel dan parent-nya */
+            .print-area,
+            .print-area * {
+                visibility: visible;
+                font-size: 11px;
+            }
+
+            /* Posisikan tabel di print area */
+            .print-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: auto;
+                transform: scale(1);
+                transform-origin: center center;
+                page-break-inside: avoid;
+            }
+
+            /* Style khusus untuk print */
+            table {
+                border-collapse: collapse !important;
+                width: 100% !important;
+                height: auto !important;
+                table-layout: fixed !important;
+                page-break-inside: avoid !important;
+            }
+
+            td {
+                border: 1px solid black !important;
+                padding: 4px !important;
+                color: black !important;
+                font-size: 10px !important;
+                word-wrap: break-word !important;
+                overflow: hidden !important;
+                height: auto !important;
+            }
+
+            .text-gray-800,
+            .text-gray-400 {
+                color: black !important;
+            }
+
+            img {
+                max-width: 120px !important;
+                max-height: 80px !important;
+                height: auto !important;
+                width: auto !important;
+            }
+
+            /* Pastikan font size konsisten */
+            p,
+            div,
+            span {
+                font-size: 11px !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            /* Atur tinggi row untuk header */
+            tr:nth-child(-n + 6) td {
+                height: auto !important;
+                max-height: 8vh !important;
+            }
+
+            /* Atur tinggi untuk konten utama */
+            tr:nth-child(n + 7) td {
+                height: auto !important;
+                max-height: 12vh !important;
+            }
+
+            @page {
+                size: F4;
+                size: 210mm 330mm;
+                margin: 10mm;
+                -webkit-print-color-adjust: exact;
+                color-adjust: exact;
+            }
+
+            /* Hindari page break di dalam tabel */
+            tbody,
+            tr,
+            td {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+        }
+    </style>
+
     <div class="flex space-x-3">
         <div class="w-[35%] rounded-sm bg-white p-4 shadow-sm">
             <form id="esopForm" action="{{ route('esop.update', ['id' => $esop->id]) }}" method="POST">
@@ -320,7 +416,7 @@
 
         <div class="w-[65%] space-y-3">
             <div class="rounded-sm bg-white p-4 shadow-sm">
-                <table class="w-full table-fixed border border-black text-sm">
+                <table class="print-area h-1 w-full table-fixed border border-black text-sm">
                     <tbody>
                         <!-- === Header === -->
                         <tr>
@@ -332,7 +428,7 @@
                                 <div id="preview_judul_sop" class="text-center text-sm text-gray-800"></div>
                             </td>
                             <td colspan="2" class="border p-2 font-bold">Nomor SOP</td>
-                            <td colspan="2" class="border p-2">
+                            <td colspan="3" class="border p-2">
                                 <div id="preview_no_sop" class="text-left text-sm text-gray-800"></div>
                             </td>
                         </tr>
@@ -340,7 +436,7 @@
                         <!-- === Tgl. Ditetapkan === -->
                         <tr>
                             <td colspan="2" class="border p-2 font-bold">Tgl. Ditetapkan</td>
-                            <td colspan="2" class="border p-2">
+                            <td colspan="3" class="border p-2">
                                 {{-- Input Tgl. Ditetapkan --}}
                                 <div id="preview_tgl_ditetapkan" class="text-left text-sm text-gray-800"></div>
                             </td>
@@ -349,7 +445,7 @@
                         <!-- === Tgl. Revisi === -->
                         <tr>
                             <td colspan="2" class="border p-2 font-bold">Tgl. Revisi</td>
-                            <td colspan="2" class="border p-2">
+                            <td colspan="3" class="border p-2">
                                 {{-- Input Tgl. Revisi --}}
                                 <div id="preview_tgl_revisi" class="text-left text-sm text-gray-800"></div>
                             </td>
@@ -358,7 +454,7 @@
                         <!-- === Tgl. Diberlakukan === -->
                         <tr>
                             <td colspan="2" class="border p-2 font-bold">Tgl. Diberlakukan</td>
-                            <td colspan="2" class="border p-2">
+                            <td colspan="3" class="border p-2">
                                 {{-- Input Tgl. Diberlakukan --}}
                                 <div id="preview_tgl_diberlakukan" class="text-left text-sm text-gray-800"></div>
                             </td>
@@ -367,10 +463,10 @@
                         <!-- === Ditetapkan Oleh === -->
                         <tr>
                             <td colspan="2" class="border p-2 font-bold">Ditetapkan Oleh</td>
-                            <td colspan="2" class="border p-2 text-center">
+                            <td colspan="3" class="border p-2 text-center">
                                 <p>
-                                    <br />
                                     Sekretaris Direktorat Jenderal Perhubungan Udara
+                                    <br />
                                     <br />
                                     <br />
                                     <br />
@@ -379,14 +475,13 @@
                                     <br />
                                     NIP. 19740819 199501 1 001
                                     <br />
-                                    <br />
                                 </p>
                             </td>
                         </tr>
 
                         <!-- === Input Nama SOP === -->
                         <tr>
-                            <td colspan="9" class="border p-2 font-bold">
+                            <td colspan="10" class="border p-2 font-bold">
                                 <div id="preview_nama_sop" class="text-center text-sm text-gray-800"></div>
                             </td>
                         </tr>
@@ -394,7 +489,7 @@
                         {{-- Judul Dasar Hukum - Kualifikasi Pelaksana --}}
                         <tr>
                             <td colspan="5" class="border p-2 font-bold">Dasar Hukum :</td>
-                            <td colspan="4" class="border p-2 font-bold">Kualifikasi Pelaksana:</td>
+                            <td colspan="5" class="border p-2 font-bold">Kualifikasi Pelaksana:</td>
                         </tr>
 
                         {{-- Input Dasar Hukum - Kualifikasi Pelaksana --}}
@@ -402,35 +497,35 @@
                             <td colspan="5" class="border p-2 align-top">
                                 <div id="preview_dasar_hukum" class="text-left text-sm text-gray-800"></div>
                             </td>
-                            <td colspan="4" class="border p-2 align-top">
+                            <td colspan="5" class="border p-2 align-top">
                                 <div id="preview_kualifikasi_pelaksana" class="text-left text-sm text-gray-800"></div>
                             </td>
                         </tr>
 
                         <tr>
                             <td colspan="5" class="border p-2 font-bold">Keterkaitan :</td>
-                            <td colspan="4" class="border p-2 font-bold">Peralatan / Perlengkapan:</td>
+                            <td colspan="5" class="border p-2 font-bold">Peralatan / Perlengkapan:</td>
                         </tr>
 
                         <tr>
                             <td colspan="5" class="border p-2 align-top">
                                 <div id="preview_keterkaitan" class="text-left text-sm text-gray-800"></div>
                             </td>
-                            <td colspan="4" class="border p-2 align-top">
+                            <td colspan="5" class="border p-2 align-top">
                                 <div id="preview_peralatan_perlengkapan" class="text-left text-sm text-gray-800"></div>
                             </td>
                         </tr>
 
                         <tr>
                             <td colspan="5" class="border p-2 font-bold">Peringatan :</td>
-                            <td colspan="4" class="border p-2 font-bold">Pencatatan dan Pendataan:</td>
+                            <td colspan="5" class="border p-2 font-bold">Pencatatan dan Pendataan:</td>
                         </tr>
 
                         <tr>
                             <td colspan="5" class="border p-2 align-top">
                                 <div id="preview_peringatan" class="text-left text-sm text-gray-800"></div>
                             </td>
-                            <td colspan="4" rowspan="3" class="border p-2 align-top">
+                            <td colspan="5" rowspan="3" class="border p-2 align-top">
                                 <div id="preview_pencatatan_pendataan" class="text-left text-sm text-gray-800"></div>
                             </td>
                         </tr>
@@ -447,36 +542,15 @@
                     </tbody>
                 </table>
 
-                {{--
-                    <div class="flex items-center justify-between gap-x-2 py-5">
+                <div class="flex items-center justify-between gap-x-2 py-5">
                     <button
-                    type="submit"
-                    id="exportButton"
-                    onclick="showSuccessAlert()"
-                    class="cursor-pointer rounded-sm bg-blue-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-400 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                        type="button"
+                        onclick="window.print()"
+                        class="cursor-pointer rounded-sm bg-green-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-400 focus-visible:outline-offset-2 focus-visible:outline-green-600"
                     >
-                    Export PDF
+                        Cetak
                     </button>
-                    
-                    <div>
-                    <button
-                    type="button"
-                    id="editButton"
-                    class="cursor-pointer rounded-sm bg-gray-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-400 focus-visible:outline-offset-2 focus-visible:outline-gray-600"
-                    >
-                    Edit
-                    </button>
-                    <button
-                    type="submit"
-                    id="simpanButton"
-                    onclick="showSuccessAlert()"
-                    class="cursor-pointer rounded-sm bg-blue-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-400 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-                    >
-                    Simpan
-                    </button>
-                    </div>
-                    </div>
-                --}}
+                </div>
             </div>
 
             <div class="rounded-sm bg-white p-4 shadow-sm">

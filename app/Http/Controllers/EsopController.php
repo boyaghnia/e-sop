@@ -15,7 +15,9 @@ class EsopController extends Controller
     }
 
     function esopTampil() {
-        $esops = Esop::all();
+        $esops = Esop::with('user')
+            ->orderBy('created_at', 'desc')
+            ->paginate(5);
         return view('esop.tampil', compact('esops'));
     }
 
@@ -172,7 +174,43 @@ class EsopController extends Controller
 
         return redirect()->route('esop.flow', ['id' => $id])->with('success', 'Flow berhasil disimpan');
     }
-    
+
+    public function esopSearch(Request $request)
+    {
+        $query = $request->get('query');
+        
+        try {
+            if (empty($query)) {
+                // Jika query kosong, tampilkan semua data
+                $esops = Esop::with('user')
+                    ->orderBy('created_at', 'desc')
+                    ->get();
+            } else {
+                // Lakukan pencarian berdasarkan nama_sop atau nama user
+                $esops = Esop::with('user')
+                    ->where('nama_sop', 'LIKE', '%' . $query . '%')
+                    ->orWhere('judul_sop', 'LIKE', '%' . $query . '%')
+                    ->orWhere('no_sop', 'LIKE', '%' . $query . '%')
+                    ->orWhereHas('user', function($userQuery) use ($query) {
+                        $userQuery->where('name', 'LIKE', '%' . $query . '%');
+                    })
+                    ->orderBy('created_at', 'desc')
+                    ->get();
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $esops,
+                'message' => 'Data berhasil diambil'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'data' => [],
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 
     
 }

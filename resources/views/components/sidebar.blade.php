@@ -1,6 +1,6 @@
 <div class="sidebar no-print">
     <aside
-        class="fixed flex h-screen w-64 flex-col justify-between overflow-y-auto border-r bg-white px-5 py-8 rtl:border-r-0 rtl:border-l dark:border-gray-700 dark:bg-gray-900"
+        class="fixed z-2 flex h-screen w-64 flex-col justify-between overflow-y-auto border-r bg-white px-5 py-8 rtl:border-r-0 rtl:border-l dark:border-gray-700 dark:bg-gray-900"
     >
         <div>
             {{-- Logo & Navigation --}}

@@ -3,8 +3,8 @@
     $breadcrumb = BreadcrumbHelper::generate();
 @endphp
 
-<div class="fixed top-0 w-full bg-white shadow-sm">
-    <div class="z-99990 container mx-auto ml-70 flex items-center overflow-x-auto py-4 pl-3 whitespace-nowrap">
+<div class="fixed top-0 z-1 w-full bg-white shadow-sm">
+    <div class="container mx-auto ml-70 flex items-center overflow-x-auto py-4 pl-3 whitespace-nowrap">
         @foreach ($breadcrumb as $index => $item)
             @if ($index === 0)
                 <a href="{{ $item['url'] }}" class="text-gray-600 hover:text-blue-600">

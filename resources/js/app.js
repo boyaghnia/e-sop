@@ -39,10 +39,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 text: `Yakin ingin menghapus SOP "${namaSOP}"?`,
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#6b7280',
                 confirmButtonText: 'Ya, Hapus!',
                 cancelButtonText: 'Batal',
+                reverseButtons: true,
             }).then((result) => {
                 if (result.isConfirmed) {
                     form.submit();

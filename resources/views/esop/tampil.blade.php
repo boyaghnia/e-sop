@@ -69,7 +69,7 @@
                     <tr class="tr_pegawai border-b border-slate-200 hover:bg-slate-50">
                         <td class="p-4 py-5">
                             <p class="block text-sm font-semibold text-slate-800">
-                                {{ $index + 1 }}
+                                {{ ($esops->currentPage() - 1) * $esops->perPage() + $index + 1 }}
                             </p>
                         </td>
                         <td class="p-4 py-5">
@@ -159,7 +159,15 @@
         </table>
 
         <div class="items-center justify-between px-4 py-3">
-            {{-- {{ $users->links('dashboard.pagination') }} --}}
+            {{ $esops->links('pagination.pagination') }}
+        </div>
+    </div>
+
+    <div id="detailModal" class="bg-opacity-50 fixed inset-0 hidden items-center justify-center bg-gray-600">
+        <div class="relative w-1/3 rounded-lg bg-white p-4 shadow-lg">
+            <div id="modalContent">
+                <!-- Halaman detail akan dimuat di sini -->
+            </div>
         </div>
     </div>
 
@@ -173,104 +181,229 @@
         </a>
     </div>
 
-    {{--
-        <div class="rounded-sm bg-white p-4 shadow-sm">
-        <table class="w-full table-fixed border border-black text-sm">
-        <thead>
-        <tr class="border border-black bg-gray-300 font-bold">
-        <td class="w-10 p-2">ID</td>
-        <td class="w-50 p-2">Unit Organisasi</td>
-        <td class="p-2">Nama SOP</td>
-        <td class="p-2">Tanggal Pembuatan</td>
-        <td class="p-2">Aksi</td>
-        <td class="p-2">Status</td>
-        </tr>
-        </thead>
-        <tbody>
-        @foreach ($esops as $index => $esop)
-        <tr class="border border-black">
-        <td class="p-2">{{ $index + 1 }}</td>
-        <td class="p-2">{{ $esop->user->name ?? '-' }}</td>
-        <td class="p-2">{{ $esop->nama_sop }}</td>
-        <td class="p-2">{{ $esop->created_at->format('d-m-Y') }}</td>
-        <td class="p-2">
-        <a href="{{ route('esop.edit', ['id' => $esop->id]) }}">
-        <button
-        class="cursor-pointer rounded-sm bg-blue-500 px-2 py-2 text-xs font-semibold text-white shadow-sm hover:bg-blue-400 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-        >
-        <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke-width="1.5"
-        stroke="currentColor"
-        class="size-4"
-        >
-        <path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"
-        />
-        </svg>
-        </button>
-        </a>
-        <form
-        action="{{ route('esop.delete', ['id' => $esop->id]) }}"
-        method="POST"
-        class="delete-esop-form"
-        data-nama="{{ $esop->nama_sop }}"
-        style="display: inline"
-        >
-        @csrf
-        @method('DELETE')
-        <button
-        type="button"
-        class="btn-delete-esop cursor-pointer rounded-sm bg-red-500 px-2 py-2 text-xs font-semibold text-white shadow-sm hover:bg-red-400"
-        >
-        <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke-width="1.5"
-        stroke="currentColor"
-        class="size-4"
-        >
-        <path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21
-        c.342.052.682.107 1.022.166m-1.022-.165L18.16
-        19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25
-        2.25 0 0 1-2.244-2.077L4.772 5.79m14.456
-        0a48.108 48.108 0 0 0-3.478-.397m-12
-        .562c.34-.059.68-.114 1.022-.165m0
-        0a48.11 48.11 0 0 1 3.478-.397m7.5
-        0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964
-        51.964 0 0 0-3.32 0c-1.18.037-2.09
-        1.022-2.09 2.201v.916m7.5 0a48.667
-        48.667 0 0 0-7.5 0"
-        />
-        </svg>
-        </button>
-        </form>
-        </td>
-        <td class="p-2">
-        {{ $esop->status }}
-        </td>
-        </tr>
-        @endforeach
-        </tbody>
-        </table>
-        
-        <div class="flex items-center justify-start gap-x-2 py-5">
-        <a href="{{ url('/esop/tambah') }}">
-        <button
-        class="cursor-pointer rounded-sm bg-blue-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-400 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-        >
-        Tambah SOP
-        </button>
-        </a>
-        </div>
-        </div>
-    --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.btn-detail').forEach((button) => {
+                button.addEventListener('click', function () {
+                    let url = this.getAttribute('data-url');
+
+                    // Load halaman detail ke dalam modal
+                    fetch(url)
+                        .then((response) => response.text())
+                        .then((html) => {
+                            document.getElementById('modalContent').innerHTML = html;
+                            document.getElementById('detailModal').classList.remove('hidden');
+                        })
+                        .catch((error) => console.error('Error:', error));
+                });
+            });
+        });
+
+        // Fungsi untuk menutup modal
+        function closeModal() {
+            document.getElementById('detailModal').classList.add('hidden');
+        }
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let searchInput = document.getElementById('searchInputDashboard');
+            let tableBody = document.querySelector('.tableBodyDashboard');
+            let detailModal = document.getElementById('detailModal');
+            let modalContent = document.getElementById('modalContent');
+            let paginationContainer = document.querySelector('.items-center.justify-between.px-4.py-3');
+            let originalTableContent = tableBody.innerHTML;
+            let originalPaginationContent = paginationContainer.innerHTML;
+
+            // Event listener untuk search
+            searchInput.addEventListener('input', function () {
+                let query = this.value.trim();
+
+                if (query === '') {
+                    // Jika search kosong, kembalikan ke tampilan original
+                    tableBody.innerHTML = originalTableContent;
+                    paginationContainer.innerHTML = originalPaginationContent;
+                    return;
+                }
+
+                fetch(`/esop/search?query=${query}`, {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                })
+                    .then((response) => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then((result) => {
+                        console.log('Search result:', result); // Debug log
+
+                        tableBody.innerHTML = ''; // Kosongkan tabel sebelum menambahkan hasil pencarian
+
+                        if (result.success && result.data && result.data.length > 0) {
+                            result.data.forEach((esop, index) => {
+                                let tr = document.createElement('tr');
+                                tr.classList.add('tr_pegawai', 'border-b', 'border-slate-200', 'hover:bg-slate-50');
+
+                                // Format tanggal
+                                let createdDate = new Date(esop.created_at);
+                                let formattedDate = createdDate.toLocaleDateString('id-ID', {
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    year: 'numeric',
+                                });
+
+                                tr.innerHTML = `
+                            <td class="p-4 py-5">
+                                <p class="block text-sm font-semibold text-slate-800">${index + 1}</p>
+                            </td>
+                            <td class="p-4 py-5">
+                                <p class="text-sm text-slate-600">${esop.user?.name ?? '-'}</p>
+                            </td>
+                            <td class="p-4 py-5">
+                                <p class="text-sm text-slate-600">${esop.nama_sop}</p>
+                            </td>
+                            <td class="p-4 py-5">
+                                <p class="text-sm text-slate-600">${formattedDate}</p>
+                            </td>
+                            <td class="p-4 py-5">
+                                <p class="text-sm text-slate-600"></p>
+                            </td>
+                            <td class="p-4 py-5">
+                                <div class="flex flex-row items-center space-x-2">
+                                    <a href="/esop/edit/${esop.id}">
+                                        <button
+                                            class="cursor-pointer rounded-sm bg-blue-500 px-2 py-2 text-xs font-semibold text-white shadow-sm hover:bg-blue-400 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                                        >
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke-width="1.5"
+                                                stroke="currentColor"
+                                                class="size-4"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"
+                                                />
+                                            </svg>
+                                        </button>
+                                    </a>
+                                    <form
+                                        action="/esop/delete/${esop.id}"
+                                        method="POST"
+                                        class="delete-esop-form"
+                                        data-nama="${esop.nama_sop}"
+                                        style="display: inline"
+                                    >
+                                        <input type="hidden" name="_token" value="${document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''}">
+                                        <input type="hidden" name="_method" value="DELETE">
+                                        <button
+                                            type="button"
+                                            class="btn-delete-esop cursor-pointer rounded-sm bg-red-500 px-2 py-2 text-xs font-semibold text-white shadow-sm hover:bg-red-400"
+                                        >
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke-width="1.5"
+                                                stroke="currentColor"
+                                                class="size-4"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21
+                                c.342.052.682.107 1.022.166m-1.022-.165L18.16
+                                19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25
+                                2.25 0 0 1-2.244-2.077L4.772 5.79m14.456
+                                0a48.108 48.108 0 0 0-3.478-.397m-12
+                                .562c.34-.059.68-.114 1.022-.165m0
+                                0a48.11 48.11 0 0 1 3.478-.397m7.5
+                                0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964
+                                51.964 0 0 0-3.32 0c-1.18.037-2.09
+                                1.022-2.09 2.201v.916m7.5 0a48.667
+                                48.667 0 0 0-7.5 0"
+                                                />
+                                            </svg>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        `;
+
+                                tableBody.appendChild(tr);
+                            });
+
+                            // Update pagination info saat searching
+                            paginationContainer.innerHTML = `
+                                <p class="text-sm text-gray-600">
+                                    Menampilkan ${result.data.length} hasil pencarian untuk "${query}"
+                                </p>
+                            `;
+                        } else {
+                            tableBody.innerHTML =
+                                '<tr><td colspan="6" class="p-4 text-center text-sm text-slate-600">Tidak ada data ditemukan</td></tr>';
+
+                            // Update pagination info saat tidak ada hasil
+                            paginationContainer.innerHTML = `
+                                <p class="text-sm text-gray-600">
+                                    Tidak ada hasil untuk pencarian "${query}"
+                                </p>
+                            `;
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                        tableBody.innerHTML =
+                            '<tr><td colspan="6" class="p-4 text-center text-sm text-red-600">Terjadi kesalahan saat mencari data</td></tr>';
+                        paginationContainer.innerHTML = `
+                            <p class="text-sm text-red-600">
+                                Error: ${error.message}
+                            </p>
+                        `;
+                    });
+            });
+
+            // Event listener untuk tombol delete SOP
+            document.addEventListener('click', function (event) {
+                if (event.target.closest('.btn-delete-esop')) {
+                    event.preventDefault();
+
+                    const button = event.target.closest('.btn-delete-esop');
+                    const form = button.closest('.delete-esop-form');
+                    const namaSop = form.getAttribute('data-nama');
+
+                    Swal.fire({
+                        title: 'Konfirmasi Hapus',
+                        text: `Apakah Anda yakin ingin menghapus SOP "${namaSop}"?`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#dc2626',
+                        cancelButtonColor: '#6b7280',
+                        confirmButtonText: 'Ya, Hapus!',
+                        cancelButtonText: 'Batal',
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                }
+            });
+
+            // Klik di luar modal untuk menutupnya
+            detailModal.addEventListener('click', function (event) {
+                if (event.target === detailModal) {
+                    detailModal.classList.add('hidden');
+                }
+            });
+        });
+    </script>
 </x-layout>
