@@ -272,11 +272,11 @@
 
     .page-preview .flow-table tbody tr {
         height: auto;
-        min-height: 75px;
+        min-height: 60px; /* Dikurangi dari 75px untuk konsistensi dengan JS */
     }
 
     .page-preview .flow-table tbody td {
-        min-height: 75px;
+        min-height: 60px; /* Dikurangi dari 75px untuk konsistensi dengan JS */
         padding: 8px 4px;
     }
 
@@ -297,7 +297,7 @@
         @page {
             size: F4 landscape;
             size: 330mm 210mm;
-            margin: 1.2cm 0.8cm 1.2cm 0.8cm;
+            margin: 0cm 0.8cm !important; /* Hapus semua margin */
             -webkit-print-color-adjust: exact;
             color-adjust: exact;
         }
@@ -320,12 +320,26 @@
             max-width: 100%;
         }
 
+        /* Override border colors for print - make all borders black */
+        .page-preview .flow-table thead th,
+        .page-preview .flow-table tbody td {
+            border: 1px solid #000 !important;
+        }
+
+        /* Override all Tailwind gray borders to black for print */
+        .border-gray-400,
+        .border-gray-300 {
+            border-color: #000 !important;
+        }
+
         /* Reset transforms for print */
         #preview-wrapper {
             transform: none !important;
-            scale: 0.95 !important;
+            scale: 1 !important;
             width: 100% !important;
             max-width: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
         }
 
         .pages-container {
@@ -333,6 +347,8 @@
             scale: 1 !important;
             width: 100% !important;
             max-width: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
         }
 
         /* Page preview optimization */
@@ -411,7 +427,7 @@
         /* Cell styling for print */
         .page-preview .flow-table th,
         .page-preview .flow-table td {
-            border: 1px solid #000;
+            border: 1px solid #000 !important;
             padding: 4px 3px;
             font-size: 9px;
             word-wrap: break-word;
@@ -459,7 +475,7 @@
         }
 
         .buffer-row td {
-            border: 1px solid #9ca3af !important;
+            border: 1px solid #000 !important;
             padding: 6px !important;
             vertical-align: middle !important;
             background-color: white !important;
@@ -1086,12 +1102,12 @@
                     // Gunakan yang lebih besar antara perhitungan karakter atau line break
                     const estimatedLines = Math.max(lineCount, actualLineCount);
 
-                    // Tinggi minimum 75px, tambah 20px per baris ekstra
-                    const estimatedHeight = Math.max(75, 55 + estimatedLines * 20);
+                    // Tinggi minimum 60px, tambah 15px per baris ekstra (dikurangi dari 75px dan 20px)
+                    const estimatedHeight = Math.max(60, 45 + estimatedLines * 15);
                     heights.push(estimatedHeight);
                 } else {
-                    // Baris kosong menggunakan tinggi minimum
-                    heights.push(75);
+                    // Baris kosong menggunakan tinggi minimum 60px (dikurangi dari 75px)
+                    heights.push(60);
                 }
             });
 
@@ -1111,25 +1127,23 @@
             // Using 96 DPI (standard web DPI)
             const availableHeightPx = (f4LandscapeHeight / 25.4) * 96; // ~794px sama dengan A4 height
 
-            // Table structure heights untuk print yang lebih akurat
-            const tableHeaderHeight = 100; // Header table lebih realistis
-            const safetyMargin = 50; // Margin lebih besar untuk safety
+            // Table structure heights untuk print yang lebih optimal
+            const tableHeaderHeight = 70; // Dikurangi dari 100px
+            const safetyMargin = 0; // Hapus safety margin untuk maksimalkan space
 
             // DYNAMIC ROW HEIGHT CALCULATION
             // Hitung tinggi aktual dari baris-baris yang ada
             const actualRowHeights = calculateActualRowHeights();
             const averageActualHeight =
                 actualRowHeights.length > 0
-                    ? Math.max(75, actualRowHeights.reduce((sum, height) => sum + height, 0) / actualRowHeights.length)
-                    : 90; // Default lebih konservatif
+                    ? Math.max(60, actualRowHeights.reduce((sum, height) => sum + height, 0) / actualRowHeights.length)
+                    : 70; // Default lebih realistis
 
             const availableForRows = availableHeightPx - tableHeaderHeight - safetyMargin;
-            const maxRows = Math.floor(availableForRows / averageActualHeight);
+            const maxRows = Math.floor(availableForRows / averageActualHeight - 1);
 
-            // Lebih konservatif: batasi berdasarkan tinggi aktual
-            const safeRows = Math.min(Math.max(7, maxRows), 20); // Min 7, Max 20 untuk F4 yang lebih lebar
-
-            return safeRows;
+            // Hapus batasan, gunakan perhitungan langsung
+            return maxRows;
         }
 
         // Function to validate page content and adjust if needed
@@ -1147,9 +1161,9 @@
                     totalRowHeight += rowHeight;
                 });
 
-                const tableHeaderHeight = 100;
-                const totalPageHeight = tableHeaderHeight + totalRowHeight + 50; // +50 safety margin
-                const pageAvailableHeight = 744; // F4 landscape height sama dengan A4 height (hanya lebih lebar)
+                const tableHeaderHeight = 70; // Sesuaikan dengan calculateRowsPerPage
+                const totalPageHeight = tableHeaderHeight + totalRowHeight; // Hapus safety margin
+                const pageAvailableHeight = 794; // F4 landscape height penuh tanpa margin
 
                 if (totalPageHeight > pageAvailableHeight) {
                 }
@@ -1710,20 +1724,20 @@
                 <tr class="page-break-avoid">
                     <td class="border border-gray-400 px-2 py-1 text-center">${rowData.number}</td>
                     <td class="border border-gray-400 px-2 py-1">
-                        <div class="px-2 py-1 text-sm min-h-[3rem] whitespace-pre-wrap">${rowData.uraianKegiatan}</div>
+                        <div class="px-2 py-1 text-sm min-h-[2.5rem] whitespace-pre-wrap">${rowData.uraianKegiatan}</div>
                     </td>
                     ${pelaksanaHTML}
                     <td class="border border-gray-400 px-2 py-1">
-                        <div class="px-2 py-1 text-sm min-h-[3rem] whitespace-pre-wrap">${rowData.kelengkapan}</div>
+                        <div class="px-2 py-1 text-sm min-h-[2.5rem] whitespace-pre-wrap">${rowData.kelengkapan}</div>
                     </td>
                     <td class="border border-gray-400 px-2 py-1">
-                        <div class="px-2 py-1 text-sm min-h-[3rem] whitespace-pre-wrap">${rowData.waktu}</div>
+                        <div class="px-2 py-1 text-sm min-h-[2.5rem] whitespace-pre-wrap">${rowData.waktu}</div>
                     </td>
                     <td class="border border-gray-400 px-2 py-1">
-                        <div class="px-2 py-1 text-sm min-h-[3rem] whitespace-pre-wrap">${rowData.output}</div>
+                        <div class="px-2 py-1 text-sm min-h-[2.5rem] whitespace-pre-wrap">${rowData.output}</div>
                     </td>
                     <td class="border border-gray-400 px-2 py-1">
-                        <div class="px-2 py-1 text-sm min-h-[3rem] whitespace-pre-wrap">${rowData.keterangan}</div>
+                        <div class="px-2 py-1 text-sm min-h-[2.5rem] whitespace-pre-wrap">${rowData.keterangan}</div>
                     </td>
                 </tr>
             `;

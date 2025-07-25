@@ -9,7 +9,7 @@
                             <div class="mt-2 grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-6">
                                 <div class="sm:col-span-6">
                                     <label for="judul_sop" class="block text-sm/6 font-medium text-gray-900">
-                                        Judul SOP
+                                        Unit Organisasi
                                     </label>
                                     <div class="mt-1 grid grid-cols-1">
                                         <div class="mt-1">
@@ -152,18 +152,15 @@
                                 </div>
 
                                 <div class="sm:col-span-6">
-                                    <label
-                                        for="kualifikasi_pelaksanan"
-                                        class="block text-sm/6 font-medium text-gray-900"
-                                    >
-                                        Kualifikasi Pelaksana
+                                    <label for="cara_mengatasi" class="block text-sm/6 font-medium text-gray-900">
+                                        Cara Mengatasi
                                     </label>
                                     <div class="mt-1 grid grid-cols-1">
                                         <div class="mt-1">
                                             <textarea
                                                 type="text"
-                                                name="kualifikasi_pelaksana"
-                                                id="kualifikasi_pelaksana"
+                                                name="cara_mengatasi"
+                                                id="cara_mengatasi"
                                                 rows="3"
                                                 class="form-control block field-sizing-content w-full resize-none overflow-hidden rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                                                 oninput="updateEsopPreview(); this.style.height='auto'; this.style.height=(this.scrollHeight)+'px';"
@@ -228,42 +225,6 @@
                                         </div>
                                     </div>
                                 </div>
-
-                                <div class="sm:col-span-6">
-                                    <label for="pencatatan_pendataan" class="block text-sm/6 font-medium text-gray-900">
-                                        Pencatatan dan Pendataan
-                                    </label>
-                                    <div class="mt-1 grid grid-cols-1">
-                                        <div class="mt-1">
-                                            <textarea
-                                                type="text"
-                                                name="pencatatan_pendataan"
-                                                id="pencatatan_pendataan"
-                                                rows="3"
-                                                class="form-control block field-sizing-content w-full resize-none overflow-hidden rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                                                oninput="updateEsopPreview(); this.style.height='auto'; this.style.height=(this.scrollHeight)+'px';"
-                                            ></textarea>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="sm:col-span-6">
-                                    <label for="cara_mengatasi" class="block text-sm/6 font-medium text-gray-900">
-                                        Cara Mengatasi
-                                    </label>
-                                    <div class="mt-1 grid grid-cols-1">
-                                        <div class="mt-1">
-                                            <textarea
-                                                type="text"
-                                                name="cara_mengatasi"
-                                                id="cara_mengatasi"
-                                                rows="3"
-                                                class="form-control block field-sizing-content w-full resize-none overflow-hidden rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                                                oninput="updateEsopPreview(); this.style.height='auto'; this.style.height=(this.scrollHeight)+'px';"
-                                            ></textarea>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                             <div class="flex items-center justify-end gap-x-2 py-5">
                                 <a href="{{ url('/esop') }}">
@@ -304,7 +265,7 @@
                                 <div id="preview_judul_sop" class="text-center text-sm text-gray-800"></div>
                             </td>
                             <td colspan="2" class="border p-2 font-bold">Nomor SOP</td>
-                            <td colspan="2" class="border p-2">
+                            <td colspan="3" class="border p-2">
                                 <div id="preview_no_sop" class="text-left text-sm text-gray-800"></div>
                             </td>
                         </tr>
@@ -312,7 +273,7 @@
                         <!-- === Tgl. Ditetapkan === -->
                         <tr>
                             <td colspan="2" class="border p-2 font-bold">Tgl. Ditetapkan</td>
-                            <td colspan="2" class="border p-2">
+                            <td colspan="3" class="border p-2">
                                 {{-- Input Tgl. Ditetapkan --}}
                                 <div id="preview_tgl_ditetapkan" class="text-left text-sm text-gray-800"></div>
                             </td>
@@ -321,7 +282,7 @@
                         <!-- === Tgl. Revisi === -->
                         <tr>
                             <td colspan="2" class="border p-2 font-bold">Tgl. Revisi</td>
-                            <td colspan="2" class="border p-2">
+                            <td colspan="3" class="border p-2">
                                 {{-- Input Tgl. Revisi --}}
                                 <div id="preview_tgl_revisi" class="text-left text-sm text-gray-800"></div>
                             </td>
@@ -330,7 +291,7 @@
                         <!-- === Tgl. Diberlakukan === -->
                         <tr>
                             <td colspan="2" class="border p-2 font-bold">Tgl. Diberlakukan</td>
-                            <td colspan="2" class="border p-2">
+                            <td colspan="3" class="border p-2">
                                 {{-- Input Tgl. Diberlakukan --}}
                                 <div id="preview_tgl_diberlakukan" class="text-left text-sm text-gray-800"></div>
                             </td>
@@ -339,9 +300,8 @@
                         <!-- === Ditetapkan Oleh === -->
                         <tr>
                             <td colspan="2" class="border p-2 font-bold">Ditetapkan Oleh</td>
-                            <td colspan="2" class="border p-2 text-center">
+                            <td colspan="3" class="border p-2 text-center">
                                 <p>
-                                    <br />
                                     Sekretaris Direktorat Jenderal Perhubungan Udara
                                     <br />
                                     <br />
@@ -351,14 +311,13 @@
                                     <br />
                                     NIP. 19740819 199501 1 001
                                     <br />
-                                    <br />
                                 </p>
                             </td>
                         </tr>
 
                         <!-- === Input Nama SOP === -->
                         <tr>
-                            <td colspan="9" class="border p-2 font-bold">
+                            <td colspan="10" class="border p-2 font-bold">
                                 <div id="preview_nama_sop" class="text-center text-sm text-gray-800"></div>
                             </td>
                         </tr>
@@ -366,7 +325,7 @@
                         {{-- Judul Dasar Hukum - Kualifikasi Pelaksana --}}
                         <tr>
                             <td colspan="5" class="border p-2 font-bold">Dasar Hukum :</td>
-                            <td colspan="4" class="border p-2 font-bold">Kualifikasi Pelaksana:</td>
+                            <td colspan="5" class="border p-2 font-bold">Cara Mengatasi :</td>
                         </tr>
 
                         {{-- Input Dasar Hukum - Kualifikasi Pelaksana --}}
@@ -374,46 +333,32 @@
                             <td colspan="5" class="border p-2 align-top">
                                 <div id="preview_dasar_hukum" class="text-left text-sm text-gray-800"></div>
                             </td>
-                            <td colspan="4" class="border p-2 align-top">
-                                <div id="preview_kualifikasi_pelaksana" class="text-left text-sm text-gray-800"></div>
+                            <td colspan="5" class="border p-2 align-top">
+                                <div id="preview_cara_mengatasi" class="text-left text-sm text-gray-800"></div>
                             </td>
                         </tr>
 
                         <tr>
                             <td colspan="5" class="border p-2 font-bold">Keterkaitan :</td>
-                            <td colspan="4" class="border p-2 font-bold">Peralatan / Perlengkapan:</td>
+                            <td colspan="5" class="border p-2 font-bold">Peralatan :</td>
                         </tr>
 
                         <tr>
                             <td colspan="5" class="border p-2 align-top">
                                 <div id="preview_keterkaitan" class="text-left text-sm text-gray-800"></div>
                             </td>
-                            <td colspan="4" class="border p-2 align-top">
+                            <td colspan="5" rowspan="3" class="border p-2 align-top">
                                 <div id="preview_peralatan_perlengkapan" class="text-left text-sm text-gray-800"></div>
                             </td>
                         </tr>
 
                         <tr>
                             <td colspan="5" class="border p-2 font-bold">Peringatan :</td>
-                            <td colspan="4" class="border p-2 font-bold">Pencatatan dan Pendataan:</td>
                         </tr>
 
                         <tr>
                             <td colspan="5" class="border p-2 align-top">
                                 <div id="preview_peringatan" class="text-left text-sm text-gray-800"></div>
-                            </td>
-                            <td colspan="4" rowspan="3 align-top" class="border p-2 align-top">
-                                <div id="preview_pencatatan_pendataan" class="text-left text-sm text-gray-800"></div>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td colspan="5" class="border p-2 font-bold">Cara Mengatasi :</td>
-                        </tr>
-
-                        <tr>
-                            <td colspan="5" class="border p-2 align-top">
-                                <div id="preview_cara_mengatasi" class="text-left text-sm text-gray-800"></div>
                             </td>
                         </tr>
                     </tbody>
@@ -433,11 +378,9 @@
                 ['ditetapkan_oleh', 'preview_ditetapkan_oleh'],
                 ['nama_sop', 'preview_nama_sop'],
                 ['dasar_hukum', 'preview_dasar_hukum'],
-                ['kualifikasi_pelaksana', 'preview_kualifikasi_pelaksana'],
                 ['keterkaitan', 'preview_keterkaitan'],
                 ['peralatan_perlengkapan', 'preview_peralatan_perlengkapan'],
                 ['peringatan', 'preview_peringatan'],
-                ['pencatatan_pendataan', 'preview_pencatatan_pendataan'],
                 ['cara_mengatasi', 'preview_cara_mengatasi'],
             ];
 

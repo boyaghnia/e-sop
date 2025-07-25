@@ -19,8 +19,9 @@
                 left: 0;
                 top: 0;
                 width: 100%;
-                height: auto;
-                transform: scale(1);
+                height: 100%;
+                max-height: 100%;
+                overflow: hidden !important;
                 transform-origin: center center;
                 page-break-inside: avoid;
             }
@@ -65,18 +66,6 @@
                 padding: 0 !important;
             }
 
-            /* Atur tinggi row untuk header */
-            tr:nth-child(-n + 6) td {
-                height: auto !important;
-                max-height: 8vh !important;
-            }
-
-            /* Atur tinggi untuk konten utama */
-            tr:nth-child(n + 7) td {
-                height: auto !important;
-                max-height: 12vh !important;
-            }
-
             @page {
                 size: F4;
                 size: 210mm 330mm;
@@ -92,6 +81,22 @@
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
             }
+
+            tr:nth-child(6) {
+                height: 50px !important;
+            }
+
+            tr:nth-child(8) {
+                height: 300px !important;
+            }
+
+            tr:nth-child(10) {
+                height: 150px !important;
+            }
+
+            tr:nth-child(12) {
+                height: 150px !important;
+            }
         }
     </style>
 
@@ -105,7 +110,7 @@
                             <div class="mt-2 grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-6">
                                 <div class="sm:col-span-6">
                                     <label for="judul_sop" class="block text-sm/6 font-medium text-gray-900">
-                                        Judul SOP
+                                        Unit Organisasi
                                     </label>
                                     <div class="mt-1 grid grid-cols-1">
                                         <div class="mt-1">
@@ -264,23 +269,20 @@
                                 </div>
 
                                 <div class="sm:col-span-6">
-                                    <label
-                                        for="kualifikasi_pelaksanan"
-                                        class="block text-sm/6 font-medium text-gray-900"
-                                    >
-                                        Kualifikasi Pelaksana
+                                    <label for="cara_mengatasi" class="block text-sm/6 font-medium text-gray-900">
+                                        Cara Mengatasi
                                     </label>
                                     <div class="mt-1 grid grid-cols-1">
                                         <div class="mt-1">
                                             <textarea
                                                 type="text"
-                                                name="kualifikasi_pelaksana"
-                                                id="kualifikasi_pelaksana"
+                                                name="cara_mengatasi"
+                                                id="cara_mengatasi"
                                                 rows="3"
                                                 class="form-control block field-sizing-content w-full resize-none overflow-hidden rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                                                 oninput="updateEsopPreview(); this.style.height='auto'; this.style.height=(this.scrollHeight)+'px';"
                                             >
-{{ old('kualifikasi_pelaksana', $esop->kualifikasi_pelaksana ?? '') }}</textarea
+{{ old('cara_mengatasi', $esop->cara_mengatasi ?? '') }}</textarea
                                             >
                                         </div>
                                     </div>
@@ -344,46 +346,6 @@
                                                 oninput="updateEsopPreview(); this.style.height='auto'; this.style.height=(this.scrollHeight)+'px';"
                                             >
 {{ old('peringatan', $esop->peringatan ?? '') }}</textarea
-                                            >
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="sm:col-span-6">
-                                    <label for="pencatatan_pendataan" class="block text-sm/6 font-medium text-gray-900">
-                                        Pencatatan dan Pendataan
-                                    </label>
-                                    <div class="mt-1 grid grid-cols-1">
-                                        <div class="mt-1">
-                                            <textarea
-                                                type="text"
-                                                name="pencatatan_pendataan"
-                                                id="pencatatan_pendataan"
-                                                rows="3"
-                                                class="form-control block field-sizing-content w-full resize-none overflow-hidden rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                                                oninput="updateEsopPreview(); this.style.height='auto'; this.style.height=(this.scrollHeight)+'px';"
-                                            >
-{{ old('pencatatan_pendataan', $esop->pencatatan_pendataan ?? '') }}</textarea
-                                            >
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="sm:col-span-6">
-                                    <label for="cara_mengatasi" class="block text-sm/6 font-medium text-gray-900">
-                                        Cara Mengatasi
-                                    </label>
-                                    <div class="mt-1 grid grid-cols-1">
-                                        <div class="mt-1">
-                                            <textarea
-                                                type="text"
-                                                name="cara_mengatasi"
-                                                id="cara_mengatasi"
-                                                rows="3"
-                                                class="form-control block field-sizing-content w-full resize-none overflow-hidden rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                                                oninput="updateEsopPreview(); this.style.height='auto'; this.style.height=(this.scrollHeight)+'px';"
-                                            >
-{{ old('cara_mengatasi', $esop->cara_mengatasi ?? '') }}</textarea
                                             >
                                         </div>
                                     </div>
@@ -471,6 +433,7 @@
                                     <br />
                                     <br />
                                     <br />
+                                    <br />
                                     Achmad Setiyo Prabowo
                                     <br />
                                     NIP. 19740819 199501 1 001
@@ -486,57 +449,43 @@
                             </td>
                         </tr>
 
-                        {{-- Judul Dasar Hukum - Kualifikasi Pelaksana --}}
+                        {{-- Judul Dasar Hukum - Cara Mengatasi Pelaksana --}}
                         <tr>
                             <td colspan="5" class="border p-2 font-bold">Dasar Hukum :</td>
-                            <td colspan="5" class="border p-2 font-bold">Kualifikasi Pelaksana:</td>
+                            <td colspan="5" class="border p-2 font-bold">Cara Mengatasi :</td>
                         </tr>
 
-                        {{-- Input Dasar Hukum - Kualifikasi Pelaksana --}}
+                        {{-- Input Dasar Hukum - Cara Mengatasi --}}
                         <tr>
                             <td colspan="5" class="border p-2 align-top">
                                 <div id="preview_dasar_hukum" class="text-left text-sm text-gray-800"></div>
                             </td>
                             <td colspan="5" class="border p-2 align-top">
-                                <div id="preview_kualifikasi_pelaksana" class="text-left text-sm text-gray-800"></div>
+                                <div id="preview_cara_mengatasi" class="text-left text-sm text-gray-800"></div>
                             </td>
                         </tr>
 
                         <tr>
                             <td colspan="5" class="border p-2 font-bold">Keterkaitan :</td>
-                            <td colspan="5" class="border p-2 font-bold">Peralatan / Perlengkapan:</td>
+                            <td colspan="5" class="border p-2 font-bold">Peralatan :</td>
                         </tr>
 
                         <tr>
                             <td colspan="5" class="border p-2 align-top">
                                 <div id="preview_keterkaitan" class="text-left text-sm text-gray-800"></div>
                             </td>
-                            <td colspan="5" class="border p-2 align-top">
+                            <td colspan="5" rowspan="3" class="border p-2 align-top">
                                 <div id="preview_peralatan_perlengkapan" class="text-left text-sm text-gray-800"></div>
                             </td>
                         </tr>
 
                         <tr>
                             <td colspan="5" class="border p-2 font-bold">Peringatan :</td>
-                            <td colspan="5" class="border p-2 font-bold">Pencatatan dan Pendataan:</td>
                         </tr>
 
                         <tr>
                             <td colspan="5" class="border p-2 align-top">
                                 <div id="preview_peringatan" class="text-left text-sm text-gray-800"></div>
-                            </td>
-                            <td colspan="5" rowspan="3" class="border p-2 align-top">
-                                <div id="preview_pencatatan_pendataan" class="text-left text-sm text-gray-800"></div>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td colspan="5" class="border p-2 font-bold">Cara Mengatasi :</td>
-                        </tr>
-
-                        <tr>
-                            <td colspan="5" class="border p-2 align-top">
-                                <div id="preview_cara_mengatasi" class="text-left text-sm text-gray-800"></div>
                             </td>
                         </tr>
                     </tbody>
@@ -705,12 +654,10 @@
                 ['ditetapkan_oleh', 'preview_ditetapkan_oleh'],
                 ['nama_sop', 'preview_nama_sop'],
                 ['dasar_hukum', 'preview_dasar_hukum'],
-                ['kualifikasi_pelaksana', 'preview_kualifikasi_pelaksana'],
+                ['cara_mengatasi', 'preview_cara_mengatasi'],
                 ['keterkaitan', 'preview_keterkaitan'],
                 ['peralatan_perlengkapan', 'preview_peralatan_perlengkapan'],
                 ['peringatan', 'preview_peringatan'],
-                ['pencatatan_pendataan', 'preview_pencatatan_pendataan'],
-                ['cara_mengatasi', 'preview_cara_mengatasi'],
             ];
 
             pairs.forEach(([inputId, previewId]) => {
