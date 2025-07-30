@@ -1094,63 +1094,62 @@
         }
 
         function calculateActualRowHeights() {
+            // Jika ada preview table (hasil render), ukur tinggi aktual baris di situ
+            const previewTable = document.querySelector('.page-preview .flow-table');
+            if (previewTable) {
+                const rows = previewTable.querySelectorAll('tbody tr:not(.buffer-row)');
+                const heights = [];
+                rows.forEach((row) => {
+                    heights.push(row.getBoundingClientRect().height);
+                });
+                return heights;
+            }
+            // Fallback ke estimasi lama jika belum ada preview table
             const editorRows = document.querySelectorAll('#editor-tabel tbody tr');
             const heights = [];
-
             editorRows.forEach((row, index) => {
-                // Hitung tinggi berdasarkan content textarea
                 const uraianTextarea = row.querySelector('textarea[name^="uraian_kegiatan_"]');
                 if (uraianTextarea && uraianTextarea.value.trim()) {
-                    // Estimasi tinggi berdasarkan panjang teks
                     const textLength = uraianTextarea.value.length;
-                    const lineCount = Math.ceil(textLength / 150); // ~150 karakter per baris
+                    const lineCount = Math.ceil(textLength / 250);
                     const actualLineCount = (uraianTextarea.value.match(/\n/g) || []).length + 1;
-
-                    // Gunakan yang lebih besar antara perhitungan karakter atau line break
                     const estimatedLines = Math.max(lineCount, actualLineCount);
-
-                    // Tinggi minimum 80px (5rem) sesuai min-h-[5rem], tambah 20px per baris ekstra
-                    const estimatedHeight = Math.max(80, 80 + (estimatedLines - 1) * 20);
+                    const estimatedHeight = Math.max(120, 120 + (estimatedLines - 1) * 20);
                     heights.push(estimatedHeight);
                 } else {
-                    // Baris kosong menggunakan tinggi minimum 80px (5rem) sesuai min-h-[5rem]
                     heights.push(80);
                 }
             });
-
             return heights;
         }
 
         // Function to calculate rows per page based on F4 dimensions
         function calculateRowsPerPage() {
-            // F4 landscape: 330mm x 210mm at print resolution
-            // Browser akan otomatis menambahkan margin saat print
+            // F4 landscape: 330mm x 250mm
+            const f4LandscapeHeight = 260; // mm
+            const availableHeightPx = (f4LandscapeHeight / 25.4) * 96;
 
-            // Real-world F4 landscape print measurements (tanpa margin tambahan)
-            const f4LandscapeHeight = 210; // mm (tinggi sama dengan A4, tapi lebih lebar)
-            const availableHeightMM = f4LandscapeHeight; // Gunakan full height, browser akan handle margin
+            // Ambil header height dari tabel preview jika ada
+            let tableHeaderHeight = 0;
+            const previewTable = document.querySelector('.page-preview .flow-table');
+            if (previewTable) {
+                const thead = previewTable.querySelector('thead');
+                if (thead) {
+                    tableHeaderHeight = thead.getBoundingClientRect().height;
+                }
+            } else {
+                tableHeaderHeight = 70; // fallback
+            }
 
-            // Convert to pixel calculations for print
-            // Using 96 DPI (standard web DPI)
-            const availableHeightPx = (f4LandscapeHeight / 25.4) * 96; // ~794px sama dengan A4 height
-
-            // Table structure heights untuk print yang lebih optimal
-            const tableHeaderHeight = 70; // Dikurangi dari 100px
-            const safetyMargin = 0; // Hapus safety margin untuk maksimalkan space
-
-            // DYNAMIC ROW HEIGHT CALCULATION
-            // Hitung tinggi aktual dari baris-baris yang ada
+            const safetyMargin = 0;
             const actualRowHeights = calculateActualRowHeights();
             const averageActualHeight =
                 actualRowHeights.length > 0
-                    ? Math.max(80, actualRowHeights.reduce((sum, height) => sum + height, 0) / actualRowHeights.length)
-                    : 85; // Default disesuaikan dengan min-h-[5rem] + padding
-
+                    ? actualRowHeights.reduce((sum, height) => sum + height, 0) / actualRowHeights.length
+                    : 85;
             const availableForRows = availableHeightPx - tableHeaderHeight - safetyMargin;
-            const maxRows = Math.floor(availableForRows / averageActualHeight - 1);
-
-            // Hapus batasan, gunakan perhitungan langsung
-            return maxRows;
+            const maxRows = Math.floor(availableForRows / averageActualHeight);
+            return maxRows > 0 ? maxRows : 1;
         }
 
         // Get dynamic rows per page - recalculate every time

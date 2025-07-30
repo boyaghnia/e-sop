@@ -14,28 +14,36 @@ class EsopController extends Controller
         return view('esop.tambah');
     }
 
-    function esopTampil() {
+        public function esopTampil()
+    {
         $user = Auth::user();
-        $query = Esop::with('user');
         
-        // Filter berdasarkan role
+        // Query untuk table atas - ESOP milik user yang sedang login
+        $myEsops = Esop::with('user')
+            ->where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->paginate(5, ['*'], 'my_page');
+        
+        // Query untuk table bawah - berdasarkan role
+        $allEsopsQuery = Esop::with('user');
+        
         if ($user->role === 'admin') {
-            // Admin dapat melihat semua data
+            // Admin dapat melihat semua ESOP
+            // Tidak ada filter tambahan
         } elseif ($user->role === 'obu') {
-            // OBU dapat melihat SOP milik sendiri dan SOP dari role upbu
-            $query->where(function($q) use ($user) {
-                $q->where('user_id', $user->id)
-                  ->orWhereHas('user', function($userQuery) {
-                      $userQuery->where('role', 'upbu');
-                  });
+            // OBU dapat melihat ESOP dari role 'upbu'
+            $allEsopsQuery->whereHas('user', function($userQuery) {
+                $userQuery->where('role', 'upbu');
             });
         } else {
-            // Role lain hanya dapat melihat SOP milik sendiri
-            $query->where('user_id', $user->id);
+            // Role lain (termasuk upbu) hanya melihat ESOP milik sendiri
+            $allEsopsQuery->where('user_id', $user->id);
         }
         
-        $esops = $query->orderBy('created_at', 'desc')->paginate(5);
-        return view('esop.tampil', compact('esops'));
+        $allEsops = $allEsopsQuery->orderBy('created_at', 'desc')
+            ->paginate(5, ['*'], 'all_page');
+
+        return view('esop.tampil', compact('myEsops', 'allEsops', 'user'));
     }
 
     function esopSimpan(Request $request) {
@@ -178,7 +186,7 @@ class EsopController extends Controller
         $esop = $query->firstOrFail();
         $esop->delete();
 
-        return redirect()->route('esop.tampil');
+        return redirect()->route('dashboard.tampil');
     }
 
     public function esopFlow($id)
@@ -426,5 +434,39 @@ class EsopController extends Controller
         }
     }
 
+    /**
+     * Menampilkan halaman cetak SOP yang menggabungkan data dari esop edit dan flow
+     */
+    public function esopPrint($id)
+    {
+        // Memastikan user berhak mengakses SOP ini
+        $user = Auth::user();
+        $esop = Esop::with(['pelaksanas'])->findOrFail($id);
+        
+        // Ambil data flow untuk SOP ini
+        $flows = Flow::where('esop_id', $id)
+                    ->orderBy('no_urutan', 'asc')
+                    ->get();
+                    
+        // Untuk setiap flow, ambil data pelaksana dan simbol
+        foreach ($flows as $flow) {
+            // Format data pelaksana
+            $pelaksanaValues = [];
+            $flowPelaksanaData = json_decode($flow->pelaksana_json, true);
+            
+            if ($flowPelaksanaData && is_array($flowPelaksanaData)) {
+                foreach ($flowPelaksanaData as $pelaksanaId => $data) {
+                    $pelaksanaValues[$pelaksanaId] = [
+                        'symbol' => $data['symbol'] ?? '',
+                        'symbol_number' => $data['symbol_number'] ?? '',
+                    ];
+                }
+            }
+            
+            $flow->pelaksana_values = $pelaksanaValues;
+        }
+        
+        return view('esop.print', compact('esop', 'flows'));
+    }
     
 }

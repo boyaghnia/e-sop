@@ -510,15 +510,17 @@
                     </tbody>
                 </table>
 
-                <div class="flex items-center justify-between gap-x-2 py-5">
+                {{--
+                    <div class="flex items-center justify-between gap-x-2 py-5">
                     <button
-                        type="button"
-                        onclick="window.print()"
-                        class="cursor-pointer rounded-sm bg-green-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-400 focus-visible:outline-offset-2 focus-visible:outline-green-600"
+                    type="button"
+                    onclick="window.print()"
+                    class="cursor-pointer rounded-sm bg-green-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-400 focus-visible:outline-offset-2 focus-visible:outline-green-600"
                     >
-                        Cetak
+                    Cetak
                     </button>
-                </div>
+                    </div>
+                --}}
             </div>
 
             <div class="rounded-sm bg-white p-4 shadow-sm">
