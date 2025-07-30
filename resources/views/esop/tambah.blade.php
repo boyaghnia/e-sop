@@ -9,7 +9,7 @@
                             <div class="mt-2 grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-6">
                                 <div class="sm:col-span-6">
                                     <label for="judul_sop" class="block text-sm/6 font-medium text-gray-900">
-                                        Unit Organisasi
+                                        Judul SOP (Unit Organisasi)
                                     </label>
                                     <div class="mt-1 grid grid-cols-1">
                                         <div class="mt-1">
@@ -302,14 +302,21 @@
                             <td colspan="2" class="border p-2 font-bold">Ditetapkan Oleh</td>
                             <td colspan="3" class="border p-2 text-center">
                                 <p>
-                                    Sekretaris Direktorat Jenderal Perhubungan Udara
+                                    <br />
+                                    <span style="margin-left: 1rem" class="spacing">${jabatan_pengirim}</span>
                                     <br />
                                     <br />
                                     <br />
                                     <br />
-                                    Achmad Setiyo Prabowo
+                                    <span style="margin-left: 3rem" class="ttd-spacing">${ttd_pengirim}</span>
                                     <br />
-                                    NIP. 19740819 199501 1 001
+                                    <br />
+                                    <br />
+                                    <br />
+                                    <span style="margin-left: 1rem" class="spacing">${nama_pengirim}</span>
+                                    <br />
+                                    <span style="margin-left: 1rem" class="spacing">${nip_pengirim}</span>
+                                    <br />
                                     <br />
                                 </p>
                             </td>

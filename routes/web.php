@@ -1,23 +1,26 @@
 <?php
 
+use App\Http\Controllers\ApiController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\EsopController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
 
 
     Route::get('/', function () {
         return view('login');
     });
 
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->middleware('auth');
-
     Route::post('/login/submit', [AuthController::class, 'submitLogin'])->name('login.submit');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    Route::get('/sekretariat/perencanaan', [EsopController::class, 'perencanaanTampil'])->name('perencanaan.tampil');
+    // Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'dashboardTampil'])->name('dashboard.tampil');
+    Route::get('/dashboard/search', [DashboardController::class, 'dashboardSearch'])->name('dashboard.search');
 
+    Route::get('/api', [ApiController::class, 'PanggilAPI'])->name('panggil.api');
+
+    // ESOP Routes
     Route::get('/esop', [EsopController::class, 'esopTampil'])->name('esop.tampil');
     Route::get('/esop/search', [EsopController::class, 'esopSearch'])->name('esop.search');
     Route::get('/esop/tambah', [EsopController::class, 'esopTambah'])->name('esop.tambah');

@@ -15,9 +15,9 @@
 
             /* Posisikan tabel di print area */
             .print-area {
-                position: absolute;
                 left: 0;
                 top: 0;
+                position: absolute;
                 width: 100%;
                 height: 100%;
                 max-height: 100%;
@@ -64,11 +64,24 @@
                 font-size: 11px !important;
                 margin: 0 !important;
                 padding: 0 !important;
+                line-height: 1.5 !important;
+            }
+
+            /* Tambahkan CSS khusus untuk tanda tangan */
+            .ttd-spacing {
+                margin-left: 3rem !important;
+            }
+
+            /* Atau alternatif dengan padding-left */
+            .ttd-spacing-alt {
+                padding-left: 3rem !important;
+            }
+
+            .spacing {
+                margin-left: 1rem !important;
             }
 
             @page {
-                size: F4;
-                size: 210mm 330mm;
                 margin: 10mm;
                 -webkit-print-color-adjust: exact;
                 color-adjust: exact;
@@ -82,20 +95,24 @@
                 break-inside: avoid !important;
             }
 
+            tr:nth-child(-n + 4) {
+                height: 35px !important;
+            }
+
             tr:nth-child(6) {
-                height: 50px !important;
+                height: 40px !important;
             }
 
             tr:nth-child(8) {
-                height: 300px !important;
+                height: auto !important;
             }
 
             tr:nth-child(10) {
-                height: 150px !important;
+                height: 125px !important;
             }
 
             tr:nth-child(12) {
-                height: 150px !important;
+                height: 125px !important;
             }
         }
     </style>
@@ -110,7 +127,7 @@
                             <div class="mt-2 grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-6">
                                 <div class="sm:col-span-6">
                                     <label for="judul_sop" class="block text-sm/6 font-medium text-gray-900">
-                                        Unit Organisasi
+                                        Judul SOP (Unit Organisasi)
                                     </label>
                                     <div class="mt-1 grid grid-cols-1">
                                         <div class="mt-1">
@@ -425,19 +442,21 @@
                         <!-- === Ditetapkan Oleh === -->
                         <tr>
                             <td colspan="2" class="border p-2 font-bold">Ditetapkan Oleh</td>
-                            <td colspan="3" class="border p-2 text-center">
+                            <td colspan="3" class="border p-2 text-left">
                                 <p>
-                                    Sekretaris Direktorat Jenderal Perhubungan Udara
+                                    <span style="margin-left: 1rem" class="spacing">${jabatan_pengirim}</span>
                                     <br />
                                     <br />
                                     <br />
                                     <br />
+                                    <span style="margin-left: 3rem" class="ttd-spacing">${ttd_pengirim}</span>
                                     <br />
                                     <br />
-                                    Achmad Setiyo Prabowo
                                     <br />
-                                    NIP. 19740819 199501 1 001
                                     <br />
+                                    <span style="margin-left: 1rem" class="spacing">${nama_pengirim}</span>
+                                    <br />
+                                    <span style="margin-left: 1rem" class="spacing">${nip_pengirim}</span>
                                 </p>
                             </td>
                         </tr>
@@ -517,18 +536,13 @@
                                             <select
                                                 id="unit_organisasi"
                                                 name="unit_organisasi"
-                                                class="form-control col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pr-8 pl-3 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 focus:outline focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                                                readonly
+                                                disabled
+                                                class="form-control pointer-events-none col-start-1 row-start-1 w-full appearance-none rounded-md bg-gray-100 py-1.5 pr-8 pl-3 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 focus:outline focus:-outline-offset-2 sm:text-sm/6"
                                             >
-                                                <option value="Bagian Organisasi dan Tata Laksana">
-                                                    Bagian Organisasi dan Tata Laksana
+                                                <option value="{{ $esop->user->id ?? '' }}" selected>
+                                                    {{ $esop->user->name ?? 'User tidak ditemukan' }}
                                                 </option>
-                                                <option value="Bagian Sumber Daya Manusia">
-                                                    Bagian Sumber Daya Manusia
-                                                </option>
-                                                <option value="Bagian Perencanaan">Bagian Perencanaan</option>
-                                                <option value="Bagian Keuangan">Bagian Keuangan</option>
-                                                <option value="Bagian Umum">Bagian Umum</option>
-                                                <option value="Bagian Hukum">Bagian Hukum</option>
                                             </select>
                                         </div>
                                     </div>
@@ -695,7 +709,7 @@
 
                     preview.innerHTML = paragraphs.length
                         ? `<div class="${customClass}">${paragraphs.join('')}</div>`
-                        : '<em class="text-gray-400">Tidak ada isian</em>';
+                        : '<em class="text-gray-400"></em>';
                 } else {
                     // ➤ Untuk yang lain pakai <ol><li>
                     const listItems = lines.map((line) => {
@@ -705,7 +719,7 @@
 
                     preview.innerHTML = listItems.length
                         ? `<ol class="list-decimal pl-4">${listItems.join('')}</ol>`
-                        : '<em class="text-gray-400">Tidak ada isian</em>';
+                        : '<em class="text-gray-400"></em>';
                 }
             });
         }

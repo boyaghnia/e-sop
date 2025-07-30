@@ -15,9 +15,26 @@ class EsopController extends Controller
     }
 
     function esopTampil() {
-        $esops = Esop::with('user')
-            ->orderBy('created_at', 'desc')
-            ->paginate(5);
+        $user = Auth::user();
+        $query = Esop::with('user');
+        
+        // Filter berdasarkan role
+        if ($user->role === 'admin') {
+            // Admin dapat melihat semua data
+        } elseif ($user->role === 'obu') {
+            // OBU dapat melihat SOP milik sendiri dan SOP dari role upbu
+            $query->where(function($q) use ($user) {
+                $q->where('user_id', $user->id)
+                  ->orWhereHas('user', function($userQuery) {
+                      $userQuery->where('role', 'upbu');
+                  });
+            });
+        } else {
+            // Role lain hanya dapat melihat SOP milik sendiri
+            $query->where('user_id', $user->id);
+        }
+        
+        $esops = $query->orderBy('created_at', 'desc')->paginate(5);
         return view('esop.tampil', compact('esops'));
     }
 
@@ -46,43 +63,119 @@ class EsopController extends Controller
     }
 
     function esopEdit($id) {
-        $esop = Esop::where('id_unor', Auth::user()->id_unor)
-            ->where('id', $id)
-            ->firstOrFail();
+        $user = Auth::user();
+        $query = Esop::where('id', $id);
+        
+        // Filter akses berdasarkan role
+        if ($user->role === 'admin') {
+            // Admin dapat mengakses semua SOP
+        } elseif ($user->role === 'obu') {
+            // OBU dapat mengakses SOP milik sendiri dan SOP dari role upbu
+            $query->where(function($q) use ($user) {
+                $q->where('user_id', $user->id)
+                  ->orWhere(function($subQuery) use ($user) {
+                      $subQuery->where('id_unor', $user->id_unor)
+                               ->whereHas('user', function($userQuery) {
+                                   $userQuery->where('role', 'upbu');
+                               });
+                  })
+                  ->orWhereHas('user', function($userQuery) {
+                      $userQuery->where('role', 'upbu');
+                  });
+            });
+        } else {
+            // Role lain hanya dapat mengakses SOP milik sendiri atau yang sama id_unor
+            $query->where(function($q) use ($user) {
+                $q->where('id_unor', $user->id_unor)
+                  ->orWhere('user_id', $user->id);
+            });
+        }
+        
+        $esop = $query->firstOrFail();
         return view('esop.edit', compact('esop'));
     }
 
     function esopUpdate(Request $request, $id) {
-    $esop = Esop::where('id_unor', Auth::user()->id_unor)
-        ->where('id', $id)
-        ->firstOrFail();
-    $esop->id_unor = Auth::user()->id_unor;
-    $esop->user_id = Auth::id();
-    $esop->judul_sop = $request->judul_sop;
-    $esop->no_sop = $request->no_sop;
-    $esop->nama_sop = $request->nama_sop;
-    $esop->tgl_ditetapkan = $request->tgl_ditetapkan;
-    $esop->tgl_revisi = $request->tgl_revisi;
-    $esop->tgl_diberlakukan = $request->tgl_diberlakukan;
-    $esop->dasar_hukum = $request->dasar_hukum;
-    $esop->kualifikasi_pelaksana = $request->kualifikasi_pelaksana;
-    $esop->keterkaitan = $request->keterkaitan;
-    $esop->peralatan_perlengkapan = $request->peralatan_perlengkapan;
-    $esop->peringatan = $request->peringatan;
-    $esop->pencatatan_pendataan = $request->pencatatan_pendataan;
-    $esop->cara_mengatasi = $request->cara_mengatasi;
-    $esop->update();
+        $user = Auth::user();
+        $query = Esop::where('id', $id);
+        
+        // Filter akses berdasarkan role
+        if ($user->role === 'admin') {
+            // Admin dapat mengakses semua SOP
+        } elseif ($user->role === 'obu') {
+            // OBU dapat mengakses SOP milik sendiri dan SOP dari role upbu
+            $query->where(function($q) use ($user) {
+                $q->where('user_id', $user->id)
+                  ->orWhere(function($subQuery) use ($user) {
+                      $subQuery->where('id_unor', $user->id_unor)
+                               ->whereHas('user', function($userQuery) {
+                                   $userQuery->where('role', 'upbu');
+                               });
+                  })
+                  ->orWhereHas('user', function($userQuery) {
+                      $userQuery->where('role', 'upbu');
+                  });
+            });
+        } else {
+            // Role lain hanya dapat mengakses SOP milik sendiri atau yang sama id_unor
+            $query->where(function($q) use ($user) {
+                $q->where('id_unor', $user->id_unor)
+                  ->orWhere('user_id', $user->id);
+            });
+        }
+        
+        $esop = $query->firstOrFail();
+        
+        // Update data
+        $esop->judul_sop = $request->judul_sop;
+        $esop->no_sop = $request->no_sop;
+        $esop->nama_sop = $request->nama_sop;
+        $esop->tgl_ditetapkan = $request->tgl_ditetapkan;
+        $esop->tgl_revisi = $request->tgl_revisi;
+        $esop->tgl_diberlakukan = $request->tgl_diberlakukan;
+        $esop->dasar_hukum = $request->dasar_hukum;
+        $esop->kualifikasi_pelaksana = $request->kualifikasi_pelaksana;
+        $esop->keterkaitan = $request->keterkaitan;
+        $esop->peralatan_perlengkapan = $request->peralatan_perlengkapan;
+        $esop->peringatan = $request->peringatan;
+        $esop->pencatatan_pendataan = $request->pencatatan_pendataan;
+        $esop->cara_mengatasi = $request->cara_mengatasi;
+        $esop->update();
 
-    // Tetap di halaman edit setelah update
-    return redirect()->route('esop.edit', ['id' => $id]);
+        return redirect()->route('esop.edit', ['id' => $id]);
     }
 
     function esopDelete($id)
     {
-        $esop = Esop::where('id_unor', Auth::user()->id_unor)
-            ->where('id', $id)
-            ->firstOrFail();
-
+        $user = Auth::user();
+        $query = Esop::where('id', $id);
+        
+        // Filter akses berdasarkan role
+        if ($user->role === 'admin') {
+            // Admin dapat mengakses semua SOP
+        } elseif ($user->role === 'obu') {
+            // OBU dapat mengakses SOP milik sendiri dan SOP dari role upbu
+            $query->where(function($q) use ($user) {
+                $q->where('user_id', $user->id)
+                  ->orWhere(function($subQuery) use ($user) {
+                      $subQuery->where('id_unor', $user->id_unor)
+                               ->whereHas('user', function($userQuery) {
+                                   $userQuery->where('role', 'upbu');
+                               });
+                  })
+                  ->orWhereHas('user', function($userQuery) {
+                      $userQuery->where('role', 'upbu');
+                  });
+            });
+        } else {
+            // Role lain hanya dapat mengakses SOP milik sendiri atau yang sama id_unor
+            $query->where(function($q) use ($user) {
+                $q->where('id_unor', $user->id_unor)
+                  ->orWhere('user_id', $user->id);
+            });
+        }
+        
+        $esop = $query->firstOrFail();
         $esop->delete();
 
         return redirect()->route('esop.tampil');
@@ -90,8 +183,35 @@ class EsopController extends Controller
 
     public function esopFlow($id)
     {
-        $esop = Esop::with('pelaksanas')->where('id_unor', Auth::user()->id_unor)->findOrFail($id);
-
+        $user = Auth::user();
+        $query = Esop::with('pelaksanas')->where('id', $id);
+        
+        // Filter akses berdasarkan role
+        if ($user->role === 'admin') {
+            // Admin dapat mengakses semua SOP
+        } elseif ($user->role === 'obu') {
+            // OBU dapat mengakses SOP milik sendiri dan SOP dari role upbu
+            $query->where(function($q) use ($user) {
+                $q->where('user_id', $user->id)
+                  ->orWhere(function($subQuery) use ($user) {
+                      $subQuery->where('id_unor', $user->id_unor)
+                               ->whereHas('user', function($userQuery) {
+                                   $userQuery->where('role', 'upbu');
+                               });
+                  })
+                  ->orWhereHas('user', function($userQuery) {
+                      $userQuery->where('role', 'upbu');
+                  });
+            });
+        } else {
+            // Role lain hanya dapat mengakses SOP milik sendiri atau yang sama id_unor
+            $query->where(function($q) use ($user) {
+                $q->where('id_unor', $user->id_unor)
+                  ->orWhere('user_id', $user->id);
+            });
+        }
+        
+        $esop = $query->firstOrFail();
         $flows = Flow::where('esop_id', $id)->orderBy('no_urutan')->get()->keyBy('no_urutan');
 
         return view('esop.flow', compact('esop', 'flows'));
@@ -99,8 +219,35 @@ class EsopController extends Controller
     
     public function simpanFlow(Request $request, $id)
     {
-
-        $esop = Esop::findOrFail($id);
+        $user = Auth::user();
+        $query = Esop::where('id', $id);
+        
+        // Filter akses berdasarkan role
+        if ($user->role === 'admin') {
+            // Admin dapat mengakses semua SOP
+        } elseif ($user->role === 'obu') {
+            // OBU dapat mengakses SOP milik sendiri dan SOP dari role upbu
+            $query->where(function($q) use ($user) {
+                $q->where('user_id', $user->id)
+                  ->orWhere(function($subQuery) use ($user) {
+                      $subQuery->where('id_unor', $user->id_unor)
+                               ->whereHas('user', function($userQuery) {
+                                   $userQuery->where('role', 'upbu');
+                               });
+                  })
+                  ->orWhereHas('user', function($userQuery) {
+                      $userQuery->where('role', 'upbu');
+                  });
+            });
+        } else {
+            // Role lain hanya dapat mengakses SOP milik sendiri atau yang sama id_unor
+            $query->where(function($q) use ($user) {
+                $q->where('id_unor', $user->id_unor)
+                  ->orWhere('user_id', $user->id);
+            });
+        }
+        
+        $esop = $query->firstOrFail();
 
         // Hapus data pelaksana lama (optional)
         $esop->pelaksanas()->delete();
@@ -127,6 +274,36 @@ class EsopController extends Controller
 
     public function updateFlow(Request $request, $id)
     {
+        $user = Auth::user();
+        $query = Esop::where('id', $id);
+        
+        // Filter akses berdasarkan role
+        if ($user->role === 'admin') {
+            // Admin dapat mengakses semua SOP
+        } elseif ($user->role === 'obu') {
+            // OBU dapat mengakses SOP milik sendiri dan SOP dari role upbu
+            $query->where(function($q) use ($user) {
+                $q->where('user_id', $user->id)
+                  ->orWhere(function($subQuery) use ($user) {
+                      $subQuery->where('id_unor', $user->id_unor)
+                               ->whereHas('user', function($userQuery) {
+                                   $userQuery->where('role', 'upbu');
+                               });
+                  })
+                  ->orWhereHas('user', function($userQuery) {
+                      $userQuery->where('role', 'upbu');
+                  });
+            });
+        } else {
+            // Role lain hanya dapat mengakses SOP milik sendiri atau yang sama id_unor
+            $query->where(function($q) use ($user) {
+                $q->where('id_unor', $user->id_unor)
+                  ->orWhere('user_id', $user->id);
+            });
+        }
+        
+        $esop = $query->firstOrFail();
+        
         // Hapus semua data lama
         Flow::where('esop_id', $id)->delete();
 
@@ -178,21 +355,58 @@ class EsopController extends Controller
     public function esopSearch(Request $request)
     {
         $query = $request->get('query');
+        $user = Auth::user();
         
         try {
             if (empty($query)) {
                 // Jika query kosong, tampilkan semua data
-                $esops = Esop::with('user')
-                    ->orderBy('created_at', 'desc')
-                    ->get();
+                $esopsQuery = Esop::with('user');
+                
+                // Filter berdasarkan role
+                if ($user->role === 'admin') {
+                    // Admin dapat melihat semua data
+                } elseif ($user->role === 'obu') {
+                    // OBU dapat melihat SOP milik sendiri dan SOP dari role upbu
+                    $esopsQuery->where(function($q) use ($user) {
+                        $q->where('user_id', $user->id)
+                          ->orWhereHas('user', function($userQuery) {
+                              $userQuery->where('role', 'upbu');
+                          });
+                    });
+                } else {
+                    // Role lain hanya dapat melihat SOP milik sendiri
+                    $esopsQuery->where('user_id', $user->id);
+                }
+                
+                $esops = $esopsQuery->orderBy('created_at', 'desc')->get();
             } else {
                 // Lakukan pencarian berdasarkan nama_sop atau nama user
-                $esops = Esop::with('user')
-                    ->where('nama_sop', 'LIKE', '%' . $query . '%')
-                    ->orWhere('judul_sop', 'LIKE', '%' . $query . '%')
-                    ->orWhere('no_sop', 'LIKE', '%' . $query . '%')
-                    ->orWhereHas('user', function($userQuery) use ($query) {
-                        $userQuery->where('name', 'LIKE', '%' . $query . '%');
+                $esopsQuery = Esop::with('user');
+                
+                // Filter berdasarkan role terlebih dahulu
+                if ($user->role === 'admin') {
+                    // Admin dapat melihat semua data
+                } elseif ($user->role === 'obu') {
+                    // OBU dapat melihat SOP milik sendiri dan SOP dari role upbu
+                    $esopsQuery->where(function($q) use ($user) {
+                        $q->where('user_id', $user->id)
+                          ->orWhereHas('user', function($userQuery) {
+                              $userQuery->where('role', 'upbu');
+                          });
+                    });
+                } else {
+                    // Role lain hanya dapat melihat SOP milik sendiri
+                    $esopsQuery->where('user_id', $user->id);
+                }
+                
+                // Tambahkan kondisi pencarian
+                $esops = $esopsQuery->where(function($searchQuery) use ($query) {
+                        $searchQuery->where('nama_sop', 'LIKE', '%' . $query . '%')
+                            ->orWhere('judul_sop', 'LIKE', '%' . $query . '%')
+                            ->orWhere('no_sop', 'LIKE', '%' . $query . '%')
+                            ->orWhereHas('user', function($userQuery) use ($query) {
+                                $userQuery->where('name', 'LIKE', '%' . $query . '%');
+                            });
                     })
                     ->orderBy('created_at', 'desc')
                     ->get();

@@ -45,35 +45,6 @@
         padding: 8px 6px;
     }
 
-    /* Column width definitions */
-    .flow-table col:nth-child(1) {
-        width: 60px;
-    } /* No */
-    .flow-table col:nth-child(2) {
-        width: 300px;
-    } /* Uraian Kegiatan */
-    .flow-table col:nth-child(3) {
-        width: 120px;
-    } /* Pelaksana 1 */
-    .flow-table col:nth-child(4) {
-        width: 120px;
-    } /* Pelaksana 2 */
-    .flow-table col:nth-child(5) {
-        width: 120px;
-    } /* Pelaksana 3 */
-    .flow-table col:nth-child(6) {
-        width: 120px;
-    } /* Kelengkapan */
-    .flow-table col:nth-child(7) {
-        width: 120px;
-    } /* Waktu */
-    .flow-table col:nth-child(8) {
-        width: 120px;
-    } /* Output */
-    .flow-table col:nth-child(9) {
-        width: 120px;
-    } /* Keterangan */
-
     /* Textarea specific styling */
     .flow-table textarea {
         height: 60px;
@@ -116,6 +87,19 @@
         position: relative;
     }
 
+    /* Connector symbol styling with SVG - same shape as clip-path */
+    .symbol-preview .connector-symbol-svg {
+        width: 40px;
+        height: 40px;
+        margin: 0 auto;
+    }
+
+    .symbol-preview .connector-symbol-svg polygon {
+        fill: #90a4ae !important;
+        stroke: #90a4ae;
+        stroke-width: 1;
+    }
+
     .symbol-number {
         position: absolute;
         top: -8px;
@@ -130,7 +114,7 @@
         justify-content: center;
         font-size: 10px;
         font-weight: bold;
-        z-index: 20;
+        z-index: 10;
     }
 
     /* ===== CONTAINER STYLES ===== */
@@ -291,15 +275,33 @@
         background: transparent;
     }
 
-    /* ===== PRINT STYLES ===== */
+    /* ===== PRINT STYLES ===============================================================
+    =
+    =
+    =
+    =
+    =
+    =
+    =
+    =
+    =
+    =
+    =
+    =
+    =
+    =
+    =
+    =
+    =
+    =
+    =
+    =
+    =
+    */
     @media print {
         /* Print page setup */
         @page {
-            size: F4 landscape;
-            size: 330mm 210mm;
-            margin: 0cm 0.8cm !important; /* Hapus semua margin */
-            -webkit-print-color-adjust: exact;
-            color-adjust: exact;
+            size: landscape;
         }
 
         /* Hide everything by default, show only preview */
@@ -395,35 +397,6 @@
             overflow: hidden !important;
         }
 
-        /* Print column widths (optimized for F4 landscape ~1160px) */
-        .page-preview .flow-table col:nth-child(1) {
-            width: 50px;
-        } /* No */
-        .page-preview .flow-table col:nth-child(2) {
-            width: 300px;
-        } /* Uraian Kegiatan */
-        .page-preview .flow-table col:nth-child(3) {
-            width: 120px;
-        } /* Pelaksana 1 */
-        .page-preview .flow-table col:nth-child(4) {
-            width: 120px;
-        } /* Pelaksana 2 */
-        .page-preview .flow-table col:nth-child(5) {
-            width: 120px;
-        } /* Pelaksana 3 */
-        .page-preview .flow-table col:nth-child(6) {
-            width: 150px;
-        } /* Kelengkapan */
-        .page-preview .flow-table col:nth-child(7) {
-            width: 100px;
-        } /* Waktu */
-        .page-preview .flow-table col:nth-child(8) {
-            width: 140px;
-        } /* Output */
-        .page-preview .flow-table col:nth-child(9) {
-            width: 120px;
-        } /* Keterangan */
-
         /* Cell styling for print */
         .page-preview .flow-table th,
         .page-preview .flow-table td {
@@ -438,14 +411,14 @@
         /* Row height optimization */
         .page-preview .flow-table tbody tr {
             height: auto;
-            min-height: 65px;
-            max-height: 85px;
+            min-height: 85px; /* Disesuaikan dengan min-h-[5rem] + padding */
+            max-height: 110px; /* Ditingkatkan untuk mengakomodasi content yang lebih tinggi */
         }
 
         .page-preview .flow-table tbody td {
             padding: 6px 4px;
             vertical-align: middle;
-            max-height: 85px !important;
+            max-height: 110px !important; /* Disesuaikan dengan row height baru */
             overflow: hidden !important;
             text-overflow: ellipsis !important;
             word-wrap: break-word !important;
@@ -542,6 +515,47 @@
         #preview-tabel tbody {
             display: table-row-group;
         }
+
+        /* Remove all background colors for symbols in print */
+        .page-preview .symbol-preview > div {
+            background-color: transparent !important;
+            background: none !important;
+            border: 1px solid #000 !important;
+            -webkit-print-color-adjust: exact;
+            color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        /* Special handling for connector symbols - SVG version with same clip-path shape */
+        .page-preview .symbol-preview .connector-symbol-svg {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto;
+        }
+
+        .page-preview .symbol-preview .connector-symbol-svg polygon {
+            fill: none !important;
+            stroke: #000 !important;
+            stroke-width: 1 !important;
+            -webkit-print-color-adjust: exact;
+            color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        /* Ensure symbol numbers are visible in print */
+        .page-preview .symbol-number {
+            visibility: hidden;
+        }
+
+        .page-preview .symbol-number {
+            display: none !important;
+            visibility: hidden !important;
+        }
+
+        .symbol-number {
+            display: none !important;
+            visibility: hidden !important;
+        }
     }
 </style>
 
@@ -570,22 +584,22 @@
                 <div class="table-container">
                     <table class="flow-table border border-gray-400 text-sm text-gray-800">
                         <colgroup>
-                            <col style="width: 70px" />
+                            <col style="width: 50px" />
                             <!-- No -->
-                            <col style="width: 320px" />
+                            <col style="width: 300px" />
                             <!-- Uraian Kegiatan lebih lebar untuk F4 -->
                             @for ($i = 0; $i < $jumlahPelaksana; $i++)
-                                <col style="width: 130px" />
+                                <col style="width: 150px" />
                                 <!-- Pelaksana columns lebih lebar -->
                             @endfor
 
-                            <col style="width: 200px" />
+                            <col style="width: 125px" />
                             <!-- Kelengkapan lebih lebar -->
-                            <col style="width: 130px" />
+                            <col style="width: 125px" />
                             <!-- Waktu -->
-                            <col style="width: 160px" />
+                            <col style="width: 125px" />
                             <!-- Output lebih lebar -->
-                            <col style="width: 130px" />
+                            <col style="width: 125px" />
                             <!-- Keterangan -->
                         </colgroup>
                         <thead>
@@ -1079,13 +1093,6 @@
             });
         }
 
-        // Expose debug function to global scope for testing
-        window.debugSymbolOrder = debugSymbolOrder;
-        window.resetSymbolOrder = resetSymbolOrder;
-        window.clearSavedSymbolOrder = clearSavedSymbolOrder;
-        window.saveSymbolOrderToStorage = saveSymbolOrderToStorage;
-        window.loadSymbolOrderFromStorage = loadSymbolOrderFromStorage;
-
         function calculateActualRowHeights() {
             const editorRows = document.querySelectorAll('#editor-tabel tbody tr');
             const heights = [];
@@ -1102,12 +1109,12 @@
                     // Gunakan yang lebih besar antara perhitungan karakter atau line break
                     const estimatedLines = Math.max(lineCount, actualLineCount);
 
-                    // Tinggi minimum 60px, tambah 15px per baris ekstra (dikurangi dari 75px dan 20px)
-                    const estimatedHeight = Math.max(60, 45 + estimatedLines * 15);
+                    // Tinggi minimum 80px (5rem) sesuai min-h-[5rem], tambah 20px per baris ekstra
+                    const estimatedHeight = Math.max(80, 80 + (estimatedLines - 1) * 20);
                     heights.push(estimatedHeight);
                 } else {
-                    // Baris kosong menggunakan tinggi minimum 60px (dikurangi dari 75px)
-                    heights.push(60);
+                    // Baris kosong menggunakan tinggi minimum 80px (5rem) sesuai min-h-[5rem]
+                    heights.push(80);
                 }
             });
 
@@ -1136,46 +1143,14 @@
             const actualRowHeights = calculateActualRowHeights();
             const averageActualHeight =
                 actualRowHeights.length > 0
-                    ? Math.max(60, actualRowHeights.reduce((sum, height) => sum + height, 0) / actualRowHeights.length)
-                    : 70; // Default lebih realistis
+                    ? Math.max(80, actualRowHeights.reduce((sum, height) => sum + height, 0) / actualRowHeights.length)
+                    : 85; // Default disesuaikan dengan min-h-[5rem] + padding
 
             const availableForRows = availableHeightPx - tableHeaderHeight - safetyMargin;
             const maxRows = Math.floor(availableForRows / averageActualHeight - 1);
 
             // Hapus batasan, gunakan perhitungan langsung
             return maxRows;
-        }
-
-        // Function to validate page content and adjust if needed
-        function validatePageContent() {
-            const pages = document.querySelectorAll('.page-preview');
-            pages.forEach((page, index) => {
-                const table = page.querySelector('.flow-table');
-                const rows = table ? table.querySelectorAll('tbody tr:not(.buffer-row)') : [];
-
-                // Hitung tinggi aktual page content
-                let totalRowHeight = 0;
-                rows.forEach((row) => {
-                    // Measure actual row height
-                    const rowHeight = row.offsetHeight || 75;
-                    totalRowHeight += rowHeight;
-                });
-
-                const tableHeaderHeight = 70; // Sesuaikan dengan calculateRowsPerPage
-                const totalPageHeight = tableHeaderHeight + totalRowHeight; // Hapus safety margin
-                const pageAvailableHeight = 794; // F4 landscape height penuh tanpa margin
-
-                if (totalPageHeight > pageAvailableHeight) {
-                }
-
-                // Check individual row heights
-                rows.forEach((row, rowIndex) => {
-                    const rowHeight = row.offsetHeight || 75;
-                });
-
-                // Check if page exceeds safe row limit
-                const maxSafeRows = ROWS_PER_PAGE;
-            });
         }
 
         // Get dynamic rows per page - recalculate every time
@@ -1308,45 +1283,6 @@
                 syncPreviewTable();
                 setTimeout(debouncedAutoScale, 300);
             }
-        }
-
-        function clearAllSymbols() {
-            // Konfirmasi sebelum menghapus
-            const confirmed = confirm(
-                'Apakah Anda yakin ingin mengosongkan semua pilihan simbol? Tindakan ini tidak dapat dibatalkan.',
-            );
-
-            if (!confirmed) {
-                return;
-            }
-
-            // Reset symbol order dan numbering
-            resetSymbolOrder();
-
-            // Cari semua select element untuk simbol
-            const allSymbolSelects = document.querySelectorAll('select[name^="symbol_"]');
-
-            allSymbolSelects.forEach((select) => {
-                // Reset select ke nilai kosong
-                select.value = '';
-
-                // Reset preview simbol
-                const symbolPreview = select.nextElementSibling;
-                if (symbolPreview && symbolPreview.classList.contains('symbol-preview')) {
-                    symbolPreview.innerHTML =
-                        '<div class="w-15 h-6 border-2 border-gray-300 border-dashed mx-auto"></div>';
-                }
-
-                // Hapus input return_to jika ada
-                const cell = select.closest('td');
-                const returnInput = cell.querySelector('input[name^="return_to_"]');
-                if (returnInput) {
-                    returnInput.closest('div').remove();
-                }
-            });
-
-            // Update preview table
-            syncPreviewTable();
         }
 
         function clearAllSymbolsWithSweetAlert() {
@@ -1560,7 +1496,6 @@
             setTimeout(() => {
                 drawAllPageConnections();
                 debouncedAutoScale();
-                validatePageContent(); // Validate page utilization
             }, 200);
         }
 
@@ -1575,10 +1510,10 @@
                     <col style="width: 50px" />
                     <col style="width: 300px" />
                     ${Array(jumlahPelaksana).fill('<col style="width: 120px" />').join('')}
-                    <col style="width: 150px" />
-                    <col style="width: 100px" />
-                    <col style="width: 140px" />
-                    <col style="width: 120px" />
+                    <col style="width: 125px" />
+                    <col style="width: 125px" />
+                    <col style="width: 125px" />
+                    <col style="width: 125px" />
                 </colgroup>
                 <thead>
                     <tr class="bg-gray-100 text-center font-semibold">
@@ -1724,20 +1659,20 @@
                 <tr class="page-break-avoid">
                     <td class="border border-gray-400 px-2 py-1 text-center">${rowData.number}</td>
                     <td class="border border-gray-400 px-2 py-1">
-                        <div class="px-2 py-1 text-sm min-h-[2.5rem] whitespace-pre-wrap">${rowData.uraianKegiatan}</div>
+                        <div class="px-2 py-1 text-sm min-h-[5rem] whitespace-pre-wrap">${rowData.uraianKegiatan}</div>
                     </td>
                     ${pelaksanaHTML}
                     <td class="border border-gray-400 px-2 py-1">
-                        <div class="px-2 py-1 text-sm min-h-[2.5rem] whitespace-pre-wrap">${rowData.kelengkapan}</div>
+                        <div class="px-2 py-1 text-sm min-h-[5rem] whitespace-pre-wrap">${rowData.kelengkapan}</div>
                     </td>
                     <td class="border border-gray-400 px-2 py-1">
-                        <div class="px-2 py-1 text-sm min-h-[2.5rem] whitespace-pre-wrap">${rowData.waktu}</div>
+                        <div class="px-2 py-1 text-sm min-h-[5rem] whitespace-pre-wrap">${rowData.waktu}</div>
                     </td>
                     <td class="border border-gray-400 px-2 py-1">
-                        <div class="px-2 py-1 text-sm min-h-[2.5rem] whitespace-pre-wrap">${rowData.output}</div>
+                        <div class="px-2 py-1 text-sm min-h-[5rem] whitespace-pre-wrap">${rowData.output}</div>
                     </td>
                     <td class="border border-gray-400 px-2 py-1">
-                        <div class="px-2 py-1 text-sm min-h-[2.5rem] whitespace-pre-wrap">${rowData.keterangan}</div>
+                        <div class="px-2 py-1 text-sm min-h-[5rem] whitespace-pre-wrap">${rowData.keterangan}</div>
                     </td>
                 </tr>
             `;
@@ -1750,7 +1685,12 @@
                     pelaksanaHTML += `
                         <td class="border border-gray-400 px-2 py-1">
                             <div class="symbol-preview">
-                                <div class="w-10 h-10 bg-gray-500 [clip-path:polygon(0%_0%,100%_0%,100%_50%,50%_100%,0%_50%)] mx-auto"></div>
+                                <svg class="connector-symbol-svg" width="40" height="40" viewBox="0 0 40 40">
+                                    <polygon points="0,0 40,0 40,20 20,40 0,20"
+                                             fill="none"
+                                             stroke="#000"
+                                             stroke-width="2"/>
+                                </svg>
                             </div>
                         </td>
                     `;
@@ -1770,53 +1710,6 @@
                     <td class="border border-gray-400 px-2 py-1"></td>
                 </tr>
             `;
-        }
-
-        function getLastActiveSymbolColumnFromData(rowData, allRowsData, currentRowIndex) {
-            // First check the current row for any active symbols
-            for (let i = rowData.pelaksanas.length - 1; i >= 0; i--) {
-                if (rowData.pelaksanas[i] && rowData.pelaksanas[i].value) {
-                    return i;
-                }
-            }
-
-            // If no active symbol in current row, look backwards through all previous rows
-            for (let rowIndex = currentRowIndex - 1; rowIndex >= 0; rowIndex--) {
-                const previousRowData = allRowsData[rowIndex];
-                if (previousRowData && previousRowData.pelaksanas) {
-                    // Check from right to left to find the last active symbol
-                    for (let i = previousRowData.pelaksanas.length - 1; i >= 0; i--) {
-                        if (previousRowData.pelaksanas[i] && previousRowData.pelaksanas[i].value) {
-                            return i;
-                        }
-                    }
-                }
-            }
-
-            return 0;
-        }
-
-        function getLastActiveSymbolColumn(editorRows, currentRowIndex) {
-            // Look backwards from current row to find the last active symbol
-            for (let rowIndex = currentRowIndex - 1; rowIndex >= 0; rowIndex--) {
-                const row = editorRows[rowIndex];
-                const cells = row.querySelectorAll('td');
-
-                // Check pelaksana columns from right to left (starting from column index 2)
-                for (let cellIndex = 2 + jumlahPelaksana - 1; cellIndex >= 2; cellIndex--) {
-                    const cell = cells[cellIndex];
-                    if (cell) {
-                        const select = cell.querySelector('select');
-                        if (select && select.value && select.value !== '') {
-                            // Found an active symbol, return the column index relative to pelaksana columns (0-based)
-                            return cellIndex - 2; // Convert to 0-based pelaksana column index
-                        }
-                    }
-                }
-            }
-
-            // If no active symbol found, default to first column
-            return 0;
         }
 
         function drawAllPageConnections() {
@@ -1858,8 +1751,10 @@
                 }
             }
 
-            // Dapatkan semua simbol dari halaman ini
-            const symbols = table.querySelectorAll('.symbol-preview > div:first-child');
+            // Dapatkan semua simbol dari halaman ini (div biasa dan SVG connector)
+            const symbols = table.querySelectorAll(
+                '.symbol-preview > div:first-child, .symbol-preview > svg.connector-symbol-svg',
+            );
 
             if (symbols.length === 0) {
                 // Set canvas size berdasarkan mode
@@ -2167,7 +2062,7 @@
             // Add "Tidak" text
             const labelText = 'Tidak';
 
-            ctx.fillStyle = '#ef4444';
+            ctx.fillStyle = '#ef4444'; // Red color for "Tidak" text
 
             // Set font size berdasarkan mode
             if (isPrinting || isPrintPage) {
@@ -2214,115 +2109,11 @@
             }
         }
 
-        function wouldLinesIntersect(decisionCenter, targetSymbol, flowFrom, flowTo, useRightSide) {
-            const decisionDim = getSymbolDimensions(decisionCenter.element, getSymbolType(decisionCenter.element));
-            const targetDim = getSymbolDimensions(targetSymbol.element, getSymbolType(targetSymbol.element));
-            const curveOffset = Math.max(decisionDim.width / 2 + 25, 40);
-
-            // Calculate decision line path
-            let decisionStartX, decisionMidX, decisionEndX;
-            if (useRightSide) {
-                decisionStartX = decisionCenter.x + (decisionDim.width / 2 + 8);
-                decisionMidX = decisionStartX + curveOffset;
-                decisionEndX = targetSymbol.x + (targetDim.width / 2 + 8);
-            } else {
-                decisionStartX = decisionCenter.x - (decisionDim.width / 2 + 8);
-                decisionMidX = decisionStartX - curveOffset;
-                decisionEndX = targetSymbol.x - (targetDim.width / 2 + 8);
-            }
-
-            const decisionY1 = decisionCenter.y;
-            const decisionY2 = targetSymbol.y;
-
-            // Calculate main flow line path
-            const flowFromDim = getSymbolDimensions(flowFrom.element, getSymbolType(flowFrom.element));
-            const flowToDim = getSymbolDimensions(flowTo.element, getSymbolType(flowTo.element));
-
-            const flowStartY = flowFrom.y + flowFromDim.height / 2 + 8;
-            const flowEndY = flowTo.y - flowToDim.height / 2 - 8;
-            const flowX = flowFrom.x;
-
-            // Check intersection between vertical segments
-            const tolerance = 15; // Minimum distance to avoid visual collision
-
-            // Check if decision line's horizontal segment intersects with flow line
-            const minDecisionY = Math.min(decisionY1, decisionY2);
-            const maxDecisionY = Math.max(decisionY1, decisionY2);
-
-            // Check if flow line's vertical path intersects decision line's horizontal path
-            if (flowStartY <= maxDecisionY && flowEndY >= minDecisionY) {
-                // Check horizontal overlap
-                const minDecisionX = Math.min(decisionMidX, Math.min(decisionStartX, decisionEndX));
-                const maxDecisionX = Math.max(decisionMidX, Math.max(decisionStartX, decisionEndX));
-
-                if (
-                    Math.abs(flowX - decisionMidX) < tolerance &&
-                    flowX >= minDecisionX - tolerance &&
-                    flowX <= maxDecisionX + tolerance
-                ) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        function isOnDifferentPages(symbolA, symbolB) {
-            // Get the rows containing both symbols
-            const rowA = symbolA.element.closest('tr');
-            const rowB = symbolB.element.closest('tr');
-
-            if (!rowA || !rowB) return false;
-
-            // Get all rows in the table
-            const allRows = Array.from(rowA.parentElement.children);
-            const rowIndexA = allRows.indexOf(rowA);
-            const rowIndexB = allRows.indexOf(rowB);
-
-            // Check if there's a page break row between them
-            const startIndex = Math.min(rowIndexA, rowIndexB);
-            const endIndex = Math.max(rowIndexA, rowIndexB);
-
-            for (let i = startIndex + 1; i < endIndex; i++) {
-                const row = allRows[i];
-                if (row.classList.contains('page-break-before')) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        function hasConnectorBetween(symbolA, symbolB, allSymbols) {
-            // Check if there are connector symbols between two regular symbols
-            const rowA = symbolA.element.closest('tr');
-            const rowB = symbolB.element.closest('tr');
-
-            if (!rowA || !rowB) return false;
-
-            const allRows = Array.from(rowA.parentElement.children);
-            const rowIndexA = allRows.indexOf(rowA);
-            const rowIndexB = allRows.indexOf(rowB);
-
-            const startIndex = Math.min(rowIndexA, rowIndexB);
-            const endIndex = Math.max(rowIndexA, rowIndexB);
-
-            // Look for connector symbols (buffer rows) between the two symbols
-            for (let i = startIndex + 1; i < endIndex; i++) {
-                const row = allRows[i];
-                if (row.classList.contains('buffer-row')) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
         function getSymbolType(element) {
             if (element.classList.contains('bg-blue-500')) return 'start';
             if (element.classList.contains('bg-green-500')) return 'process';
             if (element.classList.contains('bg-yellow-400')) return 'decision';
-            if (element.classList.contains('bg-gray-500')) return 'connector'; // Connector symbol in buffer row
+            if (element.classList.contains('connector-symbol-svg')) return 'connector'; // Connector SVG symbol in buffer row
             if (element.classList.contains('border-dashed')) return 'empty';
             return 'unknown';
         }
@@ -2495,10 +2286,6 @@
 
             // Restore context state
             ctx.restore();
-        }
-
-        function showSuccessAlert() {
-            // You can add success alert functionality here
         }
 
         // Initialize preview table on page load
