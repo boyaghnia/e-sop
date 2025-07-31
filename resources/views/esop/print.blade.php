@@ -1,124 +1,262 @@
+@php
+    $jumlahPelaksana = $esop->pelaksanas->count();
+@endphp
+
 <x-layout>
     <style>
         @media print {
-            /* Sembunyikan semua elemen kecuali tabel */
+            html,
+            body {
+                width: 100%;
+                height: 100%;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            main,
+            header,
+            aside,
+            footer {
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            header,
+            .fixed {
+                display: none !important;
+                visibility: hidden !important;
+                height: 0 !important;
+                position: none !important;
+            }
+            .space-y-3,
+            .rounded-sm,
+            .bg-white,
+            .p-4,
+            .shadow-sm,
+            .mt-4,
+            .mb-4,
+            .ml-4,
+            .mr-4,
+            .mt-20 {
+                margin: 0 !important;
+                padding: 0 !important;
+                box-shadow: none !important;
+                border-radius: 0 !important;
+                background: none !important;
+            }
             body * {
                 visibility: hidden;
             }
 
-            /* Tampilkan hanya tabel dan parent-nya */
+            @page :first {
+                size: 220mm 310mm;
+            }
+
+            @page {
+                size: 310mm 220mm;
+            }
+
+            /* ---------------------------------------------------------- */
+            /* ---------------------------------------------------------- */
+            /* ---------------------------------------------------------- */
+            /* Print Area 1 */
+
             .print-area,
             .print-area * {
                 visibility: visible;
                 font-size: 11px;
             }
 
-            /* Posisikan tabel di print area */
             .print-area {
-                left: 0;
-                top: 0;
-                position: fixed;
-                width: 100vh;
-                height: 100vw;
-                overflow: hidden !important;
-                transform-origin: top left;
-                transform: rotate(-90deg) translate(-100%, 0);
-                page-break-inside: avoid;
-            }
-
-            /* Style khusus untuk print */
-            table {
-                border-collapse: collapse !important;
-                width: 100vh !important;
-                height: auto !important;
-                table-layout: fixed !important;
-                page-break-inside: avoid !important;
-            }
-
-            td {
-                border: 1px solid black !important;
-                padding: 4px !important;
-                color: black !important;
-                font-size: 10px !important;
-                word-wrap: break-word !important;
-                overflow: hidden !important;
-                height: auto !important;
-            }
-
-            .text-gray-800,
-            .text-gray-400 {
-                color: black !important;
-            }
-
-            img {
-                max-width: 120px !important;
-                max-height: 80px !important;
-                height: auto !important;
-                width: auto !important;
-            }
-
-            /* Pastikan font size konsisten */
-            p,
-            div,
-            span {
-                font-size: 11px !important;
+                width: 100%;
+                min-height: 95vh;
+                max-height: 97vh;
                 margin: 0 !important;
                 padding: 0 !important;
-                line-height: 1.5 !important;
+                box-sizing: border-box;
+                page-break-inside: avoid !important;
+                page-break-after: always !important;
             }
 
-            /* Tambahkan CSS khusus untuk tanda tangan */
-            .ttd-spacing {
-                margin-left: 3rem !important;
+            .print-area tr:nth-child(-n + 4) {
+                height: 35px !important;
             }
 
-            /* Atau alternatif dengan padding-left */
-            .ttd-spacing-alt {
-                padding-left: 3rem !important;
+            .print-area tr:nth-child(5) {
+                height: 100px !important;
             }
 
-            .spacing {
-                margin-left: 1rem !important;
+            .print-area tr:nth-child(6) {
+                height: 50px !important;
             }
 
-            @page {
-                size: 330mm 210mm; /* Ukuran kertas A4 */
-                margin: 10mm;
-                -webkit-print-color-adjust: exact;
-                color-adjust: exact;
+            .print-area tr:nth-child(7) {
+                height: 25px !important;
             }
 
-            /* Hindari page break di dalam tabel */
-            tbody,
-            tr,
-            td {
+            .print-area tr:nth-child(8) {
+                height: auto !important;
+            }
+
+            .print-area tr:nth-child(9) {
+                height: 25px !important;
+            }
+
+            .print-area tr:nth-child(10) {
+                height: 125px !important;
+            }
+
+            .print-area tr:nth-child(11) {
+                height: 25px !important;
+            }
+
+            .print-area tr:nth-child(12) {
+                height: 125px !important;
+            }
+
+            .print-area table {
+                border-collapse: collapse !important;
+            }
+
+            .print-area td {
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
             }
 
-            tr:nth-child(-n + 4) {
-                height: 35px !important;
+            /* ---------------------------------------------------------- */
+            /* ---------------------------------------------------------- */
+            /* ---------------------------------------------------------- */
+            /* Print Area 2 */
+
+            .print-area2,
+            .print-area2 * {
+                visibility: visible;
+                font-size: 11px;
+            }
+            .print-area2 {
+                height: 100vh;
+                width: 100vh;
+                margin: 0 !important;
+                padding: 0 !important;
+                box-sizing: border-box;
+                page-break-inside: avoid !important;
             }
 
-            tr:nth-child(6) {
-                height: 40px !important;
+            .print-area2 table {
+                height: 100%;
+                table-layout: fixed;
             }
 
-            tr:nth-child(8) {
-                height: auto !important;
+            .print-area table,
+            .print-area2 table {
+                border-collapse: collapse !important;
+            }
+            .print-area td,
+            .print-area2 td {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
             }
 
-            tr:nth-child(10) {
-                height: 125px !important;
+            .print-area2 .symbol-preview,
+            .print-area2 .symbol-preview * {
+                display: block !important;
+                visibility: visible !important;
+                background: inherit !important;
+                color: inherit !important;
             }
-
-            tr:nth-child(12) {
-                height: 125px !important;
+            .print-area2 .mx-auto {
+                margin-left: auto !important;
+                margin-right: auto !important;
             }
         }
     </style>
 
-    <div class="w-[100%] space-y-3">
+    <!-- Print Preview Controls -->
+    <div class="mb-4 flex items-center justify-between">
+        <div class="w-full text-left print:hidden">
+            <span class="text-lg font-bold text-slate-700">
+                {{ $esop->nama_sop }}
+            </span>
+        </div>
+
+        <div class="flex space-x-2">
+            <button
+                onclick="window.print()"
+                class="cursor-pointer rounded-sm bg-green-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-400 focus-visible:outline-offset-2 focus-visible:outline-green-600"
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="1.5"
+                    stroke="currentColor"
+                    class="size-4"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5Zm-3 0h.008v.008H15V10.5Z"
+                    />
+                </svg>
+            </button>
+            <a href="{{ route('esop.edit', ['id' => $esop->id]) }}" class="print:hidden">
+                <button
+                    class="cursor-pointer rounded-sm bg-blue-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-400 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.5"
+                        stroke="currentColor"
+                        class="size-4"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"
+                        />
+                    </svg>
+                </button>
+            </a>
+            <a id="backBtn" href="#" class="print:hidden">
+                <button
+                    class="cursor-pointer rounded-sm bg-gray-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-400 focus-visible:outline-offset-2 focus-visible:outline-gray-600"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.5"
+                        stroke="currentColor"
+                        class="size-4"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3"
+                        />
+                    </svg>
+                </button>
+            </a>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    var backBtn = document.getElementById('backBtn');
+                    var ref = document.referrer;
+                    if (ref.includes('/esop/dashboard')) {
+                        backBtn.href = '{{ route('dashboard.tampil') }}';
+                    } else if (ref.includes('/esop/esop')) {
+                        backBtn.href = '{{ route('esop.tampil') }}';
+                    } else if (ref.includes('/esop/edit')) {
+                        backBtn.href = '{{ route('esop.tampil') }}';
+                    } else {
+                        backBtn.href = ref || '{{ route('dashboard.tampil') }}';
+                    }
+                });
+            </script>
+        </div>
+    </div>
+
+    <div class="space-y-3">
         <div class="rounded-sm bg-white p-4 shadow-sm">
             <table class="print-area h-1 w-full table-fixed border border-black text-sm">
                 <tbody>
@@ -267,6 +405,180 @@
         </div>
     </div>
 
+    <div id="preview-area" class="mt-4">
+        <div class="preview-wrapper" id="preview-wrapper">
+            <div id="pages-container" class="pages-container">
+                <div class="main-content rounded-sm bg-white p-4 shadow-sm">
+                    <div class="table-container">
+                        <table class="print-area2 flow-table border border-gray-400 text-sm text-gray-800">
+                            <colgroup>
+                                <col style="width: 2%" />
+                                <!-- No -->
+                                <col style="width: 13%" />
+                                <!-- Uraian Kegiatan -->
+                                @php
+                                    // Hitung sisa persen untuk kolom pelaksana dan kolom lain
+                                    $pelaksanaPersen = $jumlahPelaksana > 0 ? 30 / $jumlahPelaksana : 0;
+                                @endphp
+
+                                @for ($i = 0; $i < $jumlahPelaksana; $i++)
+                                    <col style="width: {{ $pelaksanaPersen }}%" />
+                                    <!-- Pelaksana -->
+                                @endfor
+
+                                <col style="width: 5%" />
+                                <!-- Kelengkapan -->
+                                <col style="width: 5%" />
+                                <!-- Waktu -->
+                                <col style="width: 5%" />
+                                <!-- Output -->
+                                <col style="width: 5%" />
+                                <!-- Keterangan -->
+                            </colgroup>
+                            <thead>
+                                <tr class="bg-gray-100 text-center font-semibold">
+                                    <th rowspan="2" class="border border-gray-400 px-2 py-1 align-middle">No</th>
+                                    <th rowspan="2" class="w-[300px] border border-gray-400 px-2 py-1 align-middle">
+                                        Uraian Kegiatan
+                                    </th>
+                                    <th colspan="{{ $jumlahPelaksana }}" class="border border-gray-400 px-2 py-1">
+                                        Pelaksana
+                                    </th>
+                                    <th colspan="3" class="border border-gray-400 px-2 py-1">Mutu Baku</th>
+                                    <th rowspan="2" class="border border-gray-400 px-2 py-1">Keterangan</th>
+                                </tr>
+                                <tr class="bg-gray-100 text-center">
+                                    @foreach ($esop->pelaksanas as $pelaksana)
+                                        <th class="border border-gray-400 px-2 py-1">{{ $pelaksana->isi }}</th>
+                                    @endforeach
+
+                                    <th class="border border-gray-400 px-2 py-1">Kelengkapan</th>
+                                    <th class="border border-gray-400 px-2 py-1">Waktu</th>
+                                    <th class="border border-gray-400 px-2 py-1">Output</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-flow">
+                                @php
+                                    $jumlahBaris = max(4, $flows->max('no_urutan') ?? 0);
+                                @endphp
+
+                                @for ($i = 0; $i < $jumlahBaris; $i++)
+                                    @php
+                                        $flow = $flows[$i] ?? null;
+                                    @endphp
+
+                                    <tr class="{{ $i % 2 === 0 ? 'bg-white' : 'bg-white' }}">
+                                        <td class="border border-gray-400 px-2 py-1 text-center">{{ $i + 1 }}</td>
+                                        <td class="uraian-column border border-gray-400 px-2 py-1">
+                                            {{ $flow->uraian_kegiatan ?? '' }}
+                                        </td>
+                                        @foreach ($esop->pelaksanas as $index => $pelaksana)
+                                            @php
+                                                $savedSymbol = '';
+                                                $savedReturnTo = '';
+                                                if ($flow && $flow->symbols && is_array($flow->symbols)) {
+                                                    $savedSymbol = $flow->symbols[$index] ?? '';
+                                                }
+                                                if ($flow && $flow->return_to && is_array($flow->return_to)) {
+                                                    $savedReturnTo = $flow->return_to[$index] ?? '';
+                                                }
+                                            @endphp
+
+                                            <td
+                                                class="border border-gray-400 px-2 py-1"
+                                                data-flow="{{ $flow->id ?? '' }}"
+                                                data-pelaksana="{{ $pelaksana->id }}"
+                                            >
+                                                <select
+                                                    name="symbol_{{ $i }}_{{ $index }}"
+                                                    onchange="updateSymbol(this)"
+                                                    class="w-full text-sm"
+                                                >
+                                                    <option value="">Pilih</option>
+                                                    <option
+                                                        value="start"
+                                                        {{ $savedSymbol == 'start' ? 'selected' : '' }}
+                                                    >
+                                                        Mulai
+                                                    </option>
+                                                    <option
+                                                        value="process"
+                                                        {{ $savedSymbol == 'process' ? 'selected' : '' }}
+                                                    >
+                                                        Proses
+                                                    </option>
+                                                    <option
+                                                        value="decision"
+                                                        {{ $savedSymbol == 'decision' ? 'selected' : '' }}
+                                                    >
+                                                        Pilihan
+                                                    </option>
+                                                </select>
+                                                <div class="symbol-preview">
+                                                    @if ($savedSymbol == 'start')
+                                                        <div class="mx-auto h-6 w-15 rounded-xl bg-blue-500"></div>
+                                                    @elseif ($savedSymbol == 'process')
+                                                        <div class="mx-auto h-6 w-15 bg-green-500"></div>
+                                                    @elseif ($savedSymbol == 'decision')
+                                                        <div class="mx-auto h-8 w-8 rotate-45 bg-yellow-400"></div>
+                                                    @else
+                                                        <div
+                                                            class="mx-auto h-6 w-15 border-2 border-dashed border-gray-300"
+                                                        ></div>
+                                                    @endif
+
+                                                    @if ($savedSymbol && $savedSymbol != '')
+                                                        <div class="symbol-number">
+                                                            {{ ($i - 1) * $jumlahPelaksana + $index + 1 }}
+                                                        </div>
+                                                    @endif
+                                                </div>
+
+                                                @if ($savedSymbol == 'decision')
+                                                    <div class="mt-2">
+                                                        <input
+                                                            type="number"
+                                                            name="return_to_{{ $i }}_{{ $index }}"
+                                                            placeholder="Kembali ke nomor"
+                                                            min="1"
+                                                            class="w-full rounded border border-gray-300 px-2 py-1 text-xs"
+                                                            value="{{ $savedReturnTo }}"
+                                                            onchange="syncPreviewTable()"
+                                                        />
+                                                    </div>
+                                                @endif
+                                            </td>
+                                        @endforeach
+
+                                        <td class="border border-gray-400 px-2 py-1">
+                                            {{ $flow->kelengkapan ?? '' }}
+                                        </td>
+                                        <td class="border border-gray-400 px-2 py-1">
+                                            {{ $flow->waktu ?? '' }}
+                                        </td>
+                                        <td class="border border-gray-400 px-2 py-1">
+                                            {{ $flow->output ?? '' }}
+                                        </td>
+
+                                        <td class="border border-gray-400 px-2 py-1">
+                                            {{ $flow->keterangan ?? '' }}
+                                        </td>
+                                    </tr>
+                                @endfor
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            window.print();
+        });
+    </script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const previewIds = ['dasar_hukum', 'cara_mengatasi', 'keterkaitan', 'peralatan_perlengkapan', 'peringatan'];
@@ -288,41 +600,5 @@
                 }
             });
         });
-    </script>
-
-    <script>
-        let pelaksanaCounter = 1;
-
-        function addPelaksanaField() {
-            pelaksanaCounter++;
-
-            const container = document.getElementById('pelaksana-container');
-
-            const wrapper = document.createElement('div');
-            wrapper.className =
-                'pelaksana-row flex items-center rounded-md bg-white py-1.5 px-3 outline outline-gray-300 focus-within:outline-1 focus-within:-outline-offset-1 focus-within:outline-indigo-600';
-
-            const textarea = document.createElement('textarea');
-            textarea.name = 'pelaksana[]';
-            textarea.rows = 1;
-            textarea.className =
-                'form-control block w-full resize-none overflow-hidden bg-white text-base text-gray-900 outline-none placeholder:text-gray-400 sm:text-sm';
-            textarea.setAttribute('oninput', "this.style.height='auto'; this.style.height=(this.scrollHeight)+'px';");
-
-            const deleteSpan = document.createElement('span');
-            deleteSpan.className = 'ml-2 text-gray-400 cursor-pointer';
-            deleteSpan.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
-          <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-        </svg>
-
-                `;
-            deleteSpan.onclick = () => container.removeChild(wrapper);
-
-            wrapper.appendChild(textarea);
-            wrapper.appendChild(deleteSpan);
-
-            container.appendChild(wrapper);
-        }
     </script>
 </x-layout>

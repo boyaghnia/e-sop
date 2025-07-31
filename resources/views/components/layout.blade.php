@@ -9,7 +9,9 @@
     </head>
 
     <body class="flex min-h-screen flex-col bg-gray-200">
-        <x-header></x-header>
+        <header>
+            <x-header></x-header>
+        </header>
 
         <!-- Sidebar -->
         <x-sidebar></x-sidebar>

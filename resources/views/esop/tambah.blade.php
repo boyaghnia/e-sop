@@ -302,7 +302,6 @@
                             <td colspan="2" class="border p-2 font-bold">Ditetapkan Oleh</td>
                             <td colspan="3" class="border p-2 text-center">
                                 <p>
-                                    <br />
                                     <span style="margin-left: 1rem" class="spacing">${jabatan_pengirim}</span>
                                     <br />
                                     <br />
@@ -316,8 +315,6 @@
                                     <span style="margin-left: 1rem" class="spacing">${nama_pengirim}</span>
                                     <br />
                                     <span style="margin-left: 1rem" class="spacing">${nip_pengirim}</span>
-                                    <br />
-                                    <br />
                                 </p>
                             </td>
                         </tr>

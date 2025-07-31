@@ -560,27 +560,93 @@
 </style>
 
 <x-layout>
+    <div class="mb-4 flex items-center justify-between">
+        <div class="w-full text-left print:hidden"></div>
+
+        <div class="flex space-x-2">
+            <a href="{{ route('esop.print', ['id' => $esop->id]) }}" class="print:hidden">
+                <button
+                    class="cursor-pointer rounded-sm bg-green-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-400 focus-visible:outline-offset-2 focus-visible:outline-green-600"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.5"
+                        stroke="currentColor"
+                        class="size-4"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5Zm-3 0h.008v.008H15V10.5Z"
+                        />
+                    </svg>
+                </button>
+            </a>
+            <a href="{{ route('esop.edit', ['id' => $esop->id]) }}" class="print:hidden">
+                <button
+                    class="cursor-pointer rounded-sm bg-blue-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-400 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.5"
+                        stroke="currentColor"
+                        class="size-4"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"
+                        />
+                    </svg>
+                </button>
+            </a>
+            <a id="backBtn" href="#" class="print:hidden">
+                <button
+                    class="cursor-pointer rounded-sm bg-gray-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-400 focus-visible:outline-offset-2 focus-visible:outline-gray-600"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.5"
+                        stroke="currentColor"
+                        class="size-4"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3"
+                        />
+                    </svg>
+                </button>
+            </a>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    var backBtn = document.getElementById('backBtn');
+                    var ref = document.referrer;
+                    if (ref.includes('/esop/dashboard')) {
+                        backBtn.href = '{{ route('dashboard.tampil') }}';
+                    } else if (ref.includes('/esop/esop')) {
+                        backBtn.href = '{{ route('esop.tampil') }}';
+                    } else if (ref.includes('/esop/edit')) {
+                        backBtn.href = '{{ route('esop.tampil') }}';
+                    } else {
+                        backBtn.href = ref || '{{ route('dashboard.tampil') }}';
+                    }
+                });
+            </script>
+        </div>
+    </div>
+
     <div id="editor-tabel">
         <form id="esopForm" action="{{ route('flow.update', $esop->id) }}" method="POST">
             @csrf
             <div class="main-content rounded-sm bg-white p-4 shadow-sm">
-                <a
-                    href="{{ route('esop.edit', ['id' => $esop->id]) }}"
-                    class="no-print mb-3 inline-block rounded-sm bg-gray-500 px-3 py-2 text-sm font-semibold text-white hover:bg-gray-400"
-                >
-                    Kembali
-                </a>
-
-                {{--
-                    <button
-                    type="button"
-                    class="no-print mb-3 cursor-pointer rounded-sm bg-green-600 px-3 py-2 text-sm font-semibold text-white hover:bg-green-500"
-                    onclick="printPreview()"
-                    >
-                    Cetak
-                    </button>
-                --}}
-
                 <div class="table-container">
                     <table class="flow-table border border-gray-400 text-sm text-gray-800">
                         <colgroup>
@@ -811,30 +877,28 @@
                             </svg>
                         </button>
                     </div>
-                    <button
-                        type="submit"
-                        id="simpanButton"
-                        onclick="showSuccessAlert()"
-                        class="rounded-sm bg-blue-500 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-400"
-                    >
-                        Simpan
-                    </button>
+                    <div class="flex justify-end space-x-2">
+                        <a
+                            href="{{ route('esop.edit', ['id' => $esop->id]) }}"
+                            class="no-print inline-block rounded-sm bg-gray-500 px-3 py-2 text-sm font-semibold text-white hover:bg-gray-400"
+                        >
+                            Kembali
+                        </a>
+                        <button
+                            type="submit"
+                            id="simpanButton"
+                            onclick="showSuccessAlert()"
+                            class="rounded-sm bg-blue-500 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-400"
+                        >
+                            Simpan
+                        </button>
+                    </div>
                 </div>
             </div>
         </form>
     </div>
 
     <div class="main-content mt-4 rounded-sm bg-white p-4 shadow-sm">
-        <div class="mb-4 flex items-center justify-between">
-            <h3 class="text-xl font-semibold">Preview Print</h3>
-            <button
-                onclick="window.print()"
-                class="rounded-sm bg-green-500 px-3 py-2 text-sm font-semibold text-white hover:bg-green-400"
-            >
-                Print Preview
-            </button>
-        </div>
-
         <div id="preview-area">
             <div class="preview-wrapper" id="preview-wrapper">
                 <div id="pages-container" class="pages-container">
