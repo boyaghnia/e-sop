@@ -1202,15 +1202,15 @@
                     tableHeaderHeight = thead.getBoundingClientRect().height;
                 }
             } else {
-                tableHeaderHeight = 70; // fallback
+                tableHeaderHeight = 75; // fallback
             }
 
-            const safetyMargin = 0;
+            const safetyMargin = 0; // nanti ganti lagi sekarang 6 rows
             const actualRowHeights = calculateActualRowHeights();
             const averageActualHeight =
                 actualRowHeights.length > 0
                     ? actualRowHeights.reduce((sum, height) => sum + height, 0) / actualRowHeights.length
-                    : 85;
+                    : 75;
             const availableForRows = availableHeightPx - tableHeaderHeight - safetyMargin;
             const maxRows = Math.floor(availableForRows / averageActualHeight);
             return maxRows > 0 ? maxRows : 1;
