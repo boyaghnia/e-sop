@@ -12,6 +12,7 @@
                 height: 100%;
                 margin: 0 !important;
                 padding: 0 !important;
+                background: none !important;
             }
             main,
             header,
@@ -126,17 +127,18 @@
             }
             .print-area2 {
                 min-height: 0;
-                height: auto;
+                height: 100%;
                 width: 100vh;
+                max-width: 100vh;
                 margin: 0 !important;
                 padding: 0 !important;
                 box-sizing: border-box;
                 page-break-inside: avoid !important;
+                page-break-after: always;
+                position: relative;
+                overflow: hidden !important;
             }
 
-            .print-area2 {
-                page-break-after: always;
-            }
             .print-area2:last-child {
                 page-break-after: auto;
             }
@@ -240,18 +242,45 @@
 
             /* Ensure red lines and text are visible in print */
             .print-area2 canvas,
-            #flow-preview-canvas {
+            .page-canvas {
                 visibility: visible !important;
                 display: block !important;
                 position: absolute !important;
                 width: 100% !important;
-                height: auto !important;
+                height: 100% !important;
                 pointer-events: none !important;
                 z-index: 10 !important;
-                background: transparent !important;
                 -webkit-print-color-adjust: exact !important;
                 color-adjust: exact !important;
                 print-color-adjust: exact !important;
+                /* Canvas doesn't need transform scaling like SVG */
+                transform-origin: top left !important;
+                /* transform: scale(1) translate(60px, -30px) !important; */
+                background-color: rgba(188, 233, 27, 0.3) !important;
+                border: #fbbf24 2px solid !important;
+                overflow: hidden !important;
+                max-width: 100% !important;
+                max-height: 100% !important;
+                box-sizing: border-box !important;
+            }
+
+            /* Force Canvas to scale properly with print-area2 */
+            .print-area2 .page-canvas {
+                position: absolute !important;
+                top: 0 !important;
+                left: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
+                z-index: 10 !important;
+                pointer-events: none !important;
+                transform-origin: top left !important;
+                /* Canvas handles scaling internally */
+            }
+
+            /* Ensure table container maintains relative positioning */
+            .print-area2 .table-container {
+                position: relative !important;
+                overflow: hidden !important;
             }
         }
     </style>
@@ -282,19 +311,17 @@
             min-height: 40px !important;
         }
 
-        /* Canvas styling */
+        /* SVG styling */
         #preview-container {
             position: relative;
             border: 1px solid #000000;
             outline: none;
         }
 
-        #flow-preview-canvas {
+        .page-svg {
             position: absolute;
             pointer-events: none;
             z-index: 10;
-            border: 1px solid #000000;
-            outline: none;
             background: transparent;
         }
 
@@ -672,6 +699,10 @@
     </div>
 
     <script>
+        // Global variables for symbol ordering system (from flow.blade.php)
+        let symbolOrder = [];
+        let nextSymbolNumber = 1;
+
         document.addEventListener('DOMContentLoaded', function () {
             const previewIds = ['dasar_hukum', 'cara_mengatasi', 'keterkaitan', 'peralatan_perlengkapan', 'peringatan'];
             previewIds.forEach(function (id) {
@@ -720,14 +751,82 @@
 
             const ROWS_PER_PAGE = 7; // Number of flow rows per page for optimal printing
 
+            // Initialize symbol ordering system
+            initializeSymbolOrdering(flowData, pelaksanaData);
+
             // Generate pages
             generateFlowPages(flowData, pelaksanaData, ROWS_PER_PAGE);
 
             // Draw connection lines after page generation
             setTimeout(() => {
+                console.log('Symbol order after initialization:', symbolOrder);
                 drawAllPageConnections();
-            }, 100); // Reduced timeout for faster rendering
+            }, 500); // Increased timeout for better DOM rendering
+
+            // Add event listeners for print to redraw SVG with correct coordinates
+            window.addEventListener('beforeprint', function() {
+                console.log('Before print - redrawing connections...');
+                console.log('Viewport size:', window.innerWidth, 'x', window.innerHeight);
+                adjustSVGScalingForPrint();
+                setTimeout(() => {
+                    drawAllPageConnections();
+                }, 200);
+            });
+
+            window.addEventListener('afterprint', function() {
+                console.log('After print - redrawing connections...');
+                resetSVGScaling();
+                setTimeout(() => {
+                    drawAllPageConnections();
+                }, 200);
+            });
         });
+
+        // Function to adjust SVG scaling for print mode
+        function adjustSVGScalingForPrint() {
+            const printAreas = document.querySelectorAll('.print-area2');
+            printAreas.forEach((printArea, index) => {
+                const svg = printArea.querySelector('.page-svg');
+                const table = printArea.querySelector('.flow-table');
+
+                if (svg && table) {
+                    // Get actual dimensions
+                    const printAreaRect = printArea.getBoundingClientRect();
+                    const tableRect = table.getBoundingClientRect();
+
+                    // Calculate scaling factors
+                    // print-area2 has width: 100vh, which causes horizontal scaling
+                    const viewportHeight = window.innerHeight;
+                    const viewportWidth = window.innerWidth;
+
+                    // The scale factor depends on the ratio between viewport dimensions
+                    // and how print-area2 width: 100vh affects the layout
+                    const scaleX = Math.min(viewportHeight / viewportWidth, 1);
+                    const scaleY = 1; // Y scaling usually remains consistent
+
+                    console.log(`Print area ${index + 1} - Page size: ${printAreaRect.width}x${printAreaRect.height}`);
+                    console.log(`Print area ${index + 1} - Table size: ${tableRect.width}x${tableRect.height}`);
+                    console.log(`Print area ${index + 1} - Viewport: ${viewportWidth}x${viewportHeight}`);
+                    console.log(`Print area ${index + 1} - Applying scale: ${scaleX}, ${scaleY}`);
+
+                    // Apply transform to SVG
+                    svg.style.transform = `scale(${scaleX}, ${scaleY})`;
+                    svg.style.transformOrigin = 'top left';
+
+                    // Store scaling info for coordinate calculations
+                    svg.dataset.scaleX = scaleX;
+                    svg.dataset.scaleY = scaleY;
+                }
+            });
+        }
+
+        // Function to reset SVG scaling after print
+        function resetSVGScaling() {
+            const svgs = document.querySelectorAll('.page-svg');
+            svgs.forEach(svg => {
+                svg.style.transform = 'scale(1, 1)';
+            });
+        }
 
         // Utility function to convert symbols data to array format
         function normalizeSymbolsArray(symbols) {
@@ -742,6 +841,37 @@
                 return symbolsArray;
             }
             return [];
+        }
+
+        // Initialize symbol ordering system based on flow data
+        function initializeSymbolOrdering(flowData, pelaksanaData) {
+            symbolOrder = [];
+            nextSymbolNumber = 1;
+
+            // Process each flow to build symbol order
+            flowData.forEach((flow, flowIndex) => {
+                if (flow && flow.symbols) {
+                    const symbolsArray = normalizeSymbolsArray(flow.symbols);
+
+                    symbolsArray.forEach((symbolType, pelaksanaIndex) => {
+                        if (symbolType && symbolType !== '') {
+                            const rowNumber = flowIndex + 1;
+                            const colIndex = pelaksanaIndex;
+                            const key = `${rowNumber}_${colIndex}`;
+
+                            symbolOrder.push({
+                                key: key,
+                                number: nextSymbolNumber++,
+                                rowNumber: rowNumber,
+                                colIndex: colIndex,
+                                symbolType: symbolType
+                            });
+                        }
+                    });
+                }
+            });
+
+            console.log('Initialized symbol order:', symbolOrder);
         }
 
         function generateFlowPages(flowData, pelaksanaData, rowsPerPage) {
@@ -815,7 +945,7 @@
 
             // Add flow rows
             flows.forEach((flow, index) => {
-                const actualRowNum = (pageNum - 1) * 6 + index + 1;
+                const actualRowNum = (pageNum - 1) * 7 + index + 1;
                 bodyHTML += createFlowRow(flow, actualRowNum, pelaksanas);
             });
 
@@ -958,8 +1088,17 @@
         function createFlowRow(flow, rowNumber, pelaksanas) {
             let pelaksanaHTML = '';
             pelaksanas.forEach((pelaksana, index) => {
-                const savedSymbol = flow && flow.symbols ? flow.symbols[index] || '' : '';
-                const savedReturnTo = flow && flow.return_to ? flow.return_to[index] || '' : '';
+                // Normalize symbols and return_to arrays
+                const symbolsArray = flow && flow.symbols ? normalizeSymbolsArray(flow.symbols) : [];
+                const returnToArray = flow && flow.return_to ? normalizeSymbolsArray(flow.return_to) : [];
+
+                const savedSymbol = symbolsArray[index] || '';
+                const savedReturnTo = returnToArray[index] || '';
+
+                // Get sequential number from symbol ordering system
+                const key = `${rowNumber}_${index}`;
+                const symbolOrderItem = symbolOrder.find((item) => item.key === key);
+                const sequentialNumber = symbolOrderItem ? symbolOrderItem.number : '';
 
                 let symbolHTML = '';
                 if (savedSymbol === 'start') {
@@ -972,7 +1111,7 @@
 
                 pelaksanaHTML += `
                     <td class="border border-black px-2 py-1" data-flow="${flow ? flow.id : ''}" data-pelaksana="${pelaksana.id}" data-return-to="${savedReturnTo}">
-                        <div class="symbol-preview">
+                        <div class="symbol-preview" style="position: relative;">
                             ${symbolHTML}
                         </div>
                     </td>
@@ -1003,75 +1142,240 @@
         }
 
         function drawPageConnections(canvas, pageElement, pageNumber) {
-            if (!canvas) return;
+            if (!canvas) {
+                return;
+            }
 
             const ctx = canvas.getContext('2d');
             const table = pageElement.querySelector('.flow-table');
-            if (!table) return;
 
-            // Set canvas size to match table
-            const rect = table.getBoundingClientRect();
-            canvas.width = rect.width;
-            canvas.height = rect.height;
-            canvas.style.width = rect.width + 'px';
-            canvas.style.height = rect.height + 'px';
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Get all symbols in this page
-            const symbols = [];
-            const rows = table.querySelectorAll('tbody tr');
-
-            rows.forEach((row, rowIndex) => {
-                const cells = row.querySelectorAll('td');
-                cells.forEach((cell, cellIndex) => {
-                    const symbolPreview = cell.querySelector('.symbol-preview > div, .symbol-preview > svg');
-                    if (symbolPreview && !symbolPreview.classList.contains('border-dashed')) {
-                        const cellRect = cell.getBoundingClientRect();
-                        const tableRect = table.getBoundingClientRect();
-
-                        symbols.push({
-                            x: cellRect.left - tableRect.left + cellRect.width / 2,
-                            y: cellRect.top - tableRect.top + cellRect.height / 2,
-                            type: getSymbolType(symbolPreview),
-                            row: rowIndex,
-                            col: cellIndex,
-                            rowIndex: rowIndex,
-                            colIndex: cellIndex,
-                            element: symbolPreview,
-                            returnTo: getReturnTo(cell),
-                            isHeader: row.classList.contains('header-row'),
-                            isFooter: row.classList.contains('footer-row'),
-                        });
-                    }
-                });
-            });
-
-            // Separate symbols by type
-            const headerSymbols = symbols.filter(s => s.isHeader);
-            const footerSymbols = symbols.filter(s => s.isFooter);
-            const regularSymbols = symbols.filter(s => !s.isHeader && !s.isFooter);
-
-            // Draw connections
-            const allFlowSymbols = [...headerSymbols, ...regularSymbols, ...footerSymbols];
-
-            // Draw main flow connections
-            for (let i = 0; i < allFlowSymbols.length - 1; i++) {
-                const current = allFlowSymbols[i];
-                const next = allFlowSymbols[i + 1];
-                drawConnectionLine(ctx, current, next);
+            if (!table) {
+                return;
             }
 
-            // Draw decision return lines
-            regularSymbols.forEach((symbol) => {
-                if (symbol.type === 'decision' && symbol.returnTo) {
-                    const targetNumber = parseInt(symbol.returnTo);
-                    const target = regularSymbols.find((s) => s.rowIndex + 1 === targetNumber);
-                    if (target) {
-                        drawDecisionLineWithCollisionDetection(ctx, symbol, target, regularSymbols);
+            // Deteksi mode print yang lebih akurat
+            const isPrinting = window.matchMedia && window.matchMedia('print').matches;
+            const isPrintPage = pageElement.classList.contains('print-full-size');
+
+            // Get current scale factor - HANYA untuk preview, NOT untuk print
+            let scaleFactor = 1;
+            if (!isPrinting && !isPrintPage) {
+                // For screen mode, no scaling needed since we're in print view
+                scaleFactor = 1;
+            }
+
+            // Dapatkan semua simbol dari halaman ini (div biasa dan SVG connector)
+            const symbols = table.querySelectorAll(
+                '.symbol-preview > div:first-child, .symbol-preview > svg.connector-symbol-svg',
+            );
+
+            if (symbols.length === 0) {
+                // Set canvas size berdasarkan mode
+                canvas.width = table.offsetWidth;
+                canvas.height = table.offsetHeight;
+                canvas.style.width = table.offsetWidth + 'px';
+                canvas.style.height = table.offsetHeight + 'px';
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                return;
+            }
+
+            const centers = [];
+            const tableRect = table.getBoundingClientRect();
+
+            console.log(`Processing page ${pageNumber} in ${isPrinting ? 'PRINT' : 'SCREEN'} mode`);
+
+            symbols.forEach((el, index) => {
+                const symbolPreview = el.parentElement;
+                const cell = symbolPreview.parentElement;
+                const row = cell.parentElement;
+                const rowIndex = Array.from(row.parentElement.children).indexOf(row);
+                const cellIndex = Array.from(row.children).indexOf(cell);
+
+                // Check if this is a buffer row (connector symbol)
+                const isBufferRow = row.classList.contains('buffer-row') || row.classList.contains('header-row') || row.classList.contains('footer-row');
+                let sequentialNumber = 0;
+                let isConnector = false;
+
+                if (isBufferRow) {
+                    isConnector = true;
+                    sequentialNumber = -1; // Connector tidak punya nomor berurutan
+                } else {
+                    // Dapatkan nomor berurutan dari sistem symbolOrder
+                    const pageRows = table.querySelectorAll('tbody tr:not(.buffer-row):not(.header-row):not(.footer-row)');
+                    const rowInPage = Array.from(pageRows).indexOf(row);
+                    const rowsPerPage = 7;
+                    const actualRowNumber = (pageNumber - 1) * rowsPerPage + rowInPage + 1;
+                    const actualColIndex = cellIndex - 2; // Column index dalam pelaksana
+                    const key = `${actualRowNumber}_${actualColIndex}`;
+
+                    const symbolOrderItem = symbolOrder.find((item) => item.key === key);
+                    if (symbolOrderItem) {
+                        sequentialNumber = symbolOrderItem.number;
+                    } else {
+                        sequentialNumber = 0; // Tidak ada nomor jika tidak ditemukan
+                    }
+                }
+
+                // Calculate coordinates - SAMA untuk print dan preview karena sudah dalam print layout
+                const rect = el.getBoundingClientRect();
+                let centerX = rect.left - tableRect.left + rect.width / 2;
+                let centerY = rect.top - tableRect.top + rect.height / 2;
+
+                const center = {
+                    element: el,
+                    x: centerX,
+                    y: centerY,
+                    rowIndex: rowIndex,
+                    cellIndex: cellIndex,
+                    sequentialNumber: sequentialNumber,
+                    symbolType: getSymbolType(el),
+                    isConnector: isConnector,
+                };
+                centers.push(center);
+            });
+
+            // Set canvas size
+            canvas.width = table.offsetWidth;
+            canvas.height = table.offsetHeight;
+            canvas.style.width = table.offsetWidth + 'px';
+            canvas.style.height = table.offsetHeight + 'px';
+
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Set drawing styles
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 2; // Fixed width
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            // Filter active symbols (exclude empty but include connectors)
+            const activeSymbols = centers.filter((center) => center.symbolType !== 'empty');
+
+            // Sort symbols by their sequential number for flowchart connections
+            // Connectors don't have sequential numbers, so handle them separately
+            const sequentialSymbols = activeSymbols.filter(
+                (center) => !center.isConnector && center.sequentialNumber > 0,
+            );
+            const connectorSymbols = activeSymbols.filter((center) => center.isConnector);
+
+            // Sort sequential symbols by their number
+            sequentialSymbols.sort((a, b) => a.sequentialNumber - b.sequentialNumber);
+
+            console.log(`Page ${pageNumber} - Sequential symbols:`, sequentialSymbols.map(s => ({
+                sequentialNumber: s.sequentialNumber,
+                x: s.x,
+                y: s.y,
+                symbolType: s.symbolType,
+                rowIndex: s.rowIndex,
+                cellIndex: s.cellIndex
+            })));
+
+            // Draw connections between sequential symbols (following the order of selection)
+            const lineScale = 1; // Always 1 for print layout
+            for (let i = 0; i < sequentialSymbols.length - 1; i++) {
+                const from = sequentialSymbols[i];
+                const to = sequentialSymbols[i + 1];
+                console.log(`Drawing Canvas connection from symbol ${from.sequentialNumber} (${from.x},${from.y}) to ${to.sequentialNumber} (${to.x},${to.y})`);
+                drawConnectionLine(ctx, from, to, lineScale);
+            }
+
+            // Handle connectors - connect them to the flow properly
+            connectorSymbols.forEach((connector) => {
+                if (sequentialSymbols.length > 0) {
+                    // Check if this is a continuation connector (at top of page)
+                    const isTopConnector =
+                        connector.rowIndex === 0 ||
+                        (connector.rowIndex === 1 &&
+                            connector.element.closest('tr').previousElementSibling?.classList.contains('buffer-row'));
+
+                    if (isTopConnector) {
+                        // This is a page continuation connector - connect TO next symbol
+                        const nextSymbol = sequentialSymbols.find((symbol) => symbol.rowIndex > connector.rowIndex);
+                        if (nextSymbol) {
+                            drawConnectionLine(ctx, connector, nextSymbol, lineScale);
+                        }
+                    } else {
+                        // This is a page ending connector - connect FROM previous symbol
+                        const previousSymbol = findNearestSequentialSymbol(connector, sequentialSymbols);
+                        if (previousSymbol) {
+                            drawConnectionLine(ctx, previousSymbol, connector, lineScale);
+                        }
                     }
                 }
             });
+
+            // Draw decision lines
+            centers.forEach((center) => {
+                if (center.symbolType === 'decision') {
+                    drawDecisionLineInPage(ctx, center, centers, pageNumber);
+                }
+            });
+        }
+
+        // Helper function to find nearest sequential symbol for connector
+        function findNearestSequentialSymbol(connector, sequentialSymbols) {
+            if (sequentialSymbols.length === 0) return null;
+
+            // Find symbols that are BEFORE this connector row (above it)
+            const symbolsAbove = sequentialSymbols.filter((symbol) => symbol.rowIndex < connector.rowIndex);
+
+            if (symbolsAbove.length === 0) {
+                // If no symbols above, find the closest symbol in same column
+                const sameColumnSymbols = sequentialSymbols.filter(
+                    (symbol) => symbol.cellIndex === connector.cellIndex,
+                );
+                if (sameColumnSymbols.length > 0) {
+                    // Return the symbol with highest sequential number in same column
+                    return sameColumnSymbols.reduce((prev, current) =>
+                        current.sequentialNumber > prev.sequentialNumber ? current : prev,
+                    );
+                }
+                return null;
+            }
+
+            // From symbols above, find the one that should logically connect to this connector
+            // Priority: same column first, then by sequential number (highest first)
+            const sameColumnAbove = symbolsAbove.filter((symbol) => symbol.cellIndex === connector.cellIndex);
+
+            if (sameColumnAbove.length > 0) {
+                // Return the symbol with highest sequential number in same column
+                return sameColumnAbove.reduce((prev, current) =>
+                    current.sequentialNumber > prev.sequentialNumber ? current : prev,
+                );
+            }
+
+            // If no symbol in same column above, find the symbol with highest sequential number
+            // that is closest row-wise
+            return symbolsAbove.reduce((prev, current) => {
+                // Prefer higher sequential number, then closer row
+                if (current.sequentialNumber > prev.sequentialNumber) {
+                    return current;
+                } else if (current.sequentialNumber === prev.sequentialNumber) {
+                    // If same sequential number, prefer closer row
+                    const currentDistance = Math.abs(current.rowIndex - connector.rowIndex);
+                    const prevDistance = Math.abs(prev.rowIndex - connector.rowIndex);
+                    return currentDistance < prevDistance ? current : prev;
+                }
+                return prev;
+            });
+        }
+
+        function drawDecisionLineInPage(ctx, decisionCenter, allCenters, pageNumber) {
+            // Get return_to value from the cell's data attribute
+            const cell = decisionCenter.element.closest('td');
+            const returnToValue = cell ? cell.getAttribute('data-return-to') : null;
+
+            if (returnToValue && returnToValue !== '') {
+                const targetNumber = parseInt(returnToValue);
+                // Find target based on sequential number
+                let targetSymbol = allCenters.find((center) => center.sequentialNumber === targetNumber);
+
+                if (targetSymbol) {
+                    // Draw decision line within this page with collision detection
+                    drawDecisionLineWithCollisionDetection(ctx, decisionCenter, targetSymbol, allCenters);
+                }
+            }
         }
 
         function getSymbolType(element) {
@@ -1079,6 +1383,7 @@
             if (element.classList.contains('bg-green-500')) return 'process';
             if (element.classList.contains('bg-yellow-400')) return 'decision';
             if (element.classList.contains('connector-symbol-svg') || element.tagName === 'svg') return 'connector';
+            if (element.classList.contains('border-dashed')) return 'empty';
             return 'unknown';
         }
 
@@ -1087,8 +1392,60 @@
             return returnTo || null;
         }
 
-        function drawConnectionLine(ctx, from, to) {
-            // Get symbol types and dimensions
+        function getSymbolDimensions(element, symbolType) {
+            const actualWidth = element.offsetWidth;
+            const actualHeight = element.offsetHeight;
+
+            let expectedWidth, expectedHeight;
+            switch (symbolType) {
+                case 'start':
+                case 'process':
+                    expectedWidth = 40;
+                    expectedHeight = 24;
+                    break;
+                case 'decision':
+                    expectedWidth = 32;
+                    expectedHeight = 32;
+                    break;
+                case 'connector':
+                    expectedWidth = 40;
+                    expectedHeight = 40;
+                    break;
+                default:
+                    expectedWidth = 40;
+                    expectedHeight = 24;
+                    break;
+            }
+
+            return {
+                width: actualWidth || expectedWidth,
+                height: actualHeight || expectedHeight,
+            };
+        }
+
+        function shouldUseRightSideForDecisionLine(decisionCenter, targetSymbol, allCenters) {
+            // LOGIC: 
+            // Jika target symbol berada di KANAN decision symbol,
+            // maka garis merah keluar dari KIRI decision diamond
+            if (targetSymbol.cellIndex > decisionCenter.cellIndex) {
+                return false; // false = left side
+            }
+            // Jika target symbol berada di KIRI decision symbol,
+            // maka garis merah keluar dari KANAN decision diamond
+            else if (targetSymbol.cellIndex < decisionCenter.cellIndex) {
+                return true; // true = right side
+            }
+            // Jika di kolom yang sama, gunakan sisi kiri sebagai default
+            else {
+                return false; // false = left side
+            }
+        }
+
+        // SVG Drawing Functions
+        function drawSVGConnectionLine(svg, from, to, pageNumber) {
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+
+            // Get symbol types and dimensions for proper padding
             const fromType = getSymbolType(from.element);
             const toType = getSymbolType(to.element);
             const fromDim = getSymbolDimensions(from.element, fromType);
@@ -1103,23 +1460,13 @@
             let endX = to.x;
             let endY = to.y - toPadding;
 
-            // Save context state
-            ctx.save();
-
-            // Set clean stroke style
-            ctx.strokeStyle = '#000000';
-            ctx.lineWidth = 2;
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-
-            ctx.beginPath();
-            ctx.moveTo(startX, startY);
+            let pathData;
 
             // Check if symbols are on the same row (horizontal alignment)
-            const isSameRow = Math.abs(from.row - to.row) === 0;
+            const isSameRow = Math.abs(from.rowIndex - to.rowIndex) === 0;
 
             if (isSameRow) {
-                // Same row: draw straight horizontal line from right side of 'from' to left side of 'to'
+                // Same row: draw straight horizontal line
                 const isFromLeftToRight = from.x < to.x;
 
                 let lineStartX, lineEndX, horizontalY;
@@ -1136,22 +1483,239 @@
                     horizontalY = from.y;
                 }
 
+                // Straight horizontal line
+                pathData = `M ${lineStartX} ${horizontalY} L ${lineEndX} ${horizontalY}`;
+            } else {
+                // Different rows: L-shaped connection (90 degree angles)
+                if (Math.abs(from.x - to.x) < 5) {
+                    // Same column: straight vertical line
+                    pathData = `M ${startX} ${startY} L ${endX} ${endY}`;
+                } else {
+                    // Different columns: L-shaped path with 90 degree turns
+                    const midY = (startY + endY) / 2;
+
+                    pathData = `M ${startX} ${startY} 
+                               L ${startX} ${midY}
+                               L ${endX} ${midY}
+                               L ${endX} ${endY}`;
+                }
+            }
+
+            path.setAttribute('d', pathData);
+            path.setAttribute('stroke', '#000000');
+            path.setAttribute('stroke-width', '2');
+            path.setAttribute('fill', 'none');
+            path.setAttribute('stroke-linejoin', 'round');
+            path.setAttribute('stroke-linecap', 'round');
+            path.setAttribute('marker-end', `url(#arrowhead-${pageNumber})`);
+
+            // Add print-specific styling
+            path.style.strokeOpacity = '1';
+            path.style.webkitPrintColorAdjust = 'exact';
+            path.style.colorAdjust = 'exact';
+            path.style.printColorAdjust = 'exact';
+
+            svg.appendChild(path);
+        }
+
+        function drawDecisionLineInPage(ctx, decisionCenter, allCenters, pageNumber) {
+            const cell = decisionCenter.element.closest('td');
+            const returnTo = getReturnTo(cell);
+
+            if (returnTo) {
+                const targetSymbol = allCenters.find(center => 
+                    center.sequentialNumber === parseInt(returnTo)
+                );
+
+                if (targetSymbol) {
+                    // Get symbol dimensions for proper offset calculation
+                    const decisionType = getSymbolType(decisionCenter.element);
+                    const targetType = getSymbolType(targetSymbol.element);
+                    const decisionDim = getSymbolDimensions(decisionCenter.element, decisionType);
+                    const targetDim = getSymbolDimensions(targetSymbol.element, targetType);
+
+                    // Determine which side to use based on target position
+                    const useRightSide = shouldUseRightSideForDecisionLine(decisionCenter, targetSymbol, allCenters);
+
+                    let startX, startY, endX, endY, midX;
+                    const horizontalOffset = Math.max(decisionDim.width / 2 + 10, 25);
+                    const curveOffset = Math.max(horizontalOffset + 15, 40);
+
+                    if (useRightSide) {
+                        // Draw on the right side
+                        startX = decisionCenter.x + (decisionDim.width / 2 + 8);
+                        startY = decisionCenter.y;
+                        endX = targetSymbol.x + (targetDim.width / 2 + 8);
+                        endY = targetSymbol.y;
+                        midX = startX + curveOffset;
+                    } else {
+                        // Draw on the left side
+                        startX = decisionCenter.x - (decisionDim.width / 2 + 8);
+                        startY = decisionCenter.y;
+                        endX = targetSymbol.x - (targetDim.width / 2 + 8);
+                        endY = targetSymbol.y;
+                        midX = startX - curveOffset;
+                    }
+
+                    // Set line style for decision line
+                    ctx.strokeStyle = '#dc2626'; // Red color for decision lines
+                    ctx.lineWidth = 2;
+                    ctx.lineCap = 'round';
+                    ctx.lineJoin = 'round';
+                    ctx.setLineDash([5, 5]); // Dashed line
+
+                    // Draw L-shaped path with 90 degree angles
+                    ctx.beginPath();
+                    ctx.moveTo(startX, startY);
+                    ctx.lineTo(midX, startY);
+                    ctx.lineTo(midX, endY);
+                    ctx.lineTo(endX, endY);
+                    ctx.stroke();
+
+                    // Draw decision arrow (red)
+                    drawDecisionArrowhead(ctx, { x: midX, y: endY }, { x: endX, y: endY });
+
+                    // Reset line dash for future drawings
+                    ctx.setLineDash([]);
+
+                    // Add "Tidak" text label
+                    const textX = midX;
+                    const textY = startY + (endY - startY) * 0.3;
+
+                    // Draw white background for text readability
+                    ctx.fillStyle = 'white';
+                    ctx.fillRect(textX - 20, textY - 8, 40, 16);
+
+                    // Draw text
+                    ctx.fillStyle = '#dc2626';
+                    ctx.font = 'bold 12px Arial, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('Tidak', textX, textY);
+                }
+            }
+        }
+
+        function drawDecisionArrowhead(ctx, start, end) {
+            // Calculate arrow direction
+            const dx = end.x - start.x;
+            const dy = end.y - start.y;
+            const length = Math.sqrt(dx * dx + dy * dy);
+
+            if (length === 0) return;
+
+            // Normalize direction
+            const unitX = dx / length;
+            const unitY = dy / length;
+
+            // Arrow dimensions
+            const arrowLength = 8;
+            const arrowWidth = 6;
+
+            // Calculate arrowhead points
+            const arrowBaseX = end.x - arrowLength * unitX;
+            const arrowBaseY = end.y - arrowLength * unitY;
+
+            // Perpendicular vector for arrow wings
+            const perpX = -unitY;
+            const perpY = unitX;
+
+            const wing1X = arrowBaseX + (arrowWidth / 2) * perpX;
+            const wing1Y = arrowBaseY + (arrowWidth / 2) * perpY;
+            const wing2X = arrowBaseX - (arrowWidth / 2) * perpX;
+            const wing2Y = arrowBaseY - (arrowWidth / 2) * perpY;
+
+            // Draw red arrowhead
+            ctx.strokeStyle = '#dc2626';
+            ctx.beginPath();
+            ctx.moveTo(end.x, end.y);
+            ctx.lineTo(wing1X, wing1Y);
+            ctx.moveTo(end.x, end.y);
+            ctx.lineTo(wing2X, wing2Y);
+            ctx.stroke();
+        }
+
+        function drawConnectionLine(ctx, from, to, scaleX) {
+            // Get symbol types and dimensions
+            const fromType = getSymbolType(from.element);
+            const toType = getSymbolType(to.element);
+            const fromDim = getSymbolDimensions(from.element, fromType);
+            const toDim = getSymbolDimensions(to.element, toType);
+
+            // Calculate dynamic padding based on symbol height
+            const fromPadding = fromDim.height / 2 + 8;
+            const toPadding = toDim.height / 2 + 8;
+
+            let startX = from.x;
+            let startY = from.y + fromPadding;
+            let endX = to.x;
+            let endY = to.y - toPadding;
+
+            // Enhanced logging for connectors using sequential numbers
+            const fromLabel = from.isConnector ? 'connector' : `symbol ${from.sequentialNumber}`;
+            const toLabel = to.isConnector ? 'connector' : `symbol ${to.sequentialNumber}`;
+
+            // Save context state
+            ctx.save();
+
+            // Set clean stroke style
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+
+            // Check if symbols are on the same row (horizontal alignment)
+            // Allow small tolerance for row detection due to potential layout differences
+            const rowTolerance = 5; // pixels
+            const isSameRow = Math.abs(from.rowIndex - to.rowIndex) === 0;
+
+            if (isSameRow) {
+                // Same row: draw straight horizontal line from right side of 'from' to left side of 'to'
+
+                // Calculate horizontal connection points based on actual positions
+                const isFromLeftToRight = from.x < to.x; // Check if 'from' is to the left of 'to'
+
+                let lineStartX, lineEndX, horizontalY;
+
+                if (isFromLeftToRight) {
+                    // From left to right: arrow points right (→)
+                    lineStartX = from.x + fromDim.width / 2 + 8; // Right side of 'from'
+                    lineEndX = to.x - toDim.width / 2 - 8; // Left side of 'to'
+                    horizontalY = from.y;
+                } else {
+                    // From right to left: arrow points left (←)
+                    lineStartX = from.x - fromDim.width / 2 - 8; // Left side of 'from'
+                    lineEndX = to.x + toDim.width / 2 + 8; // Right side of 'to'
+                    horizontalY = from.y;
+                }
+
                 // Draw straight horizontal line
                 ctx.moveTo(lineStartX, horizontalY);
                 ctx.lineTo(lineEndX, horizontalY);
                 ctx.stroke();
 
                 // Draw arrow pointing in the correct direction
-                drawPreviewArrow(ctx, lineStartX, horizontalY, lineEndX, horizontalY, 1, true);
+                drawPreviewArrow(
+                    ctx,
+                    lineStartX,
+                    horizontalY,
+                    lineEndX,
+                    horizontalY,
+                    scaleX,
+                    true, // isPrintMode
+                );
             } else {
-                // Different rows: use L-shaped connection
+                // Different rows: use the existing L-shaped connection
                 ctx.lineTo(startX, (startY + endY) / 2);
                 ctx.lineTo(endX, (startY + endY) / 2);
                 ctx.lineTo(endX, endY);
                 ctx.stroke();
 
                 // Draw arrow at the end
-                drawPreviewArrow(ctx, endX, (startY + endY) / 2, endX, endY, 1, true);
+                drawPreviewArrow(ctx, endX, (startY + endY) / 2, endX, endY, scaleX, true);
             }
 
             // Restore context state
@@ -1228,15 +1792,20 @@
         }
 
         function shouldUseRightSideForDecisionLine(decisionCenter, targetSymbol, allCenters) {
-            // Logic for decision line direction:
-            // If target symbol is to the RIGHT of decision symbol, line exits from LEFT side
-            // If target symbol is to the LEFT of decision symbol, line exits from RIGHT side
-            if (targetSymbol.colIndex > decisionCenter.colIndex) {
-                return false; // Use left side
-            } else if (targetSymbol.colIndex < decisionCenter.colIndex) {
-                return true; // Use right side
-            } else {
-                return false; // Same column, use left side as default
+            // LOGIC SESUAI PERMINTAAN USER:
+            // Jika target symbol (proses) berada di KANAN decision symbol,
+            // maka garis merah keluar dari KIRI decision diamond
+            if (targetSymbol.cellIndex > decisionCenter.cellIndex) {
+                return false; // false = left side
+            }
+            // Jika target symbol (proses) berada di KIRI decision symbol,
+            // maka garis merah keluar dari KANAN decision diamond
+            else if (targetSymbol.cellIndex < decisionCenter.cellIndex) {
+                return true; // true = right side
+            }
+            // Jika di kolom yang sama, gunakan sisi kiri sebagai default
+            else {
+                return false; // false = left side
             }
         }
 
