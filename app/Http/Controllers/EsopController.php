@@ -343,6 +343,15 @@ class EsopController extends Controller
                     }
                 }
 
+                // Ambil data connect_to untuk flow ini
+                $connectTo = [];
+                foreach ($request->all() as $connectKey => $connectValue) {
+                    if (str_starts_with($connectKey, "connect_to_{$index}_") && !empty($connectValue)) {
+                        $pelaksanaIndex = str_replace("connect_to_{$index}_", '', $connectKey);
+                        $connectTo[$pelaksanaIndex] = $connectValue;
+                    }
+                }
+
                 Flow::create([
                     'esop_id' => $id,
                     'no_urutan' => $index,
@@ -353,6 +362,7 @@ class EsopController extends Controller
                     'keterangan' => $request->input("keterangan_$index"),
                     'symbols' => !empty($symbols) ? $symbols : null,
                     'return_to' => !empty($returnTo) ? $returnTo : null,
+                    'connect_to' => !empty($connectTo) ? $connectTo : null,
                 ]);
             }
         }
@@ -437,35 +447,71 @@ class EsopController extends Controller
     /**
      * Menampilkan halaman cetak SOP yang menggabungkan data dari esop edit dan flow
      */
-    public function esopPrint($id)
-    {
-        // Memastikan user berhak mengakses SOP ini
-        $user = Auth::user();
-        $esop = Esop::with(['pelaksanas'])->findOrFail($id);
+    // public function esopPrint($id)
+    // {
+    //     // Memastikan user berhak mengakses SOP ini
+    //     $user = Auth::user();
+    //     $esop = Esop::with(['pelaksanas'])->findOrFail($id);
         
-        // Ambil data flow untuk SOP ini
-        $flows = Flow::where('esop_id', $id)
-                    ->orderBy('no_urutan', 'asc')
-                    ->get();
+    //     // Ambil data flow untuk SOP ini
+    //     $flows = Flow::where('esop_id', $id)
+    //                 ->orderBy('no_urutan', 'asc')
+    //                 ->get();
                     
-        // Untuk setiap flow, ambil data pelaksana dan simbol
-        foreach ($flows as $flow) {
-            // Format data pelaksana
-            $pelaksanaValues = [];
-            $flowPelaksanaData = json_decode($flow->pelaksana_json, true);
+    //     // Untuk setiap flow, ambil data pelaksana dan simbol
+    //     foreach ($flows as $flow) {
+    //         // Format data pelaksana
+    //         $pelaksanaValues = [];
+    //         $flowPelaksanaData = json_decode($flow->pelaksana_json, true);
             
-            if ($flowPelaksanaData && is_array($flowPelaksanaData)) {
-                foreach ($flowPelaksanaData as $pelaksanaId => $data) {
-                    $pelaksanaValues[$pelaksanaId] = [
-                        'symbol' => $data['symbol'] ?? '',
-                        'symbol_number' => $data['symbol_number'] ?? '',
-                    ];
-                }
-            }
+    //         if ($flowPelaksanaData && is_array($flowPelaksanaData)) {
+    //             foreach ($flowPelaksanaData as $pelaksanaId => $data) {
+    //                 $pelaksanaValues[$pelaksanaId] = [
+    //                     'symbol' => $data['symbol'] ?? '',
+    //                     'symbol_number' => $data['symbol_number'] ?? '',
+    //                 ];
+    //             }
+    //         }
             
-            $flow->pelaksana_values = $pelaksanaValues;
+    //         $flow->pelaksana_values = $pelaksanaValues;
+    //     }
+        
+    //     return view('esop.print', compact('esop', 'flows'));
+    // }
+
+        public function esopPrint($id)
+    {
+        $user = Auth::user();
+        $query = Esop::with('pelaksanas')->where('id', $id);
+        
+        // Filter akses berdasarkan role
+        if ($user->role === 'admin') {
+            // Admin dapat mengakses semua SOP
+        } elseif ($user->role === 'obu') {
+            // OBU dapat mengakses SOP milik sendiri dan SOP dari role upbu
+            $query->where(function($q) use ($user) {
+                $q->where('user_id', $user->id)
+                  ->orWhere(function($subQuery) use ($user) {
+                      $subQuery->where('id_unor', $user->id_unor)
+                               ->whereHas('user', function($userQuery) {
+                                   $userQuery->where('role', 'upbu');
+                               });
+                  })
+                  ->orWhereHas('user', function($userQuery) {
+                      $userQuery->where('role', 'upbu');
+                  });
+            });
+        } else {
+            // Role lain hanya dapat mengakses SOP milik sendiri atau yang sama id_unor
+            $query->where(function($q) use ($user) {
+                $q->where('id_unor', $user->id_unor)
+                  ->orWhere('user_id', $user->id);
+            });
         }
         
+        $esop = $query->firstOrFail();
+        $flows = Flow::where('esop_id', $id)->orderBy('no_urutan')->get()->keyBy('no_urutan');
+
         return view('esop.print', compact('esop', 'flows'));
     }
     

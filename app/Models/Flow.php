@@ -15,11 +15,13 @@ class Flow extends Model
         'output', 
         'keterangan',
         'symbols',
-        'return_to'
+        'return_to',
+        'connect_to'
     ];
 
     protected $casts = [
         'symbols' => 'array',
-        'return_to' => 'array'
+        'return_to' => 'array',
+        'connect_to' => 'array'
     ];
 }

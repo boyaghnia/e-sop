@@ -117,6 +117,37 @@
         z-index: 10;
     }
 
+    /* Multi direction input styling */
+    input[name^='connect_to_'].process-connect {
+        background-color: #f0f9ff;
+        border-color: #10b981;
+    }
+
+    input[name^='connect_to_'].process-connect:focus {
+        border-color: #059669;
+        box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+    }
+
+    input[name^='connect_to_'].start-connect {
+        background-color: #eff6ff;
+        border-color: #3b82f6;
+    }
+
+    input[name^='connect_to_'].start-connect:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    }
+
+    input[name^='connect_to_'].decision-connect {
+        background-color: #fffbeb;
+        border-color: #f59e0b;
+    }
+
+    input[name^='connect_to_'].decision-connect:focus {
+        border-color: #d97706;
+        box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+    }
+
     /* ===== CONTAINER STYLES ===== */
 
     .table-container {
@@ -717,11 +748,15 @@
                                         @php
                                             $savedSymbol = '';
                                             $savedReturnTo = '';
+                                            $savedConnectTo = '';
                                             if ($flow && $flow->symbols && is_array($flow->symbols)) {
                                                 $savedSymbol = $flow->symbols[$index] ?? '';
                                             }
                                             if ($flow && $flow->return_to && is_array($flow->return_to)) {
                                                 $savedReturnTo = $flow->return_to[$index] ?? '';
+                                            }
+                                            if ($flow && $flow->connect_to && is_array($flow->connect_to)) {
+                                                $savedConnectTo = $flow->connect_to[$index] ?? '';
                                             }
                                         @endphp
 
@@ -782,6 +817,38 @@
                                                         min="1"
                                                         class="w-full rounded border border-gray-300 px-2 py-1 text-xs"
                                                         value="{{ $savedReturnTo }}"
+                                                        onchange="syncPreviewTable()"
+                                                    />
+                                                </div>
+                                                <div class="mt-2">
+                                                    <input
+                                                        type="text"
+                                                        name="connect_to_{{ $i }}_{{ $index }}"
+                                                        placeholder="Hubungkan ke nomor (contoh: 2,3)"
+                                                        class="decision-connect w-full rounded border border-yellow-300 px-2 py-1 text-xs"
+                                                        value="{{ $savedConnectTo }}"
+                                                        onchange="syncPreviewTable()"
+                                                    />
+                                                </div>
+                                            @elseif ($savedSymbol == 'process')
+                                                <div class="mt-2">
+                                                    <input
+                                                        type="text"
+                                                        name="connect_to_{{ $i }}_{{ $index }}"
+                                                        placeholder="Hubungkan ke nomor (contoh: 2,3)"
+                                                        class="process-connect w-full rounded border border-green-300 px-2 py-1 text-xs"
+                                                        value="{{ $savedConnectTo }}"
+                                                        onchange="syncPreviewTable()"
+                                                    />
+                                                </div>
+                                            @elseif ($savedSymbol == 'start')
+                                                <div class="mt-2">
+                                                    <input
+                                                        type="text"
+                                                        name="connect_to_{{ $i }}_{{ $index }}"
+                                                        placeholder="Hubungkan ke nomor (contoh: 2,3)"
+                                                        class="start-connect w-full rounded border border-blue-300 px-2 py-1 text-xs"
+                                                        value="{{ $savedConnectTo }}"
                                                         onchange="syncPreviewTable()"
                                                     />
                                                 </div>
@@ -873,6 +940,27 @@
                                     stroke-linecap="round"
                                     stroke-linejoin="round"
                                     d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
+                                />
+                            </svg>
+                        </button>
+                        <button
+                            type="button"
+                            onclick="showMultiDirectionInfo()"
+                            class="rounded-md border border-gray-500 px-3 py-2 text-sm text-gray-500 hover:bg-gray-50"
+                            title="Info Multi Direction"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke-width="1.5"
+                                stroke="currentColor"
+                                class="size-4"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"
                                 />
                             </svg>
                         </button>
@@ -1018,6 +1106,13 @@
         document.addEventListener('DOMContentLoaded', function () {
             setTimeout(() => {
                 initializeExistingSymbols();
+
+                // Add event listeners to existing rows
+                const existingRows = document.querySelectorAll('#editor-tabel tbody tr');
+                existingRows.forEach((row) => {
+                    addEventListenersToRow(row);
+                });
+
                 syncPreviewTable();
             }, 100);
         });
@@ -1378,11 +1473,15 @@
                                 '<div class="w-15 h-6 border-2 border-gray-300 border-dashed mx-auto"></div>';
                         }
 
-                        // Hapus input return_to jika ada
+                        // Hapus input return_to dan connect_to jika ada
                         const cell = select.closest('td');
                         const returnInput = cell.querySelector('input[name^="return_to_"]');
+                        const connectToInput = cell.querySelector('input[name^="connect_to_"]');
                         if (returnInput) {
                             returnInput.closest('div').remove();
+                        }
+                        if (connectToInput) {
+                            connectToInput.closest('div').remove();
                         }
                     });
 
@@ -1402,19 +1501,21 @@
         }
 
         function addEventListenersToRow(row) {
-            row.querySelectorAll('textarea, input[name^="return_to_"], select').forEach((element) => {
-                const eventType = element.tagName === 'SELECT' ? 'change' : 'input';
-                element.addEventListener(eventType, () => {
-                    // Debounce untuk textarea yang sering berubah
-                    if (element.tagName === 'TEXTAREA') {
-                        setTimeout(() => {
+            row.querySelectorAll('textarea, input[name^="return_to_"], input[name^="connect_to_"], select').forEach(
+                (element) => {
+                    const eventType = element.tagName === 'SELECT' ? 'change' : 'input';
+                    element.addEventListener(eventType, () => {
+                        // Debounce untuk textarea yang sering berubah
+                        if (element.tagName === 'TEXTAREA') {
+                            setTimeout(() => {
+                                syncPreviewTable();
+                            }, 300);
+                        } else {
                             syncPreviewTable();
-                        }, 300);
-                    } else {
-                        syncPreviewTable();
-                    }
-                });
-            });
+                        }
+                    });
+                },
+            );
         }
 
         function updateSymbol(selectElement) {
@@ -1459,6 +1560,7 @@
 
             const cell = selectElement.closest('td');
             let returnInput = cell.querySelector('input[name^="return_to_"]');
+            let connectToInput = cell.querySelector('input[name^="connect_to_"]');
 
             if (value === 'decision') {
                 if (!returnInput) {
@@ -1469,8 +1571,49 @@
                     `;
                     cell.appendChild(inputDiv);
                 }
-            } else if (returnInput) {
-                returnInput.closest('div').remove();
+                // Add connect_to input for decision (for multi direction)
+                if (!connectToInput) {
+                    const connectDiv = document.createElement('div');
+                    connectDiv.className = 'mt-2';
+                    connectDiv.innerHTML = `
+                        <input type="text" name="connect_to_${rowNumber}_${colIndex}" placeholder="Hubungkan ke nomor (contoh: 2,3)" class="w-full text-xs px-2 py-1 border border-yellow-300 rounded decision-connect" onchange="syncPreviewTable()">
+                    `;
+                    cell.appendChild(connectDiv);
+                }
+            } else if (value === 'process') {
+                if (!connectToInput) {
+                    const inputDiv = document.createElement('div');
+                    inputDiv.className = 'mt-2';
+                    inputDiv.innerHTML = `
+                        <input type="text" name="connect_to_${rowNumber}_${colIndex}" placeholder="Hubungkan ke nomor (contoh: 2,3)" class="w-full text-xs px-2 py-1 border border-green-300 rounded process-connect" onchange="syncPreviewTable()">
+                    `;
+                    cell.appendChild(inputDiv);
+                }
+                // Remove return_to input if exists (process uses connect_to)
+                if (returnInput) {
+                    returnInput.closest('div').remove();
+                }
+            } else if (value === 'start') {
+                if (!connectToInput) {
+                    const inputDiv = document.createElement('div');
+                    inputDiv.className = 'mt-2';
+                    inputDiv.innerHTML = `
+                        <input type="text" name="connect_to_${rowNumber}_${colIndex}" placeholder="Hubungkan ke nomor (contoh: 2,3)" class="w-full text-xs px-2 py-1 border border-blue-300 rounded start-connect" onchange="syncPreviewTable()">
+                    `;
+                    cell.appendChild(inputDiv);
+                }
+                // Remove return_to input if exists (start uses connect_to)
+                if (returnInput) {
+                    returnInput.closest('div').remove();
+                }
+            } else {
+                // Remove both inputs for empty selection
+                if (returnInput) {
+                    returnInput.closest('div').remove();
+                }
+                if (connectToInput) {
+                    connectToInput.closest('div').remove();
+                }
             }
 
             syncPreviewTable();
@@ -1502,6 +1645,7 @@
                     const select = cell.querySelector('select');
                     const textarea = cell.querySelector('textarea');
                     const returnInput = cell.querySelector('input[name^="return_to_"]');
+                    const connectToInput = cell.querySelector('input[name^="connect_to_"]');
 
                     if (cellIndex === 1) {
                         rowData.uraianKegiatan = textarea ? textarea.value : '';
@@ -1523,6 +1667,7 @@
                         rowData.pelaksanas[pelaksanaIndex] = {
                             value: select ? select.value : '',
                             returnTo: returnInput ? returnInput.value : '',
+                            connectTo: connectToInput ? connectToInput.value : '',
                             sequentialNumber: sequentialNumber,
                             rowNumber: rowIndex + 1,
                             colIndex: pelaksanaIndex,
@@ -1801,6 +1946,10 @@
             const isPrinting = document.body.classList.contains('printing');
             const isPrintPage = pageElement.classList.contains('print-full-size');
 
+            // Get editor rows and rows per page for multi-direction calculations
+            const editorRows = document.querySelectorAll('#editor-tabel tbody tr');
+            const rowsPerPage = getCurrentRowsPerPage();
+
             // Get current scale factor - HANYA untuk preview, NOT untuk print
             let scaleFactor = 1;
             if (!isPrinting && !isPrintPage) {
@@ -1941,7 +2090,72 @@
             for (let i = 0; i < sequentialSymbols.length - 1; i++) {
                 const from = sequentialSymbols[i];
                 const to = sequentialSymbols[i + 1];
-                drawConnectionLine(ctx, from, to, lineScale);
+
+                let shouldSkipLine = false;
+
+                // Check if the 'from' symbol has multi-direction connections that target this 'to' symbol
+                const globalRowIndexFrom = (pageNumber - 1) * rowsPerPage + from.rowIndex;
+                if (globalRowIndexFrom < editorRows.length) {
+                    const originalRowFrom = editorRows[globalRowIndexFrom];
+                    const originalCellFrom = originalRowFrom ? originalRowFrom.children[from.cellIndex] : null;
+                    const connectToInputFrom = originalCellFrom
+                        ? originalCellFrom.querySelector('input[name^="connect_to_"]')
+                        : null;
+
+                    // Check if this specific 'to' symbol is in the multi-direction targets from 'from' symbol
+                    if (connectToInputFrom && connectToInputFrom.value && connectToInputFrom.value.trim()) {
+                        const targetNumbers = connectToInputFrom.value
+                            .split(',')
+                            .map((num) => parseInt(num.trim()))
+                            .filter((num) => !isNaN(num) && num > 0);
+
+                        // If this 'to' symbol is targeted by multi-direction from 'from', skip line
+                        if (targetNumbers.includes(to.sequentialNumber)) {
+                            shouldSkipLine = true;
+                        }
+                    }
+                }
+
+                // Also check if the 'to' symbol is targeted by ANY multi-direction from other symbols
+                if (!shouldSkipLine) {
+                    for (let j = 0; j < sequentialSymbols.length; j++) {
+                        const sourceSymbol = sequentialSymbols[j];
+                        if (sourceSymbol.sequentialNumber === to.sequentialNumber) continue; // Skip self
+
+                        const globalRowIndexSource = (pageNumber - 1) * rowsPerPage + sourceSymbol.rowIndex;
+                        if (globalRowIndexSource < editorRows.length) {
+                            const originalRowSource = editorRows[globalRowIndexSource];
+                            const originalCellSource = originalRowSource
+                                ? originalRowSource.children[sourceSymbol.cellIndex]
+                                : null;
+                            const connectToInputSource = originalCellSource
+                                ? originalCellSource.querySelector('input[name^="connect_to_"]')
+                                : null;
+
+                            if (
+                                connectToInputSource &&
+                                connectToInputSource.value &&
+                                connectToInputSource.value.trim()
+                            ) {
+                                const targetNumbers = connectToInputSource.value
+                                    .split(',')
+                                    .map((num) => parseInt(num.trim()))
+                                    .filter((num) => !isNaN(num) && num > 0);
+
+                                // If this 'to' symbol is targeted by multi-direction from any source, skip line
+                                if (targetNumbers.includes(to.sequentialNumber)) {
+                                    shouldSkipLine = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Draw normal black connection line only if not targeted by any multi-direction
+                if (!shouldSkipLine) {
+                    drawConnectionLine(ctx, from, to, lineScale);
+                }
             }
 
             // Handle connectors - connect them to the flow properly
@@ -1978,6 +2192,9 @@
                     drawDecisionLineInPage(ctx, center, centers, pageNumber);
                 }
             });
+
+            // Draw multi direction lines for all symbols that support it
+            drawMultiDirectionLines(ctx, centers, pageNumber, lineScale);
         }
 
         // Helper function to find nearest sequential symbol for connector
@@ -2170,6 +2387,366 @@
             else {
                 return false; // false = left side
             }
+        }
+
+        function drawMultiDirectionLines(ctx, centers, pageNumber, lineScale) {
+            console.log(`Drawing multi-direction lines for page ${pageNumber}`);
+            // Find all symbols that have connect_to values (process, start, decision)
+            const editorRows = document.querySelectorAll('#editor-tabel tbody tr');
+            const rowsPerPage = getCurrentRowsPerPage(); // Use dynamic calculation
+
+            centers.forEach((center) => {
+                if (
+                    (center.symbolType === 'process' ||
+                        center.symbolType === 'start' ||
+                        center.symbolType === 'decision') &&
+                    center.sequentialNumber > 0
+                ) {
+                    console.log(
+                        `Checking symbol ${center.sequentialNumber} (${center.symbolType}) for multi-direction connections`,
+                    );
+                    // Calculate which editor row this symbol corresponds to
+                    const pageRows = document.querySelectorAll(`#page-${pageNumber} tbody tr:not(.buffer-row)`);
+                    const rowInPage = Array.from(pageRows).indexOf(center.element.closest('tr'));
+                    const globalRowIndex = (pageNumber - 1) * rowsPerPage + rowInPage;
+
+                    console.log(
+                        `Symbol ${center.sequentialNumber}: rowInPage=${rowInPage}, globalRowIndex=${globalRowIndex}, rowsPerPage=${rowsPerPage}`,
+                    );
+
+                    if (globalRowIndex < editorRows.length) {
+                        const originalRow = editorRows[globalRowIndex];
+                        const originalCell = originalRow ? originalRow.children[center.cellIndex] : null;
+                        const connectToInput = originalCell
+                            ? originalCell.querySelector('input[name^="connect_to_"]')
+                            : null;
+
+                        console.log(`Connect-to input for symbol ${center.sequentialNumber}:`, connectToInput?.value);
+
+                        if (connectToInput && connectToInput.value) {
+                            // Parse comma-separated values
+                            const targetNumbers = connectToInput.value
+                                .split(',')
+                                .map((num) => parseInt(num.trim()))
+                                .filter((num) => !isNaN(num) && num > 0);
+
+                            console.log(`Symbol ${center.sequentialNumber} connects to:`, targetNumbers);
+
+                            // Draw lines to each target with stacking
+                            targetNumbers.forEach((targetNumber, index) => {
+                                // First, try to find target symbol in current page
+                                let targetSymbol = centers.find((c) => c.sequentialNumber === targetNumber);
+
+                                // If not found in current page, search across all pages using symbolOrder
+                                if (!targetSymbol) {
+                                    console.log(
+                                        `Target symbol ${targetNumber} not found in current page, searching across all pages`,
+                                    );
+
+                                    // Find target in symbolOrder first
+                                    const targetOrderItem = symbolOrder.find((item) => item.number === targetNumber);
+                                    if (targetOrderItem) {
+                                        console.log(`Found target ${targetNumber} in symbolOrder:`, targetOrderItem);
+
+                                        // Calculate which page the target is on
+                                        const targetPage = Math.ceil(targetOrderItem.rowNumber / rowsPerPage);
+                                        console.log(`Target symbol ${targetNumber} should be on page ${targetPage}`);
+
+                                        // Find the target symbol element in the target page
+                                        const targetPageElement = document.querySelector(`#page-${targetPage}`);
+                                        if (targetPageElement) {
+                                            const targetTable = targetPageElement.querySelector('.flow-table');
+                                            const targetSymbolElements = targetTable.querySelectorAll(
+                                                '.symbol-preview > div:first-child',
+                                            );
+
+                                            targetSymbolElements.forEach((symbolElement) => {
+                                                if (!targetSymbol) {
+                                                    const symbolPreview = symbolElement.parentElement;
+                                                    const symbolNumberElement =
+                                                        symbolPreview.querySelector('.symbol-number');
+
+                                                    if (
+                                                        symbolNumberElement &&
+                                                        parseInt(symbolNumberElement.textContent) === targetNumber
+                                                    ) {
+                                                        const rect = symbolElement.getBoundingClientRect();
+                                                        const currentPageTable = document.querySelector(
+                                                            `#page-${pageNumber} .flow-table`,
+                                                        );
+                                                        const currentTableRect =
+                                                            currentPageTable.getBoundingClientRect();
+
+                                                        // Calculate relative coordinates to current page
+                                                        const centerX =
+                                                            rect.left - currentTableRect.left + rect.width / 2;
+                                                        const centerY =
+                                                            rect.top - currentTableRect.top + rect.height / 2;
+
+                                                        targetSymbol = {
+                                                            element: symbolElement,
+                                                            x: centerX,
+                                                            y: centerY,
+                                                            sequentialNumber: targetNumber,
+                                                            symbolType: getSymbolType(symbolElement),
+                                                            isConnector: false,
+                                                        };
+
+                                                        console.log(
+                                                            `Created cross-page target symbol ${targetNumber}:`,
+                                                            targetSymbol,
+                                                        );
+                                                    }
+                                                }
+                                            });
+                                        }
+                                    }
+                                }
+
+                                if (targetSymbol) {
+                                    console.log(
+                                        `Drawing multi-direction line from symbol ${center.sequentialNumber} to ${targetSymbol.sequentialNumber}`,
+                                    );
+                                    drawStackedMultiDirectionLine(
+                                        ctx,
+                                        center,
+                                        targetSymbol,
+                                        index,
+                                        lineScale,
+                                        center.symbolType,
+                                    );
+                                } else {
+                                    console.log(`Target symbol ${targetNumber} not found for multi-direction line`);
+                                }
+                            });
+                        }
+                    }
+                }
+            });
+        }
+
+        function drawMultiDirectionLine(ctx, fromSymbol, toSymbol, connectionIndex, scaleX) {
+            // Deteksi mode print
+            const isPrinting = document.body.classList.contains('printing');
+            const pageElement = fromSymbol.element.closest('.page-preview');
+            const isPrintPage = pageElement && pageElement.classList.contains('print-full-size');
+
+            ctx.save();
+
+            // Use different colors for multiple connections to distinguish them
+            const colors = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
+            ctx.strokeStyle = colors[connectionIndex % colors.length];
+
+            // Set line width berdasarkan mode
+            if (isPrinting || isPrintPage) {
+                ctx.lineWidth = 2;
+            } else {
+                ctx.lineWidth = Math.max(2 * scaleX, 2);
+            }
+
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            // Calculate connection points
+            const fromDim = getSymbolDimensions(fromSymbol.element, fromSymbol.symbolType);
+            const toDim = getSymbolDimensions(toSymbol.element, toSymbol.symbolType);
+
+            // Different approach for multi-direction lines to avoid main flow
+            const offsetY = connectionIndex * 12; // Offset each line vertically more
+            const offsetX = connectionIndex % 2 === 0 ? 15 : -15; // Alternate left/right
+
+            let startX = fromSymbol.x + fromDim.width / 2 + offsetX;
+            let startY = fromSymbol.y + offsetY;
+            let endX = toSymbol.x - toDim.width / 2 + offsetX;
+            let endY = toSymbol.y;
+
+            // Draw the connection line with curves to distinguish from main flow
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+
+            if (Math.abs(toSymbol.sequentialNumber - fromSymbol.sequentialNumber) === 1) {
+                // If connecting to immediate next symbol, draw curved line to avoid main flow
+                const controlPoint1X = startX + 40;
+                const controlPoint1Y = startY + 20 + connectionIndex * 10;
+                const controlPoint2X = endX - 40;
+                const controlPoint2Y = endY + 20 + connectionIndex * 10;
+
+                ctx.bezierCurveTo(controlPoint1X, controlPoint1Y, controlPoint2X, controlPoint2Y, endX, endY);
+            } else {
+                // For non-sequential connections, use L-shaped line
+                const midX = startX + (endX - startX) * 0.7;
+                ctx.lineTo(midX, startY);
+                ctx.lineTo(midX, endY);
+                ctx.lineTo(endX, endY);
+            }
+
+            ctx.stroke();
+
+            // Draw arrow at the end
+            drawMultiDirectionArrow(ctx, endX, endY, toSymbol, scaleX, isPrinting || isPrintPage);
+
+            // Add connection label
+            const labelColors = ['Hijau', 'Biru', 'Kuning', 'Merah', 'Ungu', 'Cyan'];
+            const labelText = `${labelColors[connectionIndex % labelColors.length]}`;
+
+            ctx.fillStyle = ctx.strokeStyle;
+            if (isPrinting || isPrintPage) {
+                ctx.font = '10px Arial';
+            } else {
+                ctx.font = `${Math.max(10 * scaleX, 8)}px Arial`;
+            }
+
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            // Position label in middle of line
+            const midX = startX + (endX - startX) * 0.5;
+            const midY = startY + (endY - startY) * 0.5;
+
+            // White background for label
+            const textMetrics = ctx.measureText(labelText);
+            const textWidth = textMetrics.width;
+            const textHeight = isPrinting || isPrintPage ? 12 : 12 * scaleX;
+
+            ctx.fillStyle = 'white';
+            ctx.fillRect(midX - textWidth / 2 - 2, midY - textHeight / 2 - 1, textWidth + 4, textHeight + 2);
+
+            ctx.fillStyle = ctx.strokeStyle;
+            ctx.fillText(labelText, midX, midY);
+
+            ctx.restore();
+        }
+
+        function drawMultiDirectionArrow(ctx, x, y, toSymbol, scaleX, isPrint) {
+            const arrowSize = isPrint ? 8 : Math.max(8 * scaleX, 6);
+
+            ctx.save();
+            ctx.fillStyle = ctx.strokeStyle; // Use same color as line
+
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x - arrowSize, y - arrowSize / 2);
+            ctx.lineTo(x - arrowSize, y + arrowSize / 2);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        function drawStackedMultiDirectionLine(ctx, fromSymbol, toSymbol, connectionIndex, scaleX, symbolType) {
+            // Deteksi mode print
+            const isPrinting = document.body.classList.contains('printing');
+            const pageElement = fromSymbol.element.closest('.page-preview');
+            const isPrintPage = pageElement && pageElement.classList.contains('print-full-size');
+
+            ctx.save();
+
+            // Use red color for all multi-direction lines (as shown in example)
+            ctx.strokeStyle = '#ef4444'; // Red color like in the example
+
+            // Set line width berdasarkan mode
+            if (isPrinting || isPrintPage) {
+                ctx.lineWidth = 3; // Slightly thicker like in example
+            } else {
+                ctx.lineWidth = Math.max(3 * scaleX, 3);
+            }
+
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            // Calculate connection points
+            const fromDim = getSymbolDimensions(fromSymbol.element, fromSymbol.symbolType);
+            const toDim = getSymbolDimensions(toSymbol.element, toSymbol.symbolType);
+
+            // Konfigurasi untuk garis horizontal tunggal yang bercabang vertikal
+            const horizontalDistance = 60; // Jarak horizontal dari symbol source
+
+            // Start point - dari kanan tengah symbol source
+            const startX = fromSymbol.x + fromDim.width / 2;
+            const startY = fromSymbol.y;
+
+            // End point - ke atas tengah symbol target dengan jarak sedikit
+            const endX = toSymbol.x;
+            const endY = toSymbol.y - toDim.height / 2 - 8; // Tambah jarak 8px
+
+            // Titik cabang horizontal (satu garis ke kanan)
+            const branchX = startX + horizontalDistance;
+            const branchY = startY;
+
+            // Draw the path
+            ctx.beginPath();
+
+            // Garis horizontal ke kanan dari symbol source
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(branchX, branchY);
+
+            // Dari titik cabang, garis horizontal ke kolom target
+            ctx.moveTo(branchX, branchY);
+            ctx.lineTo(endX, branchY);
+
+            // Garis vertikal ke bawah menuju symbol target
+            ctx.lineTo(endX, endY);
+
+            ctx.stroke();
+
+            // Draw arrow using the same function as black arrows
+            drawPreviewArrow(ctx, endX, branchY, endX, endY, scaleX, isPrinting || isPrintPage);
+
+            // Add connection index label on the horizontal segment
+            const labelText = `${connectionIndex + 1}`;
+
+            ctx.fillStyle = '#ef4444'; // Same red color
+            if (isPrinting || isPrintPage) {
+                ctx.font = 'bold 10px Arial';
+            } else {
+                ctx.font = `bold ${Math.max(10 * scaleX, 8)}px Arial`;
+            }
+
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            // Position label in the middle of horizontal line
+            const labelX = startX + horizontalDistance / 2;
+            const labelY = startY - 8;
+
+            // White background for label
+            const textMetrics = ctx.measureText(labelText);
+            const textWidth = textMetrics.width;
+            const textHeight = isPrinting || isPrintPage ? 12 : 12 * scaleX;
+
+            ctx.fillStyle = 'white';
+            ctx.fillRect(labelX - textWidth / 2 - 2, labelY - textHeight / 2 - 1, textWidth + 4, textHeight + 2);
+
+            ctx.fillStyle = '#ef4444';
+            ctx.fillText(labelText, labelX, labelY);
+
+            ctx.restore();
+        }
+
+        function drawStackedArrow(ctx, x, y, scaleX, isPrint, direction = 'right') {
+            const arrowSize = isPrint ? 8 : Math.max(8 * scaleX, 6);
+
+            ctx.save();
+            ctx.fillStyle = ctx.strokeStyle; // Use same color as line
+
+            ctx.beginPath();
+
+            if (direction === 'down') {
+                // Arrow pointing down (into symbol from above)
+                ctx.moveTo(x, y);
+                ctx.lineTo(x - arrowSize / 2, y - arrowSize);
+                ctx.lineTo(x + arrowSize / 2, y - arrowSize);
+            } else {
+                // Default right arrow
+                ctx.moveTo(x, y);
+                ctx.lineTo(x - arrowSize, y - arrowSize / 2);
+                ctx.lineTo(x - arrowSize, y + arrowSize / 2);
+            }
+
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.restore();
         }
 
         function getSymbolType(element) {
@@ -2402,5 +2979,36 @@
                 debouncedAutoScale();
             }, 1500);
         });
+
+        // Function to show multi direction info
+        function showMultiDirectionInfo() {
+            Swal.fire({
+                title: 'Multi Direction untuk Symbol Proses',
+                html: `
+                    <div class="text-left space-y-3">
+                        <p><strong>Cara Menggunakan:</strong></p>
+                        <ol class="list-decimal list-inside space-y-2">
+                            <li>Pilih symbol <span class="bg-green-500 text-white px-2 py-1 rounded">Proses</span> (hijau)</li>
+                            <li>Akan muncul input "Hubungkan ke nomor"</li>
+                            <li>Masukkan nomor target yang dipisahkan koma</li>
+                            <li>Contoh: <code class="bg-gray-100 px-1 rounded">2,3</code> akan menghubungkan ke symbol nomor 2 dan 3</li>
+                            <li>Garis akan muncul dengan warna berbeda untuk setiap koneksi</li>
+                        </ol>
+                        <div class="mt-4 p-3 bg-blue-50 rounded">
+                            <p><strong>Catatan:</strong></p>
+                            <ul class="list-disc list-inside space-y-1 text-sm">
+                                <li>Warna garis akan berbeda untuk setiap koneksi</li>
+                                <li>Garis pertama: hijau, kedua: biru, dst.</li>
+                                <li>Nomor mengacu pada urutan penomoran symbol</li>
+                            </ul>
+                        </div>
+                    </div>
+                `,
+                icon: 'info',
+                confirmButtonText: 'Mengerti',
+                confirmButtonColor: '#10b981',
+                width: '600px',
+            });
+        }
     </script>
 </x-layout>

@@ -5,7 +5,322 @@
 
 <x-layout>
     <style>
+        /* ===== SCREEN STYLES (Non-Print) ===== */
+
+        /* General textarea styling */
+        textarea {
+            resize: none;
+            overflow: auto;
+            border: none;
+            outline: none;
+            min-height: 60px;
+            max-height: 120px;
+        }
+
+        /* Table base styles */
+        table {
+            table-layout: fixed;
+            border-collapse: collapse;
+        }
+
+        /* Flow table styling */
+        .flow-table {
+            width: 100%;
+            border-collapse: collapse !important;
+            border: 1px solid #000000 !important;
+        }
+
+        .flow-table th,
+        .flow-table td {
+            border: 1px solid #000000 !important;
+            background-color: transparent !important;
+        }
+
+        .flow-table thead th {
+            padding: 8px 6px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .flow-table tbody tr {
+            height: 80px;
+        }
+
+        .flow-table tbody td {
+            padding: 8px 6px;
+        }
+
+        .flow-table textarea {
+            height: 60px;
+            max-height: 60px;
+            min-height: 60px;
+            overflow-y: auto;
+            font-size: 13px;
+            line-height: 1.4;
+            padding: 6px;
+        }
+
+        .flow-table select {
+            font-size: 12px;
+            padding: 4px;
+        }
+
+        /* Uraian kegiatan column specific */
+        .uraian-column {
+            width: 100% !important;
+        }
+
+        .uraian-column textarea {
+            width: 100%;
+            height: 60px;
+            max-height: 100px !important;
+            overflow-y: auto !important;
+            padding: 8px !important;
+            min-height: 60px !important;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        /* Symbol styling */
+        .symbol-preview {
+            margin-top: 4px;
+            display: flex;
+            justify-content: center;
+            position: relative;
+        }
+
+        .symbol-preview .connector-symbol-svg {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto;
+        }
+
+        .symbol-preview .connector-symbol-svg polygon {
+            fill: #90a4ae !important;
+            stroke: #90a4ae;
+            stroke-width: 1;
+        }
+
+        .symbol-number {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #1f2937;
+            color: white;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            z-index: 10;
+        }
+
+        /* Multi direction input styling */
+        input[name^='connect_to_'].process-connect {
+            background-color: #f0f9ff;
+            border-color: #10b981;
+        }
+
+        input[name^='connect_to_'].process-connect:focus {
+            border-color: #059669;
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+        }
+
+        input[name^='connect_to_'].start-connect {
+            background-color: #eff6ff;
+            border-color: #3b82f6;
+        }
+
+        input[name^='connect_to_'].start-connect:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+
+        input[name^='connect_to_'].decision-connect {
+            background-color: #fffbeb;
+            border-color: #f59e0b;
+        }
+
+        input[name^='connect_to_'].decision-connect:focus {
+            border-color: #d97706;
+            box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+        }
+
+        /* Container styles */
+        .table-container {
+            width: 100%;
+            overflow-x: auto !important;
+            overflow-y: visible;
+        }
+
+        #preview-container {
+            position: relative;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            outline: none;
+        }
+
+        #flow-preview-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 10;
+            border: none;
+            outline: none;
+            background: transparent;
+        }
+
+        /* Preview styles */
+        .preview-wrapper {
+            width: 100%;
+            height: auto;
+            overflow: visible;
+            transform-origin: top center !important;
+            border: none;
+            outline: none;
+            display: inline-block;
+            min-width: min-content;
+        }
+
+        .preview-wrapper .flow-table {
+            min-width: auto;
+            width: 100%;
+            table-layout: fixed;
+        }
+
+        #preview-area {
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+            overflow-x: hidden !important;
+            width: 100%;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        #preview-wrapper,
+        #preview-container,
+        #preview-tabel {
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+        /* Page preview styles */
+        .page-preview {
+            background: white;
+            margin-bottom: 20px;
+            page-break-after: always;
+            position: relative;
+            width: 100%;
+            box-sizing: border-box;
+            overflow: visible;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .page-preview:last-child {
+            margin-bottom: 0;
+        }
+
+        .page-number {
+            position: absolute;
+            bottom: 10px;
+            right: 20px;
+            font-size: 12px;
+            color: #666;
+            background: white;
+            padding: 2px 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .pages-container {
+            width: 100%;
+            overflow: visible;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            transform-origin: top left;
+            transition: transform 0.3s ease;
+        }
+
+        .page-preview .flow-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            min-width: 100%;
+            max-width: 100%;
+            font-size: 10px;
+            height: calc(100% - 60px);
+        }
+
+        .page-preview .flow-table colgroup col {
+            width: auto;
+        }
+
+        .page-preview .flow-table thead th,
+        .page-preview .flow-table tbody td {
+            padding: 6px 4px;
+            border: 1px solid #9ca3af;
+            font-size: 10px;
+            line-height: 1.3;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            max-width: 0;
+        }
+
+        .page-preview .flow-table tbody tr {
+            height: auto;
+            min-height: 60px;
+        }
+
+        .page-preview .flow-table tbody td {
+            min-height: 60px;
+            padding: 8px 4px;
+        }
+
+        .page-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 10;
+            border: none;
+            outline: none;
+            background: transparent;
+        }
+
+        .page-container {
+            margin-bottom: 20px;
+        }
+
+        .border {
+            border-width: 1px !important;
+        }
+
+        .border-gray-400,
+        .border-black {
+            border-color: #000000 !important;
+        }
+
+        .page-svg {
+            position: absolute;
+            pointer-events: none;
+            z-index: 10;
+            background: transparent;
+        }
+
+        /* ===== PRINT STYLES ===== */
         @media print {
+            /* Reset all elements */
             html,
             body {
                 width: 100%;
@@ -14,6 +329,7 @@
                 padding: 0 !important;
                 background: none !important;
             }
+
             main,
             header,
             aside,
@@ -21,6 +337,7 @@
                 margin: 0 !important;
                 padding: 0 !important;
             }
+
             header,
             .fixed {
                 display: none !important;
@@ -28,6 +345,7 @@
                 height: 0 !important;
                 position: none !important;
             }
+
             .space-y-3,
             .rounded-sm,
             .bg-white,
@@ -44,36 +362,63 @@
                 border-radius: 0 !important;
                 background: none !important;
             }
+
             body * {
                 visibility: hidden;
             }
 
+            /* Show only print areas */
+            .print-area,
+            .print-area *,
+            #preview-area,
+            #preview-area *,
+            .main-content:last-of-type,
+            .main-content:last-of-type *,
+            .space-y-3,
+            .space-y-3 .rounded-sm:first-child,
+            .space-y-3 .rounded-sm:first-child * {
+                visibility: visible !important;
+            }
+
+            /* Explicitly hide elements that should not be printed */
+            .mb-4.flex.items-center.justify-between,
+            #editor-tabel,
+            form#esopForm,
+            .main-content:nth-of-type(2) {
+                display: none !important;
+                visibility: hidden !important;
+            }
+
+            /* Page setup */
             @page :first {
-                size: 220mm 310mm;
+                size: 210mm 330mm;
             }
 
             @page {
-                size: 310mm 220mm;
+                size: 330mm 210mm;
             }
 
-            /* Print Area 1 */
+            /* Print Area (Cover Page) - Halaman 1 */
             .print-area,
             .print-area * {
                 visibility: visible;
-                font-size: 11px;
+                font-size: 1vh;
             }
 
             .print-area {
-                width: 100%;
-                min-height: 95vh;
-                max-height: 97vh;
+                height: 100vh !important;
+                max-height: 100vh !important;
                 margin: 0 !important;
+                overflow: hidden !important;
                 padding: 0 !important;
                 box-sizing: border-box;
                 page-break-inside: avoid !important;
                 page-break-after: always !important;
+                position: relative;
+                z-index: 1;
             }
 
+            /* Cover table row heights */
             .print-area tr:nth-child(-n + 4) {
                 height: 35px !important;
             }
@@ -119,305 +464,200 @@
                 break-inside: avoid !important;
             }
 
-            /* Print Area 2 */
-            .print-area2,
-            .print-area2 * {
-                visibility: visible;
-                font-size: 10px;
-            }
-            .print-area2 {
-                min-height: 0;
-                height: 100%;
-                width: 100vh;
-                max-width: 100vh;
+            /* Flowchart Area - Mulai dari Halaman 2 */
+            #preview-area {
+                page-break-before: always !important;
+                break-before: page !important;
+                position: static !important;
+                width: 100vh !important;
                 margin: 0 !important;
                 padding: 0 !important;
-                box-sizing: border-box;
-                page-break-inside: avoid !important;
-                page-break-after: always;
-                position: relative;
+                z-index: 2;
+            }
+
+            /* Hide print controls and editor table saat print */
+            .print\:hidden,
+            #editor-tabel,
+            form#esopForm,
+            .main-content:nth-of-type(2) {
+                display: none !important;
+                visibility: hidden !important;
+            }
+
+            /* Ensure proper page separation for flowchart container */
+            .main-content:last-of-type {
+                page-break-before: always !important;
+                break-before: page !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                background: none !important;
+                box-shadow: none !important;
+                border-radius: 0 !important;
+                visibility: visible !important;
+            }
+
+            /* Additional page break enforcement */
+            .main-content:has(#preview-area) {
+                page-break-before: always !important;
+                break-before: page !important;
+            }
+
+            /* Ensure proper page separation for flowchart container */
+            .main-content:last-of-type {
+                page-break-before: always !important;
+                break-before: page !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                background: none !important;
+                box-shadow: none !important;
+                border-radius: 0 !important;
+                visibility: visible !important;
+            }
+
+            /* Reset transforms for print */
+            #preview-wrapper {
+                transform: none !important;
+                scale: 1 !important;
+                width: 100% !important;
+                max-width: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            .pages-container {
+                transform: none !important;
+                scale: 1 !important;
+                width: 100% !important;
+                max-width: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            /* Page preview optimization */
+            .page-preview {
+                page-break-after: always !important;
+                break-after: page !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+                max-width: none !important;
+                min-height: auto !important;
                 overflow: hidden !important;
             }
 
-            .print-area2:last-child {
-                page-break-after: auto;
+            .page-preview:last-child {
+                page-break-after: auto !important;
+                break-after: auto !important;
             }
 
-            .print-area2 table {
-                height: 100%;
+            /* Table optimization for print */
+            .page-preview .flow-table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 9px;
                 table-layout: fixed;
+                min-width: 100%;
+                max-width: 100%;
+                margin: 0;
+                max-height: calc(100vh - 40px) !important;
+                overflow: hidden !important;
             }
 
-            .print-area table,
-            .print-area2 table {
-                border-collapse: collapse !important;
-            }
-            .print-area td,
-            .print-area2 td {
-                page-break-inside: avoid !important;
-                break-inside: avoid !important;
+            .page-preview .flow-table tbody {
+                max-height: calc(100vh - 120px) !important;
+                overflow: hidden !important;
             }
 
-            /* Force borders for print area 2 */
-            .print-area2 table,
-            .print-area2 th,
-            .print-area2 td {
-                border: 1px solid #000000 !important;
-                background-color: transparent !important;
-                -webkit-print-color-adjust: exact !important;
-                color-adjust: exact !important;
-                print-color-adjust: exact !important;
+            /* Cell styling for print */
+            .page-preview .flow-table th,
+            .page-preview .flow-table td {
+                border: 1px solid #000 !important;
+                padding: 4px 3px;
+                font-size: 9px;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+                box-sizing: border-box;
             }
 
-            .print-area2 .flow-table {
-                border: 1px solid #000000 !important;
+            /* Row height optimization */
+            .page-preview .flow-table tbody tr {
+                height: auto;
+                min-height: 45px !important; /* Dikurangi untuk muat lebih banyak */
+                max-height: 70px !important;
             }
 
-            .print-area2 .flow-table th,
-            .print-area2 .flow-table td {
-                border: 1px solid #000000 !important;
-                border-collapse: collapse !important;
-                background-color: transparent !important;
+            .page-preview .flow-table tbody td {
+                padding: 4px 2px !important;
+                vertical-align: middle;
+                max-height: 70px !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                word-wrap: break-word !important;
+                font-size: 8px !important; /* Font lebih kecil */
+                line-height: 1.1 !important;
             }
 
-            .print-area2 .symbol-preview,
-            .print-area2 .symbol-preview * {
-                display: block !important;
-                visibility: visible !important;
-                background: inherit !important;
-                color: inherit !important;
-            }
-            .print-area2 .mx-auto {
-                margin-left: auto !important;
-                margin-right: auto !important;
+            /* Header optimization */
+            .page-preview .flow-table thead th {
+                padding: 6px 3px !important;
+                font-weight: bold;
+                background-color: #f5f5f5 !important;
+                -webkit-print-color-adjust: exact;
+                min-height: 30px !important;
+                font-size: 8px !important;
             }
 
-            /* Symbol styling untuk print */
-            .print-area2 .symbol-preview {
-                display: block !important;
-                visibility: visible !important;
-                position: relative;
+            /* Uraian kegiatan column for print */
+            .page-preview .flow-table tbody td:nth-child(2) {
+                overflow-y: hidden !important;
+                font-size: 8px !important;
+                line-height: 1.1 !important;
             }
 
-            .print-area2 .symbol-preview > div {
-                display: block !important;
-                visibility: visible !important;
-                margin: 2px auto !important;
+            /* Symbol styling for print */
+            .symbol-preview > div {
+                -webkit-print-color-adjust: exact;
+                color-adjust: exact;
+                print-color-adjust: exact;
+                transform: scale(0.8) !important; /* Perkecil symbol */
             }
 
-            .print-area2 .symbol-preview .bg-blue-500 {
-                background-color: #3b82f6 !important;
-                -webkit-print-color-adjust: exact !important;
-                color-adjust: exact !important;
-                print-color-adjust: exact !important;
+            .symbol-preview {
+                padding: 2px !important;
+                text-align: center;
             }
 
-            .print-area2 .symbol-preview .bg-green-500 {
-                background-color: #10b981 !important;
-                -webkit-print-color-adjust: exact !important;
-                color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
-
-            .print-area2 .symbol-preview .bg-yellow-400 {
-                background-color: #fbbf24 !important;
-                -webkit-print-color-adjust: exact !important;
-                color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
-
-            .print-area2 .symbol-preview .border-gray-300 {
-                border-color: #d1d5db !important;
-            }
-
-            .print-area2 .mx-auto {
-                margin-left: auto !important;
-                margin-right: auto !important;
-                display: block !important;
-            }
-
-            .print-area2 .rounded-xl {
-                border-radius: 0.75rem !important;
-            }
-
-            /* Ensure red lines and text are visible in print */
-            .print-area2 canvas,
+            /* Canvas styling for print */
             .page-canvas {
                 visibility: visible !important;
                 display: block !important;
-                position: absolute !important;
-                width: 100% !important;
-                height: 100% !important;
-                pointer-events: none !important;
-                z-index: 10 !important;
-                -webkit-print-color-adjust: exact !important;
-                color-adjust: exact !important;
-                print-color-adjust: exact !important;
-                /* Canvas doesn't need transform scaling like SVG */
-                transform-origin: top left !important;
-                /* transform: scale(1) translate(60px, -30px) !important; */
-                background-color: rgba(188, 233, 27, 0.3) !important;
-                border: #fbbf24 2px solid !important;
-                overflow: hidden !important;
-                max-width: 100% !important;
-                max-height: 100% !important;
-                box-sizing: border-box !important;
-            }
-
-            /* Force Canvas to scale properly with print-area2 */
-            .print-area2 .page-canvas {
                 position: absolute !important;
                 top: 0 !important;
                 left: 0 !important;
                 width: 100% !important;
                 height: 100% !important;
-                z-index: 10 !important;
+                transform: none !important;
+                scale: 1 !important;
+                z-index: 1 !important;
                 pointer-events: none !important;
-                transform-origin: top left !important;
-                /* Canvas handles scaling internally */
+                border: none !important;
+                background: transparent !important;
             }
 
-            /* Ensure table container maintains relative positioning */
-            .print-area2 .table-container {
-                position: relative !important;
-                overflow: hidden !important;
-            }
-        }
-    </style>
-
-    <!-- CSS untuk symbol preview di layar -->
-    <style>
-        .symbol-preview {
-            margin-top: 4px;
-            display: flex;
-            justify-content: center;
-            position: relative;
-        }
-
-        /* Ensure all table cells have consistent black borders */
-        .print-area2 td,
-        .print-area2 th {
-            border: 1px solid #000000 !important;
-        }
-
-        /* Row height settings for print-area2 */
-        .print-area2 tbody tr:not(.header-row):not(.footer-row) {
-            height: 70px !important;
-            min-height: 70px !important;
-        }
-
-        .print-area2 thead tr {
-            height: auto !important;
-            min-height: 40px !important;
-        }
-
-        /* SVG styling */
-        #preview-container {
-            position: relative;
-            border: 1px solid #000000;
-            outline: none;
-        }
-
-        .page-svg {
-            position: absolute;
-            pointer-events: none;
-            z-index: 10;
-            background: transparent;
-        }
-
-        /* Footer row styling */
-        .footer-row {
-            background-color: transparent;
-            height: 60px;
-        }
-
-        .footer-row td {
-            background-color: transparent !important;
-            border-color: #000000;
-        }
-
-        .footer-connector .connector-symbol-svg {
-            opacity: 1;
-        }
-
-        .footer-connector .connector-symbol-svg polygon {
-            fill: #6b7280 !important;
-            stroke: #6b7280 !important;
-            stroke-width: 2;
-        }
-
-        /* Header connector styling */
-        .header-row {
-            background-color: transparent;
-            height: 60px;
-        }
-
-        .header-row td {
-            background-color: transparent !important;
-            border-color: #000000;
-        }
-
-        .header-connector .connector-symbol-svg {
-            opacity: 1;
-        }
-
-        .header-connector .connector-symbol-svg polygon {
-            fill: #6b7280 !important;
-            stroke: #6b7280 !important;
-            stroke-width: 2;
-        }
-
-        /* Page container styling */
-        .page-container {
-            margin-bottom: 20px;
-        }
-
-        /* Flow table border styling */
-        .flow-table {
-            border-collapse: collapse !important;
-            border: 1px solid #000000 !important;
-        }
-
-        .flow-table th,
-        .flow-table td {
-            border: 1px solid #000000 !important;
-            background-color: transparent !important;
-        }
-
-        /* Border utility classes */
-        .border {
-            border-width: 1px !important;
-        }
-
-        .border-gray-400,
-        .border-black {
-            border-color: #000000 !important;
-        }
-
-        /* Print styles for header and footer connectors */
-        @media print {
-            .footer-row,
-            .header-row {
-                background-color: transparent !important;
-                -webkit-print-color-adjust: exact !important;
-                color-adjust: exact !important;
-                print-color-adjust: exact !important;
+            /* Hide elements that shouldn't be printed */
+            .no-print,
+            .debug-button,
+            h3,
+            .page-number {
+                display: none !important;
             }
 
-            .footer-connector .connector-symbol-svg polygon,
-            .header-connector .connector-symbol-svg polygon {
-                fill: none !important;
-                stroke: #000000 !important;
-                -webkit-print-color-adjust: exact !important;
-                color-adjust: exact !important;
-                print-color-adjust: exact !important;
+            /* Print container optimization */
+            .table-container {
+                overflow-x: visible !important;
             }
 
-            .page-container {
-                margin-bottom: 0 !important;
-            }
-
-            /* Ensure all table borders are visible in print */
+            /* Table borders for all elements */
             .flow-table,
             .flow-table th,
             .flow-table td,
@@ -436,21 +676,40 @@
                 print-color-adjust: exact !important;
             }
 
-            /* Row height settings for print */
-            .print-area2 tbody tr:not(.header-row):not(.footer-row) {
-                height: 70px !important;
-                min-height: 70px !important;
+            .page-container {
+                margin-bottom: 0 !important;
             }
 
-            .print-area2 thead tr {
-                height: auto !important;
-                min-height: 40px !important;
+            /* Remove all background colors for symbols in print */
+            .page-preview .symbol-preview > div {
+                background-color: transparent !important;
+                background: none !important;
+                border: 1px solid #000 !important;
+                -webkit-print-color-adjust: exact;
+                color-adjust: exact;
+                print-color-adjust: exact;
             }
 
-            .print-area2 .header-row,
-            .print-area2 .footer-row {
-                height: 60px !important;
-                min-height: 60px !important;
+            /* Special handling for connector symbols */
+            .page-preview .symbol-preview .connector-symbol-svg {
+                width: 30px !important; /* Diperkecil */
+                height: 30px !important;
+                margin: 0 auto;
+            }
+
+            .page-preview .symbol-preview .connector-symbol-svg polygon {
+                fill: none !important;
+                stroke: #000 !important;
+                stroke-width: 1 !important;
+                -webkit-print-color-adjust: exact;
+                color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            /* Hide symbol numbers in print */
+            .symbol-number {
+                display: none !important;
+                visibility: hidden !important;
             }
         }
     </style>
@@ -690,20 +949,331 @@
         </div>
     </div>
 
-    <div id="preview-area" class="mt-4">
-        <div class="preview-wrapper" id="preview-wrapper">
-            <div id="pages-container" class="pages-container">
-                <!-- Pages will be generated dynamically by JavaScript -->
+    <div id="editor-tabel">
+        <form id="esopForm" action="{{ route('flow.update', $esop->id) }}" method="POST">
+            @csrf
+            <div class="main-content rounded-sm bg-white p-4 shadow-sm">
+                <div class="table-container">
+                    <table class="flow-table border border-gray-400 text-sm text-gray-800">
+                        <colgroup>
+                            <col style="width: 50px" />
+                            <!-- No -->
+                            <col style="width: 300px" />
+                            <!-- Uraian Kegiatan lebih lebar untuk F4 -->
+                            @for ($i = 0; $i < $jumlahPelaksana; $i++)
+                                <col style="width: 150px" />
+                                <!-- Pelaksana columns lebih lebar -->
+                            @endfor
+
+                            <col style="width: 125px" />
+                            <!-- Kelengkapan lebih lebar -->
+                            <col style="width: 125px" />
+                            <!-- Waktu -->
+                            <col style="width: 125px" />
+                            <!-- Output lebih lebar -->
+                            <col style="width: 125px" />
+                            <!-- Keterangan -->
+                        </colgroup>
+                        <thead>
+                            <tr class="bg-gray-100 text-center font-semibold">
+                                <th rowspan="2" class="border border-gray-400 px-2 py-1 align-middle">No</th>
+                                <th rowspan="2" class="w-[300px] border border-gray-400 px-2 py-1 align-middle">
+                                    Uraian Kegiatan
+                                </th>
+                                <th colspan="{{ $jumlahPelaksana }}" class="border border-gray-400 px-2 py-1">
+                                    Pelaksana
+                                </th>
+                                <th colspan="3" class="border border-gray-400 px-2 py-1">Mutu Baku</th>
+                                <th rowspan="2" class="border border-gray-400 px-2 py-1">Keterangan</th>
+                            </tr>
+                            <tr class="bg-gray-100 text-center">
+                                @foreach ($esop->pelaksanas as $pelaksana)
+                                    <th class="border border-gray-400 px-2 py-1">{{ $pelaksana->isi }}</th>
+                                @endforeach
+
+                                <th class="border border-gray-400 px-2 py-1">Kelengkapan</th>
+                                <th class="border border-gray-400 px-2 py-1">Waktu</th>
+                                <th class="border border-gray-400 px-2 py-1">Output</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-flow">
+                            @php
+                                $jumlahBaris = max(4, $flows->max('no_urutan') ?? 0);
+                            @endphp
+
+                            @for ($i = 1; $i <= $jumlahBaris; $i++)
+                                @php
+                                    $flow = $flows[$i] ?? null;
+                                @endphp
+
+                                <tr class="{{ $i % 2 === 0 ? 'bg-white' : 'bg-white' }}">
+                                    <td class="border border-gray-400 px-2 py-1 text-center">{{ $i }}</td>
+                                    <td class="uraian-column border border-gray-400 px-2 py-1">
+                                        <textarea
+                                            type="text"
+                                            name="uraian_kegiatan_{{ $i }}"
+                                            id="uraian_kegiatan_{{ $i }}"
+                                            placeholder="Uraian Kegiatan {{ $i }}"
+                                            class="form-control block w-full resize-none rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-indigo-600"
+                                        >
+{{ $flow->uraian_kegiatan ?? '' }}</textarea
+                                        >
+                                    </td>
+                                    @foreach ($esop->pelaksanas as $index => $pelaksana)
+                                        @php
+                                            $savedSymbol = '';
+                                            $savedReturnTo = '';
+                                            $savedConnectTo = '';
+                                            if ($flow && $flow->symbols && is_array($flow->symbols)) {
+                                                $savedSymbol = $flow->symbols[$index] ?? '';
+                                            }
+                                            if ($flow && $flow->return_to && is_array($flow->return_to)) {
+                                                $savedReturnTo = $flow->return_to[$index] ?? '';
+                                            }
+                                            if ($flow && $flow->connect_to && is_array($flow->connect_to)) {
+                                                $savedConnectTo = $flow->connect_to[$index] ?? '';
+                                            }
+                                        @endphp
+
+                                        <td
+                                            class="border border-gray-400 px-2 py-1"
+                                            data-flow="{{ $flow->id ?? '' }}"
+                                            data-pelaksana="{{ $pelaksana->id }}"
+                                        >
+                                            <select
+                                                name="symbol_{{ $i }}_{{ $index }}"
+                                                onchange="updateSymbol(this)"
+                                                class="w-full text-sm"
+                                            >
+                                                <option value="">Pilih</option>
+                                                <option value="start" {{ $savedSymbol == 'start' ? 'selected' : '' }}>
+                                                    Mulai
+                                                </option>
+                                                <option
+                                                    value="process"
+                                                    {{ $savedSymbol == 'process' ? 'selected' : '' }}
+                                                >
+                                                    Proses
+                                                </option>
+                                                <option
+                                                    value="decision"
+                                                    {{ $savedSymbol == 'decision' ? 'selected' : '' }}
+                                                >
+                                                    Pilihan
+                                                </option>
+                                            </select>
+                                            <div class="symbol-preview">
+                                                @if ($savedSymbol == 'start')
+                                                    <div class="mx-auto h-6 w-15 rounded-xl bg-blue-500"></div>
+                                                @elseif ($savedSymbol == 'process')
+                                                    <div class="mx-auto h-6 w-15 bg-green-500"></div>
+                                                @elseif ($savedSymbol == 'decision')
+                                                    <div class="mx-auto h-8 w-8 rotate-45 bg-yellow-400"></div>
+                                                @else
+                                                    <div
+                                                        class="mx-auto h-6 w-15 border-2 border-dashed border-gray-300"
+                                                    ></div>
+                                                @endif
+
+                                                {{-- Only show number if symbol is selected --}}
+                                                @if ($savedSymbol && $savedSymbol != '')
+                                                    <div class="symbol-number">
+                                                        {{ ($i - 1) * $jumlahPelaksana + $index + 1 }}
+                                                    </div>
+                                                @endif
+                                            </div>
+
+                                            @if ($savedSymbol == 'decision')
+                                                <div class="mt-2">
+                                                    <input
+                                                        type="number"
+                                                        name="return_to_{{ $i }}_{{ $index }}"
+                                                        placeholder="Kembali ke nomor"
+                                                        min="1"
+                                                        class="w-full rounded border border-gray-300 px-2 py-1 text-xs"
+                                                        value="{{ $savedReturnTo }}"
+                                                        onchange="syncPreviewTable()"
+                                                    />
+                                                </div>
+                                                <div class="mt-2">
+                                                    <input
+                                                        type="text"
+                                                        name="connect_to_{{ $i }}_{{ $index }}"
+                                                        placeholder="Hubungkan ke nomor (contoh: 2,3)"
+                                                        class="decision-connect w-full rounded border border-yellow-300 px-2 py-1 text-xs"
+                                                        value="{{ $savedConnectTo }}"
+                                                        onchange="syncPreviewTable()"
+                                                    />
+                                                </div>
+                                            @elseif ($savedSymbol == 'process')
+                                                <div class="mt-2">
+                                                    <input
+                                                        type="text"
+                                                        name="connect_to_{{ $i }}_{{ $index }}"
+                                                        placeholder="Hubungkan ke nomor (contoh: 2,3)"
+                                                        class="process-connect w-full rounded border border-green-300 px-2 py-1 text-xs"
+                                                        value="{{ $savedConnectTo }}"
+                                                        onchange="syncPreviewTable()"
+                                                    />
+                                                </div>
+                                            @elseif ($savedSymbol == 'start')
+                                                <div class="mt-2">
+                                                    <input
+                                                        type="text"
+                                                        name="connect_to_{{ $i }}_{{ $index }}"
+                                                        placeholder="Hubungkan ke nomor (contoh: 2,3)"
+                                                        class="start-connect w-full rounded border border-blue-300 px-2 py-1 text-xs"
+                                                        value="{{ $savedConnectTo }}"
+                                                        onchange="syncPreviewTable()"
+                                                    />
+                                                </div>
+                                            @endif
+                                        </td>
+                                    @endforeach
+
+                                    <td class="border border-gray-400 px-2 py-1">
+                                        <textarea
+                                            type="text"
+                                            name="kelengkapan_{{ $i }}"
+                                            id="kelengkapan_{{ $i }}"
+                                            placeholder="Kelengkapan {{ $i }}"
+                                            class="form-control block w-full resize-none rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-indigo-600"
+                                        >
+{{ $flow->kelengkapan ?? '' }}</textarea
+                                        >
+                                    </td>
+                                    <td class="border border-gray-400 px-2 py-1">
+                                        <textarea
+                                            type="text"
+                                            name="waktu_{{ $i }}"
+                                            id="waktu_{{ $i }}"
+                                            placeholder="Waktu {{ $i }}"
+                                            class="form-control block w-full resize-none rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-indigo-600"
+                                        >
+{{ $flow->waktu ?? '' }}</textarea
+                                        >
+                                    </td>
+                                    <td class="border border-gray-400 px-2 py-1">
+                                        <textarea
+                                            type="text"
+                                            name="output_{{ $i }}"
+                                            id="output_{{ $i }}"
+                                            placeholder="Output {{ $i }}"
+                                            class="form-control block w-full resize-none rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-indigo-600"
+                                        >
+{{ $flow->output ?? '' }}</textarea
+                                        >
+                                    </td>
+                                    <td class="border border-gray-400 px-2 py-1">
+                                        <textarea
+                                            type="text"
+                                            name="keterangan_{{ $i }}"
+                                            id="keterangan_{{ $i }}"
+                                            placeholder="Keterangan {{ $i }}"
+                                            class="form-control block w-full resize-none rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-indigo-600"
+                                        >
+{{ $flow->keterangan ?? '' }}</textarea
+                                        >
+                                    </td>
+                                </tr>
+                            @endfor
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-4 flex items-center justify-between">
+                    <div class="flex justify-start space-x-2">
+                        <button
+                            type="button"
+                            onclick="removeRow()"
+                            class="rounded-md border border-blue-500 px-3 py-2 text-sm text-blue-500 hover:bg-indigo-50"
+                        >
+                            - Hapus Baris
+                        </button>
+                        <button
+                            type="button"
+                            onclick="addRow()"
+                            class="rounded-md border border-blue-500 px-3 py-2 text-sm text-blue-500 hover:bg-indigo-50"
+                        >
+                            + Tambah Baris
+                        </button>
+                        <button
+                            type="button"
+                            onclick="clearAllSymbolsWithSweetAlert()"
+                            class="rounded-md border border-red-500 px-3 py-2 text-sm text-red-500 hover:bg-red-50"
+                            title="Kosongkan semua pilihan simbol dan reset penomoran"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke-width="1.5"
+                                stroke="currentColor"
+                                class="size-4"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
+                                />
+                            </svg>
+                        </button>
+                        <button
+                            type="button"
+                            onclick="showMultiDirectionInfo()"
+                            class="rounded-md border border-gray-500 px-3 py-2 text-sm text-gray-500 hover:bg-gray-50"
+                            title="Info Multi Direction"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke-width="1.5"
+                                stroke="currentColor"
+                                class="size-4"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"
+                                />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="flex justify-end space-x-2">
+                        <a
+                            href="{{ route('esop.edit', ['id' => $esop->id]) }}"
+                            class="no-print inline-block rounded-sm bg-gray-500 px-3 py-2 text-sm font-semibold text-white hover:bg-gray-400"
+                        >
+                            Kembali
+                        </a>
+                        <button
+                            type="submit"
+                            id="simpanButton"
+                            onclick="showSuccessAlert()"
+                            class="rounded-sm bg-blue-500 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-400"
+                        >
+                            Simpan
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="main-content mt-4 rounded-sm bg-white p-4 shadow-sm">
+        <div id="preview-area">
+            <div class="preview-wrapper" id="preview-wrapper">
+                <div id="pages-container" class="pages-container">
+                    <!-- Pages will be dynamically generated here -->
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Global variables for symbol ordering system (from flow.blade.php)
-        let symbolOrder = [];
-        let nextSymbolNumber = 1;
-
         document.addEventListener('DOMContentLoaded', function () {
+            // Process preview elements for cover page
             const previewIds = ['dasar_hukum', 'cara_mengatasi', 'keterkaitan', 'peralatan_perlengkapan', 'peringatan'];
             previewIds.forEach(function (id) {
                 const el = document.getElementById('preview_' + id);
@@ -748,391 +1318,935 @@
                 },
                 @endforeach
             ];
-
-            const ROWS_PER_PAGE = 7; // Number of flow rows per page for optimal printing
-
-            // Initialize symbol ordering system
-            initializeSymbolOrdering(flowData, pelaksanaData);
-
-            // Generate pages
-            generateFlowPages(flowData, pelaksanaData, ROWS_PER_PAGE);
-
-            // Draw connection lines after page generation
-            setTimeout(() => {
-                console.log('Symbol order after initialization:', symbolOrder);
-                drawAllPageConnections();
-            }, 500); // Increased timeout for better DOM rendering
-
-            // Add event listeners for print to redraw SVG with correct coordinates
-            window.addEventListener('beforeprint', function() {
-                console.log('Before print - redrawing connections...');
-                console.log('Viewport size:', window.innerWidth, 'x', window.innerHeight);
-                adjustSVGScalingForPrint();
-                setTimeout(() => {
-                    drawAllPageConnections();
-                }, 200);
-            });
-
-            window.addEventListener('afterprint', function() {
-                console.log('After print - redrawing connections...');
-                resetSVGScaling();
-                setTimeout(() => {
-                    drawAllPageConnections();
-                }, 200);
-            });
         });
+    </script>
 
-        // Function to adjust SVG scaling for print mode
-        function adjustSVGScalingForPrint() {
-            const printAreas = document.querySelectorAll('.print-area2');
-            printAreas.forEach((printArea, index) => {
-                const svg = printArea.querySelector('.page-svg');
-                const table = printArea.querySelector('.flow-table');
+    <script>
+        // Initialize rowCount based on actual rows in the table, not just flow keys
+        let rowCount = Math.max({{ $flows->keys()->max() ?? 0 }}, {{ max(4, $flows->max('no_urutan') ?? 0) }});
+        const jumlahPelaksana = {{ $esop->pelaksanas->count() }};
+        const pelaksanaIds = @json($esop->pelaksanas->pluck('id'));
 
-                if (svg && table) {
-                    // Get actual dimensions
-                    const printAreaRect = printArea.getBoundingClientRect();
-                    const tableRect = table.getBoundingClientRect();
+        // Array untuk menyimpan urutan simbol berdasarkan pemilihan
+        let symbolOrder = [];
+        let nextSymbolNumber = 1;
 
-                    // Calculate scaling factors
-                    // print-area2 has width: 100vh, which causes horizontal scaling
-                    const viewportHeight = window.innerHeight;
-                    const viewportWidth = window.innerWidth;
+        // Initialize existing symbols on page load
+        function initializeExistingSymbols() {
+            // First try to load from localStorage
+            const loadedFromStorage = loadSymbolOrderFromStorage();
 
-                    // The scale factor depends on the ratio between viewport dimensions
-                    // and how print-area2 width: 100vh affects the layout
-                    const scaleX = Math.min(viewportHeight / viewportWidth, 1);
-                    const scaleY = 1; // Y scaling usually remains consistent
-
-                    console.log(`Print area ${index + 1} - Page size: ${printAreaRect.width}x${printAreaRect.height}`);
-                    console.log(`Print area ${index + 1} - Table size: ${tableRect.width}x${tableRect.height}`);
-                    console.log(`Print area ${index + 1} - Viewport: ${viewportWidth}x${viewportHeight}`);
-                    console.log(`Print area ${index + 1} - Applying scale: ${scaleX}, ${scaleY}`);
-
-                    // Apply transform to SVG
-                    svg.style.transform = `scale(${scaleX}, ${scaleY})`;
-                    svg.style.transformOrigin = 'top left';
-
-                    // Store scaling info for coordinate calculations
-                    svg.dataset.scaleX = scaleX;
-                    svg.dataset.scaleY = scaleY;
-                }
-            });
-        }
-
-        // Function to reset SVG scaling after print
-        function resetSVGScaling() {
-            const svgs = document.querySelectorAll('.page-svg');
-            svgs.forEach(svg => {
-                svg.style.transform = 'scale(1, 1)';
-            });
-        }
-
-        // Utility function to convert symbols data to array format
-        function normalizeSymbolsArray(symbols) {
-            if (Array.isArray(symbols)) {
-                return symbols;
-            } else if (typeof symbols === 'object' && symbols !== null) {
-                const maxIndex = Math.max(...Object.keys(symbols).map(k => parseInt(k)));
-                const symbolsArray = new Array(maxIndex + 1).fill('');
-                Object.keys(symbols).forEach(key => {
-                    symbolsArray[parseInt(key)] = symbols[key];
+            if (loadedFromStorage && symbolOrder.length > 0) {
+                // Clear all existing numbers first
+                const allSymbolPreviews = document.querySelectorAll('.symbol-preview');
+                allSymbolPreviews.forEach((preview) => {
+                    const numberDiv = preview.querySelector('.symbol-number');
+                    if (numberDiv) {
+                        numberDiv.remove();
+                    }
                 });
-                return symbolsArray;
-            }
-            return [];
-        }
 
-        // Initialize symbol ordering system based on flow data
-        function initializeSymbolOrdering(flowData, pelaksanaData) {
+                // Validate and update display for saved symbols
+                symbolOrder.forEach((item) => {
+                    const select = document.querySelector(`select[name="symbol_${item.rowNumber}_${item.colIndex}"]`);
+                    if (select && select.value && select.value !== '') {
+                        const symbolPreview = select.nextElementSibling;
+
+                        // Add number only if symbol is selected
+                        const numberDiv = document.createElement('div');
+                        numberDiv.className = 'symbol-number';
+                        numberDiv.textContent = item.number;
+                        symbolPreview.appendChild(numberDiv);
+                    }
+                });
+
+                return; // Exit early if we loaded from storage
+            }
+
+            // If no saved order, initialize from current state
+
+            // Reset order first
             symbolOrder = [];
             nextSymbolNumber = 1;
 
-            // Process each flow to build symbol order
-            flowData.forEach((flow, flowIndex) => {
-                if (flow && flow.symbols) {
-                    const symbolsArray = normalizeSymbolsArray(flow.symbols);
+            // Collect all existing symbols with their current numbers
+            const existingSymbols = [];
+            const editorRows = document.querySelectorAll('#editor-tabel tbody tr');
 
-                    symbolsArray.forEach((symbolType, pelaksanaIndex) => {
-                        if (symbolType && symbolType !== '') {
-                            const rowNumber = flowIndex + 1;
-                            const colIndex = pelaksanaIndex;
-                            const key = `${rowNumber}_${colIndex}`;
+            editorRows.forEach((row, rowIndex) => {
+                const cells = row.querySelectorAll('td');
+                cells.forEach((cell, cellIndex) => {
+                    if (cellIndex >= 2 && cellIndex < 2 + jumlahPelaksana) {
+                        const select = cell.querySelector('select');
+                        const symbolPreview = cell.querySelector('.symbol-preview');
+                        const numberDiv = symbolPreview ? symbolPreview.querySelector('.symbol-number') : null;
 
-                            symbolOrder.push({
-                                key: key,
-                                number: nextSymbolNumber++,
-                                rowNumber: rowNumber,
-                                colIndex: colIndex,
-                                symbolType: symbolType
+                        if (select && select.value && select.value !== '') {
+                            // For fresh initialization, use visual order (top-to-bottom, left-to-right)
+                            const visualOrder = rowIndex * jumlahPelaksana + (cellIndex - 2) + 1;
+                            existingSymbols.push({
+                                rowNumber: rowIndex + 1,
+                                colIndex: cellIndex - 2,
+                                visualOrder: visualOrder,
+                                select: select,
+                                symbolPreview: symbolPreview,
                             });
                         }
-                    });
+                    }
+                });
+            });
+
+            // Sort by visual order for consistent initialization
+            existingSymbols.sort((a, b) => a.visualOrder - b.visualOrder);
+
+            // Re-initialize symbolOrder based on visual order
+            existingSymbols.forEach((symbol, index) => {
+                const key = `${symbol.rowNumber}_${symbol.colIndex}`;
+                const sequentialNumber = index + 1;
+
+                symbolOrder.push({
+                    key: key,
+                    number: sequentialNumber,
+                    rowNumber: symbol.rowNumber,
+                    colIndex: symbol.colIndex,
+                });
+
+                // Update the display number
+                const numberDiv = symbol.symbolPreview.querySelector('.symbol-number');
+                if (numberDiv) {
+                    numberDiv.textContent = sequentialNumber;
                 }
             });
 
-            console.log('Initialized symbol order:', symbolOrder);
-        }
+            // Set next symbol number
+            nextSymbolNumber = existingSymbols.length + 1;
 
-        function generateFlowPages(flowData, pelaksanaData, rowsPerPage) {
-            // Store flow data globally for header connector logic
-            window.globalFlowData = flowData;
-
-            const pagesContainer = document.getElementById('pages-container');
-            pagesContainer.innerHTML = '';
-
-            const totalRows = Math.max(4, flowData.length);
-            const totalPages = Math.ceil(totalRows / rowsPerPage);
-
-            for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
-                const startIndex = (pageNum - 1) * rowsPerPage;
-                const endIndex = Math.min(startIndex + rowsPerPage, totalRows);
-                const pageFlows = [];
-
-                for (let i = startIndex; i < endIndex; i++) {
-                    pageFlows.push(flowData[i] || null);
-                }
-
-                const pageDiv = createPageDiv(pageNum, pageFlows, pelaksanaData, totalPages);
-                pagesContainer.appendChild(pageDiv);
+            // Save this initial order
+            if (existingSymbols.length > 0) {
+                saveSymbolOrderToStorage();
             }
         }
 
-        function createPageDiv(pageNum, flows, pelaksanas, totalPages) {
-            const pageDiv = document.createElement('div');
-            pageDiv.className = 'page-container print-area2';
-            pageDiv.id = `page-${pageNum}`;
+        // Call initialization after page loads
+        document.addEventListener('DOMContentLoaded', function () {
+            setTimeout(() => {
+                initializeExistingSymbols();
 
-            // Calculate pelaksana column width
-            const pelaksanaPersen = pelaksanas.length > 0 ? 30 / pelaksanas.length : 0;
+                // Add event listeners to existing rows
+                const existingRows = document.querySelectorAll('#editor-tabel tbody tr');
+                existingRows.forEach((row) => {
+                    addEventListenersToRow(row);
+                });
 
-            let colGroupHTML = `
-                <colgroup>
-                    <col style="width: 2%" />
-                    <col style="width: 13%" />
-                    ${pelaksanas.map(() => `<col style="width: ${pelaksanaPersen}%" />`).join('')}
-                    <col style="width: 5%" />
-                    <col style="width: 5%" />
-                    <col style="width: 5%" />
-                    <col style="width: 5%" />
-                </colgroup>
+                syncPreviewTable();
+            }, 100);
+        });
+
+        // Function to save symbol order to localStorage
+        function saveSymbolOrderToStorage() {
+            const storageKey = `symbol_order_{{ $esop->id }}`;
+            localStorage.setItem(storageKey, JSON.stringify(symbolOrder));
+        }
+
+        // Function to load symbol order from localStorage
+        function loadSymbolOrderFromStorage() {
+            const storageKey = `symbol_order_{{ $esop->id }}`;
+            const saved = localStorage.getItem(storageKey);
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    if (Array.isArray(parsed)) {
+                        symbolOrder = parsed;
+                        nextSymbolNumber = parsed.length + 1;
+                        return true;
+                    }
+                } catch (e) {
+                    console.error('Error parsing saved symbol order:', e);
+                }
+            }
+            return false;
+        }
+
+        // Function to clear saved symbol order
+        function clearSavedSymbolOrder() {
+            const storageKey = `symbol_order_{{ $esop->id }}`;
+            localStorage.removeItem(storageKey);
+        }
+        // Function to get sequential symbol number based on selection order
+        function getSequentialSymbolNumber(rowNumber, colIndex) {
+            const key = `${rowNumber}_${colIndex}`;
+
+            // Cari apakah simbol ini sudah ada dalam urutan
+            const existingIndex = symbolOrder.findIndex((item) => item.key === key);
+
+            if (existingIndex !== -1) {
+                return symbolOrder[existingIndex].number;
+            }
+
+            // Jika belum ada, tambahkan ke urutan
+            const number = nextSymbolNumber++;
+            symbolOrder.push({
+                key: key,
+                number: number,
+                rowNumber: rowNumber,
+                colIndex: colIndex,
+            });
+
+            // Save to localStorage whenever order changes
+            saveSymbolOrderToStorage();
+
+            return number;
+        }
+
+        // Function to remove symbol from order when changed to empty
+        function removeSymbolFromOrder(rowNumber, colIndex) {
+            const key = `${rowNumber}_${colIndex}`;
+            const index = symbolOrder.findIndex((item) => item.key === key);
+
+            if (index !== -1) {
+                symbolOrder.splice(index, 1);
+
+                // Re-number all subsequent symbols
+                for (let i = index; i < symbolOrder.length; i++) {
+                    symbolOrder[i].number = i + 1;
+                }
+
+                // Update nextSymbolNumber
+                nextSymbolNumber = symbolOrder.length + 1;
+
+                // Save to localStorage
+                saveSymbolOrderToStorage();
+
+                // Update all existing symbols display
+                updateAllSymbolNumbers();
+            }
+        }
+
+        // Function to update all symbol numbers in the editor
+        function updateAllSymbolNumbers() {
+            // First, clear all symbol numbers
+            const allSymbolPreviews = document.querySelectorAll('.symbol-preview');
+            allSymbolPreviews.forEach((preview) => {
+                const numberDiv = preview.querySelector('.symbol-number');
+                if (numberDiv) {
+                    numberDiv.remove();
+                }
+            });
+
+            // Then, add numbers only for symbols in the order
+            symbolOrder.forEach((item) => {
+                const select = document.querySelector(`select[name="symbol_${item.rowNumber}_${item.colIndex}"]`);
+                if (select && select.value && select.value !== '') {
+                    const symbolPreview = select.nextElementSibling;
+
+                    // Remove existing number if any
+                    const existingNumber = symbolPreview.querySelector('.symbol-number');
+                    if (existingNumber) {
+                        existingNumber.remove();
+                    }
+
+                    // Add new number
+                    const numberDiv = document.createElement('div');
+                    numberDiv.className = 'symbol-number';
+                    numberDiv.textContent = item.number;
+                    symbolPreview.appendChild(numberDiv);
+                }
+            });
+        }
+
+        // Function to get ordered symbols for flowchart connections
+        function getOrderedSymbols() {
+            return symbolOrder.sort((a, b) => a.number - b.number);
+        }
+
+        // Function to reset all symbol numbering (useful for initialization or reset)
+        function resetSymbolOrder() {
+            symbolOrder = [];
+            nextSymbolNumber = 1;
+            clearSavedSymbolOrder();
+        }
+
+        // Function to debug current symbol order
+        function debugSymbolOrder() {
+            console.log('Current symbol order:', symbolOrder);
+            console.log('Next symbol number:', nextSymbolNumber);
+
+            // Show current sequential numbering
+            symbolOrder.forEach((item) => {
+                console.log(`Symbol ${item.number}: Row ${item.rowNumber}, Col ${item.colIndex}`);
+            });
+        }
+
+        function calculateActualRowHeights() {
+            // Jika ada preview table (hasil render), ukur tinggi aktual baris di situ
+            const previewTable = document.querySelector('.page-preview .flow-table');
+            if (previewTable) {
+                const rows = previewTable.querySelectorAll('tbody tr:not(.buffer-row)');
+                const heights = [];
+                rows.forEach((row) => {
+                    heights.push(row.getBoundingClientRect().height);
+                });
+                return heights;
+            }
+            // Fallback ke estimasi lama jika belum ada preview table
+            const editorRows = document.querySelectorAll('#editor-tabel tbody tr');
+            const heights = [];
+            editorRows.forEach((row, index) => {
+                const uraianTextarea = row.querySelector('textarea[name^="uraian_kegiatan_"]');
+                if (uraianTextarea && uraianTextarea.value.trim()) {
+                    const textLength = uraianTextarea.value.length;
+                    const lineCount = Math.ceil(textLength / 250);
+                    const actualLineCount = (uraianTextarea.value.match(/\n/g) || []).length + 1;
+                    const estimatedLines = Math.max(lineCount, actualLineCount);
+                    const estimatedHeight = Math.max(120, 120 + (estimatedLines - 1) * 20);
+                    heights.push(estimatedHeight);
+                } else {
+                    heights.push(80);
+                }
+            });
+            return heights;
+        }
+
+        // Function to calculate rows per page based on F4 dimensions
+        function calculateRowsPerPage() {
+            // F4 landscape: 330mm x 250mm
+            const f4LandscapeHeight = 260; // mm
+            const availableHeightPx = (f4LandscapeHeight / 25.4) * 96;
+
+            // Ambil header height dari tabel preview jika ada
+            let tableHeaderHeight = 0;
+            const previewTable = document.querySelector('.page-preview .flow-table');
+            if (previewTable) {
+                const thead = previewTable.querySelector('thead');
+                if (thead) {
+                    tableHeaderHeight = thead.getBoundingClientRect().height;
+                }
+            } else {
+                tableHeaderHeight = 75; // fallback
+            }
+
+            const safetyMargin = 0; // nanti ganti lagi sekarang 6 rows
+            const actualRowHeights = calculateActualRowHeights();
+            const averageActualHeight =
+                actualRowHeights.length > 0
+                    ? actualRowHeights.reduce((sum, height) => sum + height, 0) / actualRowHeights.length
+                    : 75;
+            const availableForRows = availableHeightPx - tableHeaderHeight - safetyMargin;
+            const maxRows = Math.floor(availableForRows / averageActualHeight);
+            return maxRows > 0 ? maxRows : 1;
+        }
+
+        // Get dynamic rows per page - recalculate every time
+        let ROWS_PER_PAGE = calculateRowsPerPage();
+
+        // Function to get current ROWS_PER_PAGE (always fresh calculation)
+        function getCurrentRowsPerPage() {
+            ROWS_PER_PAGE = calculateRowsPerPage();
+            return ROWS_PER_PAGE;
+        }
+
+        // Debounce function to prevent excessive auto-scaling calls
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Auto-scale preview to fit screen
+        function autoScalePreview() {
+            const previewArea = document.getElementById('preview-area');
+            const previewWrapper = document.getElementById('preview-wrapper');
+            const pagesContainer = document.getElementById('pages-container');
+
+            if (previewArea && previewWrapper && pagesContainer) {
+                // Reset scale first
+                previewWrapper.style.transform = 'scale(1)';
+
+                // Force layout recalculation
+                previewWrapper.offsetHeight;
+
+                // Get dimensions for auto-scaling
+                const containerWidth = previewArea.clientWidth; // Padding for pages
+                const containerHeight = previewArea.clientHeight; // Padding for pages
+                const firstPage = pagesContainer.querySelector('.page-preview');
+
+                if (firstPage) {
+                    // Wait for layout to settle
+                    setTimeout(() => {
+                        const pageWidth = firstPage.scrollWidth;
+                        const pageHeight = firstPage.scrollHeight;
+
+                        if (pageWidth > 0) {
+                            // Calculate scale to fit screen with maximum scale of 1
+                            const scaleX = containerWidth / pageWidth;
+                            const scaleY = containerHeight / pageHeight;
+                            const scale = Math.min(1, scaleX, scaleY);
+
+                            // Apply scale with center transform origin
+                            previewWrapper.style.transform = `scale(${scale})`;
+                            previewWrapper.style.transformOrigin = 'center center';
+
+                            // Redraw connections after scaling
+                            setTimeout(() => {
+                                drawAllPageConnections();
+                            }, 100);
+                        }
+                    }, 50);
+                }
+            }
+        }
+
+        // Debounced version of autoScalePreview
+        const debouncedAutoScale = debounce(autoScalePreview, 150);
+
+        function addRow() {
+            // Get current number of rows in table to ensure proper numbering
+            const tbody = document.getElementById('tbody-flow');
+            const currentRowCount = tbody.children.length;
+
+            // Use the higher value between rowCount and actual table rows
+            rowCount = Math.max(rowCount, currentRowCount);
+            rowCount++;
+
+            const row = document.createElement('tr');
+            row.className = 'bg-white';
+
+            let html = `
+                <td class="border border-gray-400 px-2 py-1 text-center">${rowCount}</td>
+                <td class="border border-gray-400 px-2 py-1 uraian-column">
+                    <textarea name="uraian_kegiatan_${rowCount}" placeholder="Uraian Kegiatan ${rowCount}" class="form-control block w-full resize-none rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-indigo-600"></textarea>
+                </td>
             `;
 
-            let headerHTML = `
+            for (let i = 0; i < jumlahPelaksana; i++) {
+                html += `
+                    <td class="border border-gray-400 px-2 py-1" data-pelaksana="${pelaksanaIds[i]}">
+                        <select name="symbol_${rowCount}_${i}" onchange="updateSymbol(this)" class="w-full text-sm">
+                            <option value="">Pilih</option>
+                            <option value="start">Mulai</option>
+                            <option value="process">Proses</option>
+                            <option value="decision">Pilihan</option>
+                        </select>
+                        <div class="symbol-preview">
+                            <div class="w-15 h-6 border-2 border-gray-300 border-dashed mx-auto"></div>
+                        </div>
+                    </td>`;
+            }
+
+            html += `
+                <td class="border border-gray-400 px-2 py-1"><textarea name="kelengkapan_${rowCount}" placeholder="Kelengkapan ${rowCount}" class="form-control block w-full resize-none rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-indigo-600"></textarea></td>
+                <td class="border border-gray-400 px-2 py-1"><textarea name="waktu_${rowCount}" placeholder="Waktu ${rowCount}" class="form-control block w-full resize-none rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-indigo-600"></textarea></td>
+                <td class="border border-gray-400 px-2 py-1"><textarea name="output_${rowCount}" placeholder="Output ${rowCount}" class="form-control block w-full resize-none rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-indigo-600"></textarea></td>
+                <td class="border border-gray-400 px-2 py-1"><textarea name="keterangan_${rowCount}" placeholder="Keterangan ${rowCount}" class="form-control block w-full resize-none rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-indigo-600"></textarea></td>
+            `;
+
+            row.innerHTML = html;
+            tbody.appendChild(row);
+
+            addEventListenersToRow(row);
+            syncPreviewTable();
+            setTimeout(debouncedAutoScale, 300);
+        }
+
+        function removeRow() {
+            const tbody = document.getElementById('tbody-flow');
+            if (tbody.lastElementChild) {
+                tbody.removeChild(tbody.lastElementChild);
+
+                // Update rowCount to match actual table rows
+                const actualRowCount = tbody.children.length;
+                rowCount = actualRowCount;
+
+                syncPreviewTable();
+                setTimeout(debouncedAutoScale, 300);
+            }
+        }
+
+        function clearAllSymbolsWithSweetAlert() {
+            Swal.fire({
+                title: 'Hapus Simbol?',
+                text: 'Apakah Anda yakin ingin mengosongkan semua pilihan simbol? Tindakan ini tidak dapat dibatalkan.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, Kosongkan!',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Reset symbol order dan numbering
+                    resetSymbolOrder();
+
+                    // Cari semua select element untuk simbol
+                    const allSymbolSelects = document.querySelectorAll('select[name^="symbol_"]');
+
+                    allSymbolSelects.forEach((select) => {
+                        // Reset select ke nilai kosong
+                        select.value = '';
+
+                        // Reset preview simbol
+                        const symbolPreview = select.nextElementSibling;
+                        if (symbolPreview && symbolPreview.classList.contains('symbol-preview')) {
+                            symbolPreview.innerHTML =
+                                '<div class="w-15 h-6 border-2 border-gray-300 border-dashed mx-auto"></div>';
+                        }
+
+                        // Hapus input return_to dan connect_to jika ada
+                        const cell = select.closest('td');
+                        const returnInput = cell.querySelector('input[name^="return_to_"]');
+                        const connectToInput = cell.querySelector('input[name^="connect_to_"]');
+                        if (returnInput) {
+                            returnInput.closest('div').remove();
+                        }
+                        if (connectToInput) {
+                            connectToInput.closest('div').remove();
+                        }
+                    });
+
+                    // Update preview table
+                    syncPreviewTable();
+
+                    // Tampilkan notifikasi sukses
+                    Swal.fire({
+                        title: 'Berhasil!',
+                        text: 'Semua pilihan simbol telah dikosongkan.',
+                        icon: 'success',
+                        timer: 2000,
+                        showConfirmButton: false,
+                    });
+                }
+            });
+        }
+
+        function addEventListenersToRow(row) {
+            row.querySelectorAll('textarea, input[name^="return_to_"], input[name^="connect_to_"], select').forEach(
+                (element) => {
+                    const eventType = element.tagName === 'SELECT' ? 'change' : 'input';
+                    element.addEventListener(eventType, () => {
+                        // Debounce untuk textarea yang sering berubah
+                        if (element.tagName === 'TEXTAREA') {
+                            setTimeout(() => {
+                                syncPreviewTable();
+                            }, 300);
+                        } else {
+                            syncPreviewTable();
+                        }
+                    });
+                },
+            );
+        }
+
+        function updateSymbol(selectElement) {
+            const symbolPreview = selectElement.nextElementSibling;
+            const value = selectElement.value;
+            const nameAttr = selectElement.getAttribute('name');
+            const match = nameAttr.match(/symbol_(\d+)_(\d+)/);
+            const rowNumber = match ? parseInt(match[1]) : 1;
+            const colIndex = match ? parseInt(match[2]) : 0;
+
+            let symbolHtml = '';
+            let sequentialNumber = 0;
+
+            // Jika simbol dipilih (bukan kosong), dapatkan nomor berurutan
+            if (value && value !== '') {
+                sequentialNumber = getSequentialSymbolNumber(rowNumber, colIndex);
+            } else {
+                // Jika simbol dikosongkan, hapus dari urutan
+                removeSymbolFromOrder(rowNumber, colIndex);
+            }
+
+            switch (value) {
+                case 'start':
+                    symbolHtml = `<div class="w-15 h-6 bg-blue-500 rounded-xl mx-auto"></div>`;
+                    break;
+                case 'process':
+                    symbolHtml = `<div class="w-15 h-6 bg-green-500 mx-auto"></div>`;
+                    break;
+                case 'decision':
+                    symbolHtml = `<div class="w-8 h-8 bg-yellow-400 rotate-45 mx-auto"></div>`;
+                    break;
+                default:
+                    symbolHtml = `<div class="w-15 h-6 border-2 border-gray-300 border-dashed mx-auto"></div>`;
+            }
+
+            // Tambahkan nomor simbol hanya jika ada simbol
+            if (value && value !== '' && sequentialNumber > 0) {
+                symbolHtml += `<div class="symbol-number">${sequentialNumber}</div>`;
+            }
+
+            symbolPreview.innerHTML = symbolHtml;
+
+            const cell = selectElement.closest('td');
+            let returnInput = cell.querySelector('input[name^="return_to_"]');
+            let connectToInput = cell.querySelector('input[name^="connect_to_"]');
+
+            if (value === 'decision') {
+                if (!returnInput) {
+                    const inputDiv = document.createElement('div');
+                    inputDiv.className = 'mt-2';
+                    inputDiv.innerHTML = `
+                        <input type="number" name="return_to_${rowNumber}_${colIndex}" placeholder="Kembali ke nomor" min="1" class="w-full text-xs px-2 py-1 border border-gray-300 rounded" onchange="syncPreviewTable()">
+                    `;
+                    cell.appendChild(inputDiv);
+                }
+                // Add connect_to input for decision (for multi direction)
+                if (!connectToInput) {
+                    const connectDiv = document.createElement('div');
+                    connectDiv.className = 'mt-2';
+                    connectDiv.innerHTML = `
+                        <input type="text" name="connect_to_${rowNumber}_${colIndex}" placeholder="Hubungkan ke nomor (contoh: 2,3)" class="w-full text-xs px-2 py-1 border border-yellow-300 rounded decision-connect" onchange="syncPreviewTable()">
+                    `;
+                    cell.appendChild(connectDiv);
+                }
+            } else if (value === 'process') {
+                if (!connectToInput) {
+                    const inputDiv = document.createElement('div');
+                    inputDiv.className = 'mt-2';
+                    inputDiv.innerHTML = `
+                        <input type="text" name="connect_to_${rowNumber}_${colIndex}" placeholder="Hubungkan ke nomor (contoh: 2,3)" class="w-full text-xs px-2 py-1 border border-green-300 rounded process-connect" onchange="syncPreviewTable()">
+                    `;
+                    cell.appendChild(inputDiv);
+                }
+                // Remove return_to input if exists (process uses connect_to)
+                if (returnInput) {
+                    returnInput.closest('div').remove();
+                }
+            } else if (value === 'start') {
+                if (!connectToInput) {
+                    const inputDiv = document.createElement('div');
+                    inputDiv.className = 'mt-2';
+                    inputDiv.innerHTML = `
+                        <input type="text" name="connect_to_${rowNumber}_${colIndex}" placeholder="Hubungkan ke nomor (contoh: 2,3)" class="w-full text-xs px-2 py-1 border border-blue-300 rounded start-connect" onchange="syncPreviewTable()">
+                    `;
+                    cell.appendChild(inputDiv);
+                }
+                // Remove return_to input if exists (start uses connect_to)
+                if (returnInput) {
+                    returnInput.closest('div').remove();
+                }
+            } else {
+                // Remove both inputs for empty selection
+                if (returnInput) {
+                    returnInput.closest('div').remove();
+                }
+                if (connectToInput) {
+                    connectToInput.closest('div').remove();
+                }
+            }
+
+            syncPreviewTable();
+        }
+
+        function syncPreviewTable() {
+            const editorRows = document.querySelectorAll('#editor-tabel tbody tr');
+            const pagesContainer = document.getElementById('pages-container');
+            pagesContainer.innerHTML = '';
+
+            // Recalculate rows per page based on current content
+            const UPDATED_ROWS_PER_PAGE = calculateRowsPerPage();
+
+            const processedRowsData = [];
+
+            editorRows.forEach((row, rowIndex) => {
+                const cells = row.querySelectorAll('td');
+                const rowData = {
+                    number: rowIndex + 1,
+                    uraianKegiatan: '',
+                    pelaksanas: [],
+                    kelengkapan: '',
+                    waktu: '',
+                    output: '',
+                    keterangan: '',
+                };
+
+                cells.forEach((cell, cellIndex) => {
+                    const select = cell.querySelector('select');
+                    const textarea = cell.querySelector('textarea');
+                    const returnInput = cell.querySelector('input[name^="return_to_"]');
+                    const connectToInput = cell.querySelector('input[name^="connect_to_"]');
+
+                    if (cellIndex === 1) {
+                        rowData.uraianKegiatan = textarea ? textarea.value : '';
+                    } else if (cellIndex >= 2 && cellIndex < 2 + jumlahPelaksana) {
+                        const pelaksanaIndex = cellIndex - 2;
+
+                        // Dapatkan nomor berurutan dari sistem symbolOrder
+                        let sequentialNumber = 0;
+                        if (select && select.value && select.value !== '') {
+                            const rowNumber = rowIndex + 1;
+                            const colIndex = pelaksanaIndex;
+                            const key = `${rowNumber}_${colIndex}`;
+                            const symbolOrderItem = symbolOrder.find((item) => item.key === key);
+                            if (symbolOrderItem) {
+                                sequentialNumber = symbolOrderItem.number;
+                            }
+                        }
+
+                        rowData.pelaksanas[pelaksanaIndex] = {
+                            value: select ? select.value : '',
+                            returnTo: returnInput ? returnInput.value : '',
+                            connectTo: connectToInput ? connectToInput.value : '',
+                            sequentialNumber: sequentialNumber,
+                            rowNumber: rowIndex + 1,
+                            colIndex: pelaksanaIndex,
+                        };
+                    } else if (cellIndex === 2 + jumlahPelaksana) {
+                        rowData.kelengkapan = textarea ? textarea.value : '';
+                    } else if (cellIndex === 3 + jumlahPelaksana) {
+                        rowData.waktu = textarea ? textarea.value : '';
+                    } else if (cellIndex === 4 + jumlahPelaksana) {
+                        rowData.output = textarea ? textarea.value : '';
+                    } else if (cellIndex === 5 + jumlahPelaksana) {
+                        rowData.keterangan = textarea ? textarea.value : '';
+                    }
+                });
+
+                processedRowsData.push(rowData);
+            });
+
+            const pages = [];
+            for (let i = 0; i < processedRowsData.length; i += UPDATED_ROWS_PER_PAGE) {
+                const pageRows = processedRowsData.slice(i, i + UPDATED_ROWS_PER_PAGE);
+                pages.push({
+                    number: Math.floor(i / UPDATED_ROWS_PER_PAGE) + 1,
+                    rows: pageRows,
+                    needsConnector: i + UPDATED_ROWS_PER_PAGE < processedRowsData.length,
+                });
+            }
+
+            pages.forEach((page, pageIndex) => {
+                const pageDiv = createPageElement(page, pageIndex === pages.length - 1);
+                pagesContainer.appendChild(pageDiv);
+            });
+
+            setTimeout(() => {
+                drawAllPageConnections();
+                debouncedAutoScale();
+            }, 200);
+        }
+
+        function createPageElement(page, isLastPage) {
+            const pageDiv = document.createElement('div');
+            pageDiv.className = 'page-preview';
+            pageDiv.id = `page-${page.number}`;
+
+            // Create table header
+            const tableHeader = `
+                <colgroup>
+                    <col style="width: 50px" />
+                    <col style="width: 300px" />
+                    ${Array(jumlahPelaksana).fill('<col style="width: 120px" />').join('')}
+                    <col style="width: 125px" />
+                    <col style="width: 125px" />
+                    <col style="width: 125px" />
+                    <col style="width: 125px" />
+                </colgroup>
                 <thead>
-                    <tr class="text-center font-semibold">
-                        <th rowspan="2" class="border border-black px-2 py-1 align-middle">No</th>
-                        <th rowspan="2" class="border border-black px-2 py-1 align-middle">Uraian Kegiatan</th>
-                        <th colspan="${pelaksanas.length}" class="border border-black px-2 py-1">Pelaksana</th>
-                        <th colspan="3" class="border border-black px-2 py-1">Mutu Baku</th>
-                        <th rowspan="2" class="border border-black px-2 py-1">Keterangan</th>
+                    <tr class="bg-gray-100 text-center font-semibold">
+                        <th rowspan="2" class="border border-gray-400 px-2 py-1 align-middle">No</th>
+                        <th rowspan="2" class="border border-gray-400 px-2 py-1 align-middle">Uraian Kegiatan</th>
+                        <th colspan="${jumlahPelaksana}" class="border border-gray-400 px-2 py-1">Pelaksana</th>
+                        <th colspan="3" class="border border-gray-400 px-2 py-1">Mutu Baku</th>
+                        <th rowspan="2" class="border border-gray-400 px-2 py-1">Keterangan</th>
                     </tr>
-                    <tr class="text-center">
-                        ${pelaksanas.map(p => `<th class="border border-black px-2 py-1">${p.isi}</th>`).join('')}
-                        <th class="border border-black px-2 py-1">Kelengkapan</th>
-                        <th class="border border-black px-2 py-1">Waktu</th>
-                        <th class="border border-black px-2 py-1">Output</th>
+                    <tr class="bg-gray-100 text-center">
+                        ${(() => {
+                            const pelaksanas = @json($esop->pelaksanas);
+                            return pelaksanas
+                                .map(
+                                    (pelaksana) => `<th class="border border-gray-400 px-2 py-1">${pelaksana.isi}</th>`,
+                                )
+                                .join('');
+                        })()}
+                        <th class="border border-gray-400 px-2 py-1">Kelengkapan</th>
+                        <th class="border border-gray-400 px-2 py-1">Waktu</th>
+                        <th class="border border-gray-400 px-2 py-1">Output</th>
                     </tr>
                 </thead>
             `;
 
-            let bodyHTML = '<tbody>';
+            // Create table body
+            let tableBody = '<tbody>';
 
-            // Add header connector for page > 1
-            if (pageNum > 1) {
-                bodyHTML += createHeaderConnectorRow(flows, pelaksanas, pageNum, window.globalFlowData || []);
+            // Add connector row for continuation pages
+            if (page.number > 1) {
+                // Get all processed data to find the last active symbol from previous pages
+                const allRowsData = [];
+                const editorRows = document.querySelectorAll('#editor-tabel tbody tr');
+                editorRows.forEach((row, rowIndex) => {
+                    const cells = row.querySelectorAll('td');
+                    const rowData = { pelaksanas: [] };
+
+                    cells.forEach((cell, cellIndex) => {
+                        const select = cell.querySelector('select');
+                        if (cellIndex >= 2 && cellIndex < 2 + jumlahPelaksana) {
+                            const pelaksanaIndex = cellIndex - 2;
+                            rowData.pelaksanas[pelaksanaIndex] = {
+                                value: select ? select.value : '',
+                            };
+                        }
+                    });
+                    allRowsData.push(rowData);
+                });
+
+                const rowsPerPage = ROWS_PER_PAGE; // Use dynamic calculation
+                const previousPageLastRowIndex = (page.number - 1) * rowsPerPage - 1;
+                let connectorColumn = 0;
+
+                // Find the last active symbol from previous pages
+                for (let rowIndex = previousPageLastRowIndex; rowIndex >= 0; rowIndex--) {
+                    if (allRowsData[rowIndex] && allRowsData[rowIndex].pelaksanas) {
+                        for (let i = allRowsData[rowIndex].pelaksanas.length - 1; i >= 0; i--) {
+                            if (allRowsData[rowIndex].pelaksanas[i] && allRowsData[rowIndex].pelaksanas[i].value) {
+                                connectorColumn = i;
+                                break;
+                            }
+                        }
+                        if (
+                            connectorColumn > 0 ||
+                            (allRowsData[rowIndex].pelaksanas[0] && allRowsData[rowIndex].pelaksanas[0].value)
+                        ) {
+                            break;
+                        }
+                    }
+                }
+
+                tableBody += createConnectorRowHTML(connectorColumn);
             }
 
-            // Add flow rows
-            flows.forEach((flow, index) => {
-                const actualRowNum = (pageNum - 1) * 7 + index + 1;
-                bodyHTML += createFlowRow(flow, actualRowNum, pelaksanas);
+            // Add regular rows
+            page.rows.forEach((rowData) => {
+                tableBody += createRowHTML(rowData);
             });
 
-            // Add footer connector (only if not the last page)
-            if (pageNum < totalPages) {
-                bodyHTML += createFooterConnectorRow(flows, pelaksanas);
+            // Add connector row for pages that continue to next page
+            if (page.needsConnector && !isLastPage) {
+                // Find the last active symbol from current page
+                let connectorColumn = 0;
+                for (let rowIndex = page.rows.length - 1; rowIndex >= 0; rowIndex--) {
+                    const rowData = page.rows[rowIndex];
+                    if (rowData && rowData.pelaksanas) {
+                        for (let i = rowData.pelaksanas.length - 1; i >= 0; i--) {
+                            if (rowData.pelaksanas[i] && rowData.pelaksanas[i].value) {
+                                connectorColumn = i;
+                                break;
+                            }
+                        }
+                        if (connectorColumn > 0 || (rowData.pelaksanas[0] && rowData.pelaksanas[0].value)) {
+                            break;
+                        }
+                    }
+                }
+
+                tableBody += createConnectorRowHTML(connectorColumn);
             }
 
-            bodyHTML += '</tbody>';
+            tableBody += '</tbody>';
 
             pageDiv.innerHTML = `
-                <div class="main-content rounded-sm bg-white p-4 shadow-sm">
-                    <div class="table-container" style="position: relative;">
-                        <canvas class="page-canvas pointer-events-none absolute top-0 left-0 z-10" id="canvas-page-${pageNum}"></canvas>
-                        <table class="flow-table border border-gray-400 text-sm text-gray-800" style="width: 100%;">
-                            ${colGroupHTML}
-                            ${headerHTML}
-                            ${bodyHTML}
-                        </table>
-                    </div>
-                </div>
+                <table class="flow-table border border-gray-400 text-sm text-gray-800">
+                    ${tableHeader}
+                    ${tableBody}
+                </table>
+                <canvas class="page-canvas" id="canvas-page-${page.number}"></canvas>
+                <div class="page-number">Halaman ${page.number}</div>
             `;
 
             return pageDiv;
         }
 
-        function createHeaderConnectorRow(flows, pelaksanas, pageNum, allFlowData) {
-            // Find the column where connector should be placed (same as last active from previous page)
-            let connectorColumn = 0;
-
-            // Calculate which flows belong to previous pages
-            const rowsPerPage = 7;
-            const previousPageLastRowIndex = (pageNum - 1) * rowsPerPage - 1;
-
-            // Find the last active symbol from previous pages
-            for (let rowIndex = previousPageLastRowIndex; rowIndex >= 0; rowIndex--) {
-                if (allFlowData[rowIndex] && allFlowData[rowIndex].symbols) {
-                    const symbolsArray = normalizeSymbolsArray(allFlowData[rowIndex].symbols);
-
-                    for (let i = symbolsArray.length - 1; i >= 0; i--) {
-                        if (symbolsArray[i] && symbolsArray[i] !== '') {
-                            connectorColumn = i;
-                            break;
-                        }
-                    }
-                    if (connectorColumn > 0 || (symbolsArray[0] && symbolsArray[0] !== '')) {
-                        break;
-                    }
-                }
-            }
-
+        function createRowHTML(rowData) {
             let pelaksanaHTML = '';
-            pelaksanas.forEach((pelaksana, index) => {
-                if (index === connectorColumn) {
-                    pelaksanaHTML += `
-                        <td class="border border-black px-2 py-1">
-                            <div class="symbol-preview header-connector">
-                                <svg class="connector-symbol-svg mx-auto" width="40" height="40" viewBox="0 0 40 40">
-                                    <polygon points="0,0 40,0 40,20 20,40 0,20"
-                                             fill="none"
-                                             stroke="#000"
-                                             stroke-width="2"/>
-                                </svg>
-                            </div>
-                        </td>
-                    `;
-                } else {
-                    pelaksanaHTML += `<td class="border border-black px-2 py-1"></td>`;
-                }
-            });
-
-            return `
-                <tr class="header-row">
-                    <td class="border border-black px-2 py-1"></td>
-                    <td class="border border-black px-2 py-1"></td>
-                    ${pelaksanaHTML}
-                    <td class="border border-black px-2 py-1"></td>
-                    <td class="border border-black px-2 py-1"></td>
-                    <td class="border border-black px-2 py-1"></td>
-                    <td class="border border-black px-2 py-1"></td>
-                </tr>
-            `;
-        }
-
-        function createFooterConnectorRow(flows, pelaksanas) {
-            // Find the last active column in current page flows
-            let connectorColumn = 0;
-
-            // Find the last active symbol from current page
-            for (let rowIndex = flows.length - 1; rowIndex >= 0; rowIndex--) {
-                const rowData = flows[rowIndex];
-                if (rowData && rowData.symbols) {
-                    const symbolsArray = normalizeSymbolsArray(rowData.symbols);
-
-                    for (let i = symbolsArray.length - 1; i >= 0; i--) {
-                        if (symbolsArray[i] && symbolsArray[i] !== '') {
-                            connectorColumn = i;
-                            break;
-                        }
-                    }
-                    if (connectorColumn > 0 || (symbolsArray[0] && symbolsArray[0] !== '')) {
-                        break;
-                    }
-                }
-            }
-
-            let pelaksanaHTML = '';
-            pelaksanas.forEach((pelaksana, index) => {
-                if (index === connectorColumn) {
-                    pelaksanaHTML += `
-                        <td class="border border-black px-2 py-1">
-                            <div class="symbol-preview footer-connector">
-                                <svg class="connector-symbol-svg mx-auto" width="40" height="40" viewBox="0 0 40 40">
-                                    <polygon points="0,0 40,0 40,20 20,40 0,20"
-                                             fill="none"
-                                             stroke="#000"
-                                             stroke-width="2"/>
-                                </svg>
-                            </div>
-                        </td>
-                    `;
-                } else {
-                    pelaksanaHTML += `<td class="border border-black px-2 py-1"></td>`;
-                }
-            });
-
-            return `
-                <tr class="footer-row">
-                    <td class="border border-black px-2 py-1"></td>
-                    <td class="border border-black px-2 py-1"></td>
-                    ${pelaksanaHTML}
-                    <td class="border border-black px-2 py-1"></td>
-                    <td class="border border-black px-2 py-1"></td>
-                    <td class="border border-black px-2 py-1"></td>
-                    <td class="border border-black px-2 py-1"></td>
-                </tr>
-            `;
-        }
-
-        function createFlowRow(flow, rowNumber, pelaksanas) {
-            let pelaksanaHTML = '';
-            pelaksanas.forEach((pelaksana, index) => {
-                // Normalize symbols and return_to arrays
-                const symbolsArray = flow && flow.symbols ? normalizeSymbolsArray(flow.symbols) : [];
-                const returnToArray = flow && flow.return_to ? normalizeSymbolsArray(flow.return_to) : [];
-
-                const savedSymbol = symbolsArray[index] || '';
-                const savedReturnTo = returnToArray[index] || '';
-
-                // Get sequential number from symbol ordering system
-                const key = `${rowNumber}_${index}`;
-                const symbolOrderItem = symbolOrder.find((item) => item.key === key);
-                const sequentialNumber = symbolOrderItem ? symbolOrderItem.number : '';
-
+            rowData.pelaksanas.forEach((pelaksana, index) => {
                 let symbolHTML = '';
-                if (savedSymbol === 'start') {
-                    symbolHTML = '<div class="mx-auto h-6 w-15 rounded-xl bg-blue-500"></div>';
-                } else if (savedSymbol === 'process') {
-                    symbolHTML = '<div class="mx-auto h-6 w-15 bg-green-500"></div>';
-                } else if (savedSymbol === 'decision') {
-                    symbolHTML = '<div class="mx-auto h-8 w-8 rotate-45 bg-yellow-400"></div>';
+                if (pelaksana.value === 'start') {
+                    symbolHTML = `<div class="w-15 h-6 bg-blue-500 rounded-xl mx-auto"></div>`;
+                } else if (pelaksana.value === 'process') {
+                    symbolHTML = `<div class="w-15 h-6 bg-green-500 mx-auto"></div>`;
+                } else if (pelaksana.value === 'decision') {
+                    symbolHTML = `<div class="w-8 h-8 bg-yellow-400 rotate-45 mx-auto"></div>`;
+                } else {
+                    symbolHTML = '';
+                }
+
+                // Add symbol number if symbol exists - gunakan nomor berurutan
+                if (symbolHTML && pelaksana.sequentialNumber > 0) {
+                    symbolHTML += `<div class="symbol-number">${pelaksana.sequentialNumber}</div>`;
                 }
 
                 pelaksanaHTML += `
-                    <td class="border border-black px-2 py-1" data-flow="${flow ? flow.id : ''}" data-pelaksana="${pelaksana.id}" data-return-to="${savedReturnTo}">
-                        <div class="symbol-preview" style="position: relative;">
-                            ${symbolHTML}
-                        </div>
+                    <td class="border border-gray-400 px-2 py-1">
+                        ${symbolHTML ? `<div class="symbol-preview relative px-2 py-1">${symbolHTML}</div>` : '<div class="px-2 py-1"></div>'}
                     </td>
                 `;
             });
 
             return `
-                <tr>
-                    <td class="border border-gray-400 px-2 py-1 text-center">${rowNumber}</td>
-                    <td class="border border-gray-400 px-2 py-1">${flow ? flow.uraian_kegiatan : ''}</td>
+                <tr class="page-break-avoid">
+                    <td class="border border-gray-400 px-2 py-1 text-center">${rowData.number}</td>
+                    <td class="border border-gray-400 px-2 py-1">
+                        <div class="px-2 py-1 text-sm min-h-[5rem] whitespace-pre-wrap">${rowData.uraianKegiatan}</div>
+                    </td>
                     ${pelaksanaHTML}
-                    <td class="border border-gray-400 px-2 py-1">${flow ? flow.kelengkapan : ''}</td>
-                    <td class="border border-gray-400 px-2 py-1">${flow ? flow.waktu : ''}</td>
-                    <td class="border border-gray-400 px-2 py-1">${flow ? flow.output : ''}</td>
-                    <td class="border border-gray-400 px-2 py-1">${flow ? flow.keterangan : ''}</td>
+                    <td class="border border-gray-400 px-2 py-1">
+                        <div class="px-2 py-1 text-sm min-h-[5rem] whitespace-pre-wrap">${rowData.kelengkapan}</div>
+                    </td>
+                    <td class="border border-gray-400 px-2 py-1">
+                        <div class="px-2 py-1 text-sm min-h-[5rem] whitespace-pre-wrap">${rowData.waktu}</div>
+                    </td>
+                    <td class="border border-gray-400 px-2 py-1">
+                        <div class="px-2 py-1 text-sm min-h-[5rem] whitespace-pre-wrap">${rowData.output}</div>
+                    </td>
+                    <td class="border border-gray-400 px-2 py-1">
+                        <div class="px-2 py-1 text-sm min-h-[5rem] whitespace-pre-wrap">${rowData.keterangan}</div>
+                    </td>
+                </tr>
+            `;
+        }
+
+        function createConnectorRowHTML(connectorColumn = 0) {
+            let pelaksanaHTML = '';
+            for (let i = 0; i < jumlahPelaksana; i++) {
+                if (i === connectorColumn) {
+                    pelaksanaHTML += `
+                        <td class="border border-gray-400 px-2 py-1">
+                            <div class="symbol-preview">
+                                <svg class="connector-symbol-svg" width="40" height="40" viewBox="0 0 40 40">
+                                    <polygon points="0,0 40,0 40,20 20,40 0,20"
+                                             fill="none"
+                                             stroke="#000"
+                                             stroke-width="2"/>
+                                </svg>
+                            </div>
+                        </td>
+                    `;
+                } else {
+                    pelaksanaHTML += `<td class="border border-gray-400 px-2 py-1"></td>`;
+                }
+            }
+
+            return `
+                <tr class="buffer-row">
+                    <td class="border border-gray-400 px-2 py-1"></td>
+                    <td class="border border-gray-400 px-2 py-1"></td>
+                    ${pelaksanaHTML}
+                    <td class="border border-gray-400 px-2 py-1"></td>
+                    <td class="border border-gray-400 px-2 py-1"></td>
+                    <td class="border border-gray-400 px-2 py-1"></td>
+                    <td class="border border-gray-400 px-2 py-1"></td>
                 </tr>
             `;
         }
 
         function drawAllPageConnections() {
-            const pages = document.querySelectorAll('.page-container');
+            const pages = document.querySelectorAll('.page-preview');
             pages.forEach((page, pageIndex) => {
                 const canvas = page.querySelector('.page-canvas');
                 if (canvas) {
@@ -1154,14 +2268,24 @@
             }
 
             // Deteksi mode print yang lebih akurat
-            const isPrinting = window.matchMedia && window.matchMedia('print').matches;
+            const isPrinting = document.body.classList.contains('printing');
             const isPrintPage = pageElement.classList.contains('print-full-size');
+
+            // Get editor rows and rows per page for multi-direction calculations
+            const editorRows = document.querySelectorAll('#editor-tabel tbody tr');
+            const rowsPerPage = getCurrentRowsPerPage();
 
             // Get current scale factor - HANYA untuk preview, NOT untuk print
             let scaleFactor = 1;
             if (!isPrinting && !isPrintPage) {
-                // For screen mode, no scaling needed since we're in print view
-                scaleFactor = 1;
+                const previewWrapper = document.getElementById('preview-wrapper');
+                if (previewWrapper) {
+                    const transform = previewWrapper.style.transform;
+                    const scaleMatch = transform.match(/scale\(([\d.]+)\)/);
+                    if (scaleMatch) {
+                        scaleFactor = parseFloat(scaleMatch[1]);
+                    }
+                }
             }
 
             // Dapatkan semua simbol dari halaman ini (div biasa dan SVG connector)
@@ -1171,10 +2295,17 @@
 
             if (symbols.length === 0) {
                 // Set canvas size berdasarkan mode
-                canvas.width = table.offsetWidth;
-                canvas.height = table.offsetHeight;
-                canvas.style.width = table.offsetWidth + 'px';
-                canvas.style.height = table.offsetHeight + 'px';
+                if (isPrinting || isPrintPage) {
+                    canvas.width = table.offsetWidth;
+                    canvas.height = table.offsetHeight;
+                    canvas.style.width = table.offsetWidth + 'px';
+                    canvas.style.height = table.offsetHeight + 'px';
+                } else {
+                    canvas.width = table.offsetWidth / scaleFactor;
+                    canvas.height = table.offsetHeight / scaleFactor;
+                    canvas.style.width = table.offsetWidth + 'px';
+                    canvas.style.height = table.offsetHeight + 'px';
+                }
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 return;
             }
@@ -1182,9 +2313,8 @@
             const centers = [];
             const tableRect = table.getBoundingClientRect();
 
-            console.log(`Processing page ${pageNumber} in ${isPrinting ? 'PRINT' : 'SCREEN'} mode`);
-
             symbols.forEach((el, index) => {
+                const rect = el.getBoundingClientRect();
                 const symbolPreview = el.parentElement;
                 const cell = symbolPreview.parentElement;
                 const row = cell.parentElement;
@@ -1192,7 +2322,7 @@
                 const cellIndex = Array.from(row.children).indexOf(cell);
 
                 // Check if this is a buffer row (connector symbol)
-                const isBufferRow = row.classList.contains('buffer-row') || row.classList.contains('header-row') || row.classList.contains('footer-row');
+                const isBufferRow = row.classList.contains('buffer-row');
                 let sequentialNumber = 0;
                 let isConnector = false;
 
@@ -1201,9 +2331,9 @@
                     sequentialNumber = -1; // Connector tidak punya nomor berurutan
                 } else {
                     // Dapatkan nomor berurutan dari sistem symbolOrder
-                    const pageRows = table.querySelectorAll('tbody tr:not(.buffer-row):not(.header-row):not(.footer-row)');
+                    const pageRows = table.querySelectorAll('tbody tr:not(.buffer-row)');
                     const rowInPage = Array.from(pageRows).indexOf(row);
-                    const rowsPerPage = 7;
+                    const rowsPerPage = ROWS_PER_PAGE;
                     const actualRowNumber = (pageNumber - 1) * rowsPerPage + rowInPage + 1;
                     const actualColIndex = cellIndex - 2; // Column index dalam pelaksana
                     const key = `${actualRowNumber}_${actualColIndex}`;
@@ -1216,10 +2346,17 @@
                     }
                 }
 
-                // Calculate coordinates - SAMA untuk print dan preview karena sudah dalam print layout
-                const rect = el.getBoundingClientRect();
-                let centerX = rect.left - tableRect.left + rect.width / 2;
-                let centerY = rect.top - tableRect.top + rect.height / 2;
+                // Calculate coordinates - BERBEDA untuk print vs preview
+                let centerX, centerY;
+                if (isPrinting || isPrintPage) {
+                    // Untuk print: gunakan koordinat relatif langsung tanpa scaling
+                    centerX = rect.left - tableRect.left + rect.width / 2;
+                    centerY = rect.top - tableRect.top + rect.height / 2;
+                } else {
+                    // Untuk preview: gunakan scaling
+                    centerX = (rect.left - tableRect.left + rect.width / 2) / scaleFactor;
+                    centerY = (rect.top - tableRect.top + rect.height / 2) / scaleFactor;
+                }
 
                 const center = {
                     element: el,
@@ -1234,18 +2371,29 @@
                 centers.push(center);
             });
 
-            // Set canvas size
-            canvas.width = table.offsetWidth;
-            canvas.height = table.offsetHeight;
-            canvas.style.width = table.offsetWidth + 'px';
-            canvas.style.height = table.offsetHeight + 'px';
+            // Set canvas size berdasarkan mode
+            if (isPrinting || isPrintPage) {
+                canvas.width = table.offsetWidth;
+                canvas.height = table.offsetHeight;
+                canvas.style.width = table.offsetWidth + 'px';
+                canvas.style.height = table.offsetHeight + 'px';
+            } else {
+                canvas.width = table.offsetWidth;
+                canvas.height = table.offsetHeight;
+                canvas.style.width = table.offsetWidth + 'px';
+                canvas.style.height = table.offsetHeight + 'px';
+            }
 
             // Clear canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Set drawing styles
+            // Set drawing styles - BERBEDA untuk print vs preview
             ctx.strokeStyle = '#000000';
-            ctx.lineWidth = 2; // Fixed width
+            if (isPrinting || isPrintPage) {
+                ctx.lineWidth = 2; // Fixed width untuk print
+            } else {
+                ctx.lineWidth = Math.max(2 * scaleFactor, 2); // Scaled width untuk preview
+            }
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
 
@@ -1262,27 +2410,85 @@
             // Sort sequential symbols by their number
             sequentialSymbols.sort((a, b) => a.sequentialNumber - b.sequentialNumber);
 
-            console.log(`Page ${pageNumber} - Sequential symbols:`, sequentialSymbols.map(s => ({
-                sequentialNumber: s.sequentialNumber,
-                x: s.x,
-                y: s.y,
-                symbolType: s.symbolType,
-                rowIndex: s.rowIndex,
-                cellIndex: s.cellIndex
-            })));
-
             // Draw connections between sequential symbols (following the order of selection)
-            const lineScale = 1; // Always 1 for print layout
+            const lineScale = isPrinting || isPrintPage ? 1 : scaleFactor;
             for (let i = 0; i < sequentialSymbols.length - 1; i++) {
                 const from = sequentialSymbols[i];
                 const to = sequentialSymbols[i + 1];
-                console.log(`Drawing Canvas connection from symbol ${from.sequentialNumber} (${from.x},${from.y}) to ${to.sequentialNumber} (${to.x},${to.y})`);
-                drawConnectionLine(ctx, from, to, lineScale);
+
+                let shouldSkipLine = false;
+
+                // Check if the 'from' symbol has multi-direction connections that target this 'to' symbol
+                const globalRowIndexFrom = (pageNumber - 1) * rowsPerPage + from.rowIndex;
+                if (globalRowIndexFrom < editorRows.length) {
+                    const originalRowFrom = editorRows[globalRowIndexFrom];
+                    const originalCellFrom = originalRowFrom ? originalRowFrom.children[from.cellIndex] : null;
+                    const connectToInputFrom = originalCellFrom
+                        ? originalCellFrom.querySelector('input[name^="connect_to_"]')
+                        : null;
+
+                    // Check if this specific 'to' symbol is in the multi-direction targets from 'from' symbol
+                    if (connectToInputFrom && connectToInputFrom.value && connectToInputFrom.value.trim()) {
+                        const targetNumbers = connectToInputFrom.value
+                            .split(',')
+                            .map((num) => parseInt(num.trim()))
+                            .filter((num) => !isNaN(num) && num > 0);
+
+                        // If this 'to' symbol is targeted by multi-direction from 'from', skip line
+                        if (targetNumbers.includes(to.sequentialNumber)) {
+                            shouldSkipLine = true;
+                        }
+                    }
+                }
+
+                // Also check if the 'to' symbol is targeted by ANY multi-direction from other symbols
+                if (!shouldSkipLine) {
+                    for (let j = 0; j < sequentialSymbols.length; j++) {
+                        const sourceSymbol = sequentialSymbols[j];
+                        if (sourceSymbol.sequentialNumber === to.sequentialNumber) continue; // Skip self
+
+                        const globalRowIndexSource = (pageNumber - 1) * rowsPerPage + sourceSymbol.rowIndex;
+                        if (globalRowIndexSource < editorRows.length) {
+                            const originalRowSource = editorRows[globalRowIndexSource];
+                            const originalCellSource = originalRowSource
+                                ? originalRowSource.children[sourceSymbol.cellIndex]
+                                : null;
+                            const connectToInputSource = originalCellSource
+                                ? originalCellSource.querySelector('input[name^="connect_to_"]')
+                                : null;
+
+                            if (
+                                connectToInputSource &&
+                                connectToInputSource.value &&
+                                connectToInputSource.value.trim()
+                            ) {
+                                const targetNumbers = connectToInputSource.value
+                                    .split(',')
+                                    .map((num) => parseInt(num.trim()))
+                                    .filter((num) => !isNaN(num) && num > 0);
+
+                                // If this 'to' symbol is targeted by multi-direction from any source, skip line
+                                if (targetNumbers.includes(to.sequentialNumber)) {
+                                    shouldSkipLine = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Draw normal black connection line only if not targeted by any multi-direction
+                if (!shouldSkipLine) {
+                    drawConnectionLine(ctx, from, to, lineScale);
+                }
             }
 
             // Handle connectors - connect them to the flow properly
             connectorSymbols.forEach((connector) => {
                 if (sequentialSymbols.length > 0) {
+                    // For page continuity connectors (like on page 2),
+                    // they should connect TO the next symbol, not FROM a previous symbol
+
                     // Check if this is a continuation connector (at top of page)
                     const isTopConnector =
                         connector.rowIndex === 0 ||
@@ -1311,11 +2517,17 @@
                     drawDecisionLineInPage(ctx, center, centers, pageNumber);
                 }
             });
+
+            // Draw multi direction lines for all symbols that support it
+            drawMultiDirectionLines(ctx, centers, pageNumber, lineScale);
         }
 
         // Helper function to find nearest sequential symbol for connector
         function findNearestSequentialSymbol(connector, sequentialSymbols) {
             if (sequentialSymbols.length === 0) return null;
+
+            // For connectors, we want to connect to the PREVIOUS symbol in the sequence
+            // to continue the flow, not just the nearest by distance
 
             // Find symbols that are BEFORE this connector row (above it)
             const symbolsAbove = sequentialSymbols.filter((symbol) => symbol.rowIndex < connector.rowIndex);
@@ -1362,75 +2574,136 @@
         }
 
         function drawDecisionLineInPage(ctx, decisionCenter, allCenters, pageNumber) {
-            // Get return_to value from the cell's data attribute
-            const cell = decisionCenter.element.closest('td');
-            const returnToValue = cell ? cell.getAttribute('data-return-to') : null;
+            // For now, only draw decision lines within the same page
+            // You can extend this to handle cross-page decision lines if needed
 
-            if (returnToValue && returnToValue !== '') {
-                const targetNumber = parseInt(returnToValue);
-                // Find target based on sequential number
-                let targetSymbol = allCenters.find((center) => center.sequentialNumber === targetNumber);
+            // Find the original input field to get return_to value
+            // This is simplified - you might need to adapt based on your data structure
+            const editorRows = document.querySelectorAll('#editor-tabel tbody tr');
 
-                if (targetSymbol) {
-                    // Draw decision line within this page with collision detection
-                    drawDecisionLineWithCollisionDetection(ctx, decisionCenter, targetSymbol, allCenters);
+            // Calculate which editor row this decision symbol corresponds to
+            const rowsPerPage = ROWS_PER_PAGE; // Use dynamic calculation
+            const pageRows = document.querySelectorAll(
+                `.page-preview:nth-child(${pageNumber}) tbody tr:not(.buffer-row)`,
+            );
+            const rowInPage = Array.from(pageRows).indexOf(decisionCenter.element.closest('tr'));
+            const globalRowIndex = (pageNumber - 1) * rowsPerPage + rowInPage;
+
+            if (globalRowIndex < editorRows.length) {
+                const originalRow = editorRows[globalRowIndex];
+                const originalCell = originalRow ? originalRow.children[decisionCenter.cellIndex] : null;
+                const returnInput = originalCell ? originalCell.querySelector('input[name^="return_to_"]') : null;
+
+                if (returnInput && returnInput.value) {
+                    const targetNumber = parseInt(returnInput.value);
+                    // Cari berdasarkan nomor berurutan, bukan globalNumber
+                    let targetSymbol = allCenters.find((center) => center.sequentialNumber === targetNumber);
+
+                    if (targetSymbol) {
+                        // Draw decision line within this page with collision detection
+                        drawDecisionLineWithCollisionDetection(ctx, decisionCenter, targetSymbol, allCenters, 1);
+                    }
                 }
             }
         }
 
-        function getSymbolType(element) {
-            if (element.classList.contains('bg-blue-500')) return 'start';
-            if (element.classList.contains('bg-green-500')) return 'process';
-            if (element.classList.contains('bg-yellow-400')) return 'decision';
-            if (element.classList.contains('connector-symbol-svg') || element.tagName === 'svg') return 'connector';
-            if (element.classList.contains('border-dashed')) return 'empty';
-            return 'unknown';
-        }
+        function drawDecisionLineWithCollisionDetection(ctx, decisionCenter, targetSymbol, allCenters, scaleX) {
+            const decisionType = getSymbolType(decisionCenter.element);
+            const targetType = getSymbolType(targetSymbol.element);
+            const decisionDim = getSymbolDimensions(decisionCenter.element, decisionType);
+            const targetDim = getSymbolDimensions(targetSymbol.element, targetType);
 
-        function getReturnTo(cell) {
-            const returnTo = cell.getAttribute('data-return-to');
-            return returnTo || null;
-        }
+            const horizontalOffset = Math.max(decisionDim.width / 2 + 10, 25);
+            const curveOffset = Math.max(horizontalOffset + 15, 40);
 
-        function getSymbolDimensions(element, symbolType) {
-            const actualWidth = element.offsetWidth;
-            const actualHeight = element.offsetHeight;
+            // Check for potential collision with main flow lines (black lines)
+            const useRightSide = shouldUseRightSideForDecisionLine(decisionCenter, targetSymbol, allCenters);
 
-            let expectedWidth, expectedHeight;
-            switch (symbolType) {
-                case 'start':
-                case 'process':
-                    expectedWidth = 40;
-                    expectedHeight = 24;
-                    break;
-                case 'decision':
-                    expectedWidth = 32;
-                    expectedHeight = 32;
-                    break;
-                case 'connector':
-                    expectedWidth = 40;
-                    expectedHeight = 40;
-                    break;
-                default:
-                    expectedWidth = 40;
-                    expectedHeight = 24;
-                    break;
+            // Deteksi mode print untuk styling yang berbeda
+            const isPrinting = document.body.classList.contains('printing');
+            const pageElement = decisionCenter.element.closest('.page-preview');
+            const isPrintPage = pageElement && pageElement.classList.contains('print-full-size');
+
+            ctx.save();
+            ctx.strokeStyle = '#ef4444';
+
+            // Set line width berdasarkan mode
+            if (isPrinting || isPrintPage) {
+                ctx.lineWidth = 2; // Fixed width untuk print
+            } else {
+                ctx.lineWidth = Math.max(2 * scaleX, 2); // Scaled width untuk preview
             }
 
-            return {
-                width: actualWidth || expectedWidth,
-                height: actualHeight || expectedHeight,
-            };
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            let startX, startY, endX, endY, midX;
+
+            if (useRightSide) {
+                // Draw on the right side to avoid collision
+                startX = decisionCenter.x + (decisionDim.width / 2 + 8);
+                startY = decisionCenter.y;
+                endX = targetSymbol.x + (targetDim.width / 2 + 8);
+                endY = targetSymbol.y;
+                midX = startX + curveOffset;
+            } else {
+                // Draw on the left side (original behavior)
+                startX = decisionCenter.x - (decisionDim.width / 2 + 8);
+                startY = decisionCenter.y;
+                endX = targetSymbol.x - (targetDim.width / 2 + 8);
+                endY = targetSymbol.y;
+                midX = startX - curveOffset;
+            }
+
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(midX, startY);
+            ctx.lineTo(midX, endY);
+            ctx.lineTo(endX, endY);
+            ctx.stroke();
+
+            drawPreviewArrow(ctx, midX, endY, endX, endY, scaleX, isPrinting || isPrintPage);
+
+            // Add "Tidak" text
+            const labelText = 'Tidak';
+
+            ctx.fillStyle = '#ef4444'; // Red color for "Tidak" text
+
+            // Set font size berdasarkan mode
+            if (isPrinting || isPrintPage) {
+                ctx.font = '12px Arial'; // Fixed font untuk print
+            } else {
+                ctx.font = `${Math.max(12 * scaleX, 8)}px Arial`; // Scaled font untuk preview
+            }
+
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            const textX = midX;
+            const textY = startY + (endY - startY) * 0.3;
+
+            // White background for text
+            const textMetrics = ctx.measureText(labelText);
+            const textWidth = textMetrics.width;
+            const textHeight = isPrinting || isPrintPage ? 15 : 15 * scaleX;
+
+            ctx.fillStyle = 'white';
+            ctx.fillRect(textX - textWidth / 2 - 2, textY - textHeight / 2 - 1, textWidth + 4, textHeight + 2);
+
+            ctx.fillStyle = '#ef4444';
+            ctx.fillText(labelText, textX, textY);
+
+            ctx.restore();
         }
 
         function shouldUseRightSideForDecisionLine(decisionCenter, targetSymbol, allCenters) {
-            // LOGIC: 
-            // Jika target symbol berada di KANAN decision symbol,
+            // LOGIC SESUAI PERMINTAAN USER:
+            // Jika target symbol (proses) berada di KANAN decision symbol,
             // maka garis merah keluar dari KIRI decision diamond
             if (targetSymbol.cellIndex > decisionCenter.cellIndex) {
                 return false; // false = left side
             }
-            // Jika target symbol berada di KIRI decision symbol,
+            // Jika target symbol (proses) berada di KIRI decision symbol,
             // maka garis merah keluar dari KANAN decision diamond
             else if (targetSymbol.cellIndex < decisionCenter.cellIndex) {
                 return true; // true = right side
@@ -1441,198 +2714,406 @@
             }
         }
 
-        // SVG Drawing Functions
-        function drawSVGConnectionLine(svg, from, to, pageNumber) {
-            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        function drawMultiDirectionLines(ctx, centers, pageNumber, lineScale) {
+            console.log(`Drawing multi-direction lines for page ${pageNumber}`);
+            // Find all symbols that have connect_to values (process, start, decision)
+            const editorRows = document.querySelectorAll('#editor-tabel tbody tr');
+            const rowsPerPage = getCurrentRowsPerPage(); // Use dynamic calculation
 
-            // Get symbol types and dimensions for proper padding
-            const fromType = getSymbolType(from.element);
-            const toType = getSymbolType(to.element);
-            const fromDim = getSymbolDimensions(from.element, fromType);
-            const toDim = getSymbolDimensions(to.element, toType);
+            centers.forEach((center) => {
+                if (
+                    (center.symbolType === 'process' ||
+                        center.symbolType === 'start' ||
+                        center.symbolType === 'decision') &&
+                    center.sequentialNumber > 0
+                ) {
+                    console.log(
+                        `Checking symbol ${center.sequentialNumber} (${center.symbolType}) for multi-direction connections`,
+                    );
+                    // Calculate which editor row this symbol corresponds to
+                    const pageRows = document.querySelectorAll(`#page-${pageNumber} tbody tr:not(.buffer-row)`);
+                    const rowInPage = Array.from(pageRows).indexOf(center.element.closest('tr'));
+                    const globalRowIndex = (pageNumber - 1) * rowsPerPage + rowInPage;
 
-            // Calculate dynamic padding based on symbol height
-            const fromPadding = fromDim.height / 2 + 8;
-            const toPadding = toDim.height / 2 + 8;
+                    console.log(
+                        `Symbol ${center.sequentialNumber}: rowInPage=${rowInPage}, globalRowIndex=${globalRowIndex}, rowsPerPage=${rowsPerPage}`,
+                    );
 
-            let startX = from.x;
-            let startY = from.y + fromPadding;
-            let endX = to.x;
-            let endY = to.y - toPadding;
+                    if (globalRowIndex < editorRows.length) {
+                        const originalRow = editorRows[globalRowIndex];
+                        const originalCell = originalRow ? originalRow.children[center.cellIndex] : null;
+                        const connectToInput = originalCell
+                            ? originalCell.querySelector('input[name^="connect_to_"]')
+                            : null;
 
-            let pathData;
+                        console.log(`Connect-to input for symbol ${center.sequentialNumber}:`, connectToInput?.value);
 
-            // Check if symbols are on the same row (horizontal alignment)
-            const isSameRow = Math.abs(from.rowIndex - to.rowIndex) === 0;
+                        if (connectToInput && connectToInput.value) {
+                            // Parse comma-separated values
+                            const targetNumbers = connectToInput.value
+                                .split(',')
+                                .map((num) => parseInt(num.trim()))
+                                .filter((num) => !isNaN(num) && num > 0);
 
-            if (isSameRow) {
-                // Same row: draw straight horizontal line
-                const isFromLeftToRight = from.x < to.x;
+                            console.log(`Symbol ${center.sequentialNumber} connects to:`, targetNumbers);
 
-                let lineStartX, lineEndX, horizontalY;
+                            // Draw lines to each target with stacking
+                            targetNumbers.forEach((targetNumber, index) => {
+                                // First, try to find target symbol in current page
+                                let targetSymbol = centers.find((c) => c.sequentialNumber === targetNumber);
 
-                if (isFromLeftToRight) {
-                    // From left to right: arrow points right (→)
-                    lineStartX = from.x + fromDim.width / 2 + 8;
-                    lineEndX = to.x - toDim.width / 2 - 8;
-                    horizontalY = from.y;
-                } else {
-                    // From right to left: arrow points left (←)
-                    lineStartX = from.x - fromDim.width / 2 - 8;
-                    lineEndX = to.x + toDim.width / 2 + 8;
-                    horizontalY = from.y;
-                }
+                                // If not found in current page, search across all pages using symbolOrder
+                                if (!targetSymbol) {
+                                    console.log(
+                                        `Target symbol ${targetNumber} not found in current page, searching across all pages`,
+                                    );
 
-                // Straight horizontal line
-                pathData = `M ${lineStartX} ${horizontalY} L ${lineEndX} ${horizontalY}`;
-            } else {
-                // Different rows: L-shaped connection (90 degree angles)
-                if (Math.abs(from.x - to.x) < 5) {
-                    // Same column: straight vertical line
-                    pathData = `M ${startX} ${startY} L ${endX} ${endY}`;
-                } else {
-                    // Different columns: L-shaped path with 90 degree turns
-                    const midY = (startY + endY) / 2;
+                                    // Find target in symbolOrder first
+                                    const targetOrderItem = symbolOrder.find((item) => item.number === targetNumber);
+                                    if (targetOrderItem) {
+                                        console.log(`Found target ${targetNumber} in symbolOrder:`, targetOrderItem);
 
-                    pathData = `M ${startX} ${startY} 
-                               L ${startX} ${midY}
-                               L ${endX} ${midY}
-                               L ${endX} ${endY}`;
-                }
-            }
+                                        // Calculate which page the target is on
+                                        const targetPage = Math.ceil(targetOrderItem.rowNumber / rowsPerPage);
+                                        console.log(`Target symbol ${targetNumber} should be on page ${targetPage}`);
 
-            path.setAttribute('d', pathData);
-            path.setAttribute('stroke', '#000000');
-            path.setAttribute('stroke-width', '2');
-            path.setAttribute('fill', 'none');
-            path.setAttribute('stroke-linejoin', 'round');
-            path.setAttribute('stroke-linecap', 'round');
-            path.setAttribute('marker-end', `url(#arrowhead-${pageNumber})`);
+                                        // Find the target symbol element in the target page
+                                        const targetPageElement = document.querySelector(`#page-${targetPage}`);
+                                        if (targetPageElement) {
+                                            const targetTable = targetPageElement.querySelector('.flow-table');
+                                            const targetSymbolElements = targetTable.querySelectorAll(
+                                                '.symbol-preview > div:first-child',
+                                            );
 
-            // Add print-specific styling
-            path.style.strokeOpacity = '1';
-            path.style.webkitPrintColorAdjust = 'exact';
-            path.style.colorAdjust = 'exact';
-            path.style.printColorAdjust = 'exact';
+                                            targetSymbolElements.forEach((symbolElement) => {
+                                                if (!targetSymbol) {
+                                                    const symbolPreview = symbolElement.parentElement;
+                                                    const symbolNumberElement =
+                                                        symbolPreview.querySelector('.symbol-number');
 
-            svg.appendChild(path);
-        }
+                                                    if (
+                                                        symbolNumberElement &&
+                                                        parseInt(symbolNumberElement.textContent) === targetNumber
+                                                    ) {
+                                                        const rect = symbolElement.getBoundingClientRect();
+                                                        const currentPageTable = document.querySelector(
+                                                            `#page-${pageNumber} .flow-table`,
+                                                        );
+                                                        const currentTableRect =
+                                                            currentPageTable.getBoundingClientRect();
 
-        function drawDecisionLineInPage(ctx, decisionCenter, allCenters, pageNumber) {
-            const cell = decisionCenter.element.closest('td');
-            const returnTo = getReturnTo(cell);
+                                                        // Calculate relative coordinates to current page
+                                                        const centerX =
+                                                            rect.left - currentTableRect.left + rect.width / 2;
+                                                        const centerY =
+                                                            rect.top - currentTableRect.top + rect.height / 2;
 
-            if (returnTo) {
-                const targetSymbol = allCenters.find(center => 
-                    center.sequentialNumber === parseInt(returnTo)
-                );
+                                                        targetSymbol = {
+                                                            element: symbolElement,
+                                                            x: centerX,
+                                                            y: centerY,
+                                                            sequentialNumber: targetNumber,
+                                                            symbolType: getSymbolType(symbolElement),
+                                                            isConnector: false,
+                                                        };
 
-                if (targetSymbol) {
-                    // Get symbol dimensions for proper offset calculation
-                    const decisionType = getSymbolType(decisionCenter.element);
-                    const targetType = getSymbolType(targetSymbol.element);
-                    const decisionDim = getSymbolDimensions(decisionCenter.element, decisionType);
-                    const targetDim = getSymbolDimensions(targetSymbol.element, targetType);
+                                                        console.log(
+                                                            `Created cross-page target symbol ${targetNumber}:`,
+                                                            targetSymbol,
+                                                        );
+                                                    }
+                                                }
+                                            });
+                                        }
+                                    }
+                                }
 
-                    // Determine which side to use based on target position
-                    const useRightSide = shouldUseRightSideForDecisionLine(decisionCenter, targetSymbol, allCenters);
-
-                    let startX, startY, endX, endY, midX;
-                    const horizontalOffset = Math.max(decisionDim.width / 2 + 10, 25);
-                    const curveOffset = Math.max(horizontalOffset + 15, 40);
-
-                    if (useRightSide) {
-                        // Draw on the right side
-                        startX = decisionCenter.x + (decisionDim.width / 2 + 8);
-                        startY = decisionCenter.y;
-                        endX = targetSymbol.x + (targetDim.width / 2 + 8);
-                        endY = targetSymbol.y;
-                        midX = startX + curveOffset;
-                    } else {
-                        // Draw on the left side
-                        startX = decisionCenter.x - (decisionDim.width / 2 + 8);
-                        startY = decisionCenter.y;
-                        endX = targetSymbol.x - (targetDim.width / 2 + 8);
-                        endY = targetSymbol.y;
-                        midX = startX - curveOffset;
+                                if (targetSymbol) {
+                                    console.log(
+                                        `Drawing multi-direction line from symbol ${center.sequentialNumber} to ${targetSymbol.sequentialNumber}`,
+                                    );
+                                    drawStackedMultiDirectionLine(
+                                        ctx,
+                                        center,
+                                        targetSymbol,
+                                        index,
+                                        lineScale,
+                                        center.symbolType,
+                                    );
+                                } else {
+                                    console.log(`Target symbol ${targetNumber} not found for multi-direction line`);
+                                }
+                            });
+                        }
                     }
-
-                    // Set line style for decision line
-                    ctx.strokeStyle = '#dc2626'; // Red color for decision lines
-                    ctx.lineWidth = 2;
-                    ctx.lineCap = 'round';
-                    ctx.lineJoin = 'round';
-                    ctx.setLineDash([5, 5]); // Dashed line
-
-                    // Draw L-shaped path with 90 degree angles
-                    ctx.beginPath();
-                    ctx.moveTo(startX, startY);
-                    ctx.lineTo(midX, startY);
-                    ctx.lineTo(midX, endY);
-                    ctx.lineTo(endX, endY);
-                    ctx.stroke();
-
-                    // Draw decision arrow (red)
-                    drawDecisionArrowhead(ctx, { x: midX, y: endY }, { x: endX, y: endY });
-
-                    // Reset line dash for future drawings
-                    ctx.setLineDash([]);
-
-                    // Add "Tidak" text label
-                    const textX = midX;
-                    const textY = startY + (endY - startY) * 0.3;
-
-                    // Draw white background for text readability
-                    ctx.fillStyle = 'white';
-                    ctx.fillRect(textX - 20, textY - 8, 40, 16);
-
-                    // Draw text
-                    ctx.fillStyle = '#dc2626';
-                    ctx.font = 'bold 12px Arial, sans-serif';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText('Tidak', textX, textY);
                 }
-            }
+            });
         }
 
-        function drawDecisionArrowhead(ctx, start, end) {
-            // Calculate arrow direction
-            const dx = end.x - start.x;
-            const dy = end.y - start.y;
-            const length = Math.sqrt(dx * dx + dy * dy);
+        function drawMultiDirectionLine(ctx, fromSymbol, toSymbol, connectionIndex, scaleX) {
+            // Deteksi mode print
+            const isPrinting = document.body.classList.contains('printing');
+            const pageElement = fromSymbol.element.closest('.page-preview');
+            const isPrintPage = pageElement && pageElement.classList.contains('print-full-size');
 
-            if (length === 0) return;
+            ctx.save();
 
-            // Normalize direction
-            const unitX = dx / length;
-            const unitY = dy / length;
+            // Use different colors for multiple connections to distinguish them
+            const colors = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
+            ctx.strokeStyle = colors[connectionIndex % colors.length];
 
-            // Arrow dimensions
-            const arrowLength = 8;
-            const arrowWidth = 6;
+            // Set line width berdasarkan mode
+            if (isPrinting || isPrintPage) {
+                ctx.lineWidth = 2;
+            } else {
+                ctx.lineWidth = Math.max(2 * scaleX, 2);
+            }
 
-            // Calculate arrowhead points
-            const arrowBaseX = end.x - arrowLength * unitX;
-            const arrowBaseY = end.y - arrowLength * unitY;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
 
-            // Perpendicular vector for arrow wings
-            const perpX = -unitY;
-            const perpY = unitX;
+            // Calculate connection points
+            const fromDim = getSymbolDimensions(fromSymbol.element, fromSymbol.symbolType);
+            const toDim = getSymbolDimensions(toSymbol.element, toSymbol.symbolType);
 
-            const wing1X = arrowBaseX + (arrowWidth / 2) * perpX;
-            const wing1Y = arrowBaseY + (arrowWidth / 2) * perpY;
-            const wing2X = arrowBaseX - (arrowWidth / 2) * perpX;
-            const wing2Y = arrowBaseY - (arrowWidth / 2) * perpY;
+            // Different approach for multi-direction lines to avoid main flow
+            const offsetY = connectionIndex * 12; // Offset each line vertically more
+            const offsetX = connectionIndex % 2 === 0 ? 15 : -15; // Alternate left/right
 
-            // Draw red arrowhead
-            ctx.strokeStyle = '#dc2626';
+            let startX = fromSymbol.x + fromDim.width / 2 + offsetX;
+            let startY = fromSymbol.y + offsetY;
+            let endX = toSymbol.x - toDim.width / 2 + offsetX;
+            let endY = toSymbol.y;
+
+            // Draw the connection line with curves to distinguish from main flow
             ctx.beginPath();
-            ctx.moveTo(end.x, end.y);
-            ctx.lineTo(wing1X, wing1Y);
-            ctx.moveTo(end.x, end.y);
-            ctx.lineTo(wing2X, wing2Y);
+            ctx.moveTo(startX, startY);
+
+            if (Math.abs(toSymbol.sequentialNumber - fromSymbol.sequentialNumber) === 1) {
+                // If connecting to immediate next symbol, draw curved line to avoid main flow
+                const controlPoint1X = startX + 40;
+                const controlPoint1Y = startY + 20 + connectionIndex * 10;
+                const controlPoint2X = endX - 40;
+                const controlPoint2Y = endY + 20 + connectionIndex * 10;
+
+                ctx.bezierCurveTo(controlPoint1X, controlPoint1Y, controlPoint2X, controlPoint2Y, endX, endY);
+            } else {
+                // For non-sequential connections, use L-shaped line
+                const midX = startX + (endX - startX) * 0.7;
+                ctx.lineTo(midX, startY);
+                ctx.lineTo(midX, endY);
+                ctx.lineTo(endX, endY);
+            }
+
             ctx.stroke();
+
+            // Draw arrow at the end
+            drawMultiDirectionArrow(ctx, endX, endY, toSymbol, scaleX, isPrinting || isPrintPage);
+
+            // Add connection label
+            const labelColors = ['Hijau', 'Biru', 'Kuning', 'Merah', 'Ungu', 'Cyan'];
+            const labelText = `${labelColors[connectionIndex % labelColors.length]}`;
+
+            ctx.fillStyle = ctx.strokeStyle;
+            if (isPrinting || isPrintPage) {
+                ctx.font = '10px Arial';
+            } else {
+                ctx.font = `${Math.max(10 * scaleX, 8)}px Arial`;
+            }
+
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            // Position label in middle of line
+            const midX = startX + (endX - startX) * 0.5;
+            const midY = startY + (endY - startY) * 0.5;
+
+            // White background for label
+            const textMetrics = ctx.measureText(labelText);
+            const textWidth = textMetrics.width;
+            const textHeight = isPrinting || isPrintPage ? 12 : 12 * scaleX;
+
+            ctx.fillStyle = 'white';
+            ctx.fillRect(midX - textWidth / 2 - 2, midY - textHeight / 2 - 1, textWidth + 4, textHeight + 2);
+
+            ctx.fillStyle = ctx.strokeStyle;
+            ctx.fillText(labelText, midX, midY);
+
+            ctx.restore();
+        }
+
+        function drawMultiDirectionArrow(ctx, x, y, toSymbol, scaleX, isPrint) {
+            const arrowSize = isPrint ? 8 : Math.max(8 * scaleX, 6);
+
+            ctx.save();
+            ctx.fillStyle = ctx.strokeStyle; // Use same color as line
+
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x - arrowSize, y - arrowSize / 2);
+            ctx.lineTo(x - arrowSize, y + arrowSize / 2);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        function drawStackedMultiDirectionLine(ctx, fromSymbol, toSymbol, connectionIndex, scaleX, symbolType) {
+            // Deteksi mode print
+            const isPrinting = document.body.classList.contains('printing');
+            const pageElement = fromSymbol.element.closest('.page-preview');
+            const isPrintPage = pageElement && pageElement.classList.contains('print-full-size');
+
+            ctx.save();
+
+            // Use red color for all multi-direction lines (as shown in example)
+            ctx.strokeStyle = '#ef4444'; // Red color like in the example
+
+            // Set line width berdasarkan mode
+            if (isPrinting || isPrintPage) {
+                ctx.lineWidth = 3; // Slightly thicker like in example
+            } else {
+                ctx.lineWidth = Math.max(3 * scaleX, 3);
+            }
+
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            // Calculate connection points
+            const fromDim = getSymbolDimensions(fromSymbol.element, fromSymbol.symbolType);
+            const toDim = getSymbolDimensions(toSymbol.element, toSymbol.symbolType);
+
+            // Konfigurasi untuk garis horizontal tunggal yang bercabang vertikal
+            const horizontalDistance = 60; // Jarak horizontal dari symbol source
+
+            // Start point - dari kanan tengah symbol source
+            const startX = fromSymbol.x + fromDim.width / 2;
+            const startY = fromSymbol.y;
+
+            // End point - ke atas tengah symbol target dengan jarak sedikit
+            const endX = toSymbol.x;
+            const endY = toSymbol.y - toDim.height / 2 - 8; // Tambah jarak 8px
+
+            // Titik cabang horizontal (satu garis ke kanan)
+            const branchX = startX + horizontalDistance;
+            const branchY = startY;
+
+            // Draw the path
+            ctx.beginPath();
+
+            // Garis horizontal ke kanan dari symbol source
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(branchX, branchY);
+
+            // Dari titik cabang, garis horizontal ke kolom target
+            ctx.moveTo(branchX, branchY);
+            ctx.lineTo(endX, branchY);
+
+            // Garis vertikal ke bawah menuju symbol target
+            ctx.lineTo(endX, endY);
+
+            ctx.stroke();
+
+            // Draw arrow using the same function as black arrows
+            drawPreviewArrow(ctx, endX, branchY, endX, endY, scaleX, isPrinting || isPrintPage);
+
+            // Add connection index label on the horizontal segment
+            const labelText = `${connectionIndex + 1}`;
+
+            ctx.fillStyle = '#ef4444'; // Same red color
+            if (isPrinting || isPrintPage) {
+                ctx.font = 'bold 10px Arial';
+            } else {
+                ctx.font = `bold ${Math.max(10 * scaleX, 8)}px Arial`;
+            }
+
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            // Position label in the middle of horizontal line
+            const labelX = startX + horizontalDistance / 2;
+            const labelY = startY - 8;
+
+            // White background for label
+            const textMetrics = ctx.measureText(labelText);
+            const textWidth = textMetrics.width;
+            const textHeight = isPrinting || isPrintPage ? 12 : 12 * scaleX;
+
+            ctx.fillStyle = 'white';
+            ctx.fillRect(labelX - textWidth / 2 - 2, labelY - textHeight / 2 - 1, textWidth + 4, textHeight + 2);
+
+            ctx.fillStyle = '#ef4444';
+            ctx.fillText(labelText, labelX, labelY);
+
+            ctx.restore();
+        }
+
+        function drawStackedArrow(ctx, x, y, scaleX, isPrint, direction = 'right') {
+            const arrowSize = isPrint ? 8 : Math.max(8 * scaleX, 6);
+
+            ctx.save();
+            ctx.fillStyle = ctx.strokeStyle; // Use same color as line
+
+            ctx.beginPath();
+
+            if (direction === 'down') {
+                // Arrow pointing down (into symbol from above)
+                ctx.moveTo(x, y);
+                ctx.lineTo(x - arrowSize / 2, y - arrowSize);
+                ctx.lineTo(x + arrowSize / 2, y - arrowSize);
+            } else {
+                // Default right arrow
+                ctx.moveTo(x, y);
+                ctx.lineTo(x - arrowSize, y - arrowSize / 2);
+                ctx.lineTo(x - arrowSize, y + arrowSize / 2);
+            }
+
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        function getSymbolType(element) {
+            if (element.classList.contains('bg-blue-500')) return 'start';
+            if (element.classList.contains('bg-green-500')) return 'process';
+            if (element.classList.contains('bg-yellow-400')) return 'decision';
+            if (element.classList.contains('connector-symbol-svg')) return 'connector'; // Connector SVG symbol in buffer row
+            if (element.classList.contains('border-dashed')) return 'empty';
+            return 'unknown';
+        }
+
+        function getSymbolDimensions(element, symbolType) {
+            // Get actual dimensions or fallback to expected dimensions based on type
+            const actualWidth = element.offsetWidth;
+            const actualHeight = element.offsetHeight;
+
+            // Fallback dimensions based on CSS classes
+            let expectedWidth, expectedHeight;
+            switch (symbolType) {
+                case 'start':
+                case 'process':
+                case 'empty':
+                    expectedWidth = 60; // w-15 = 3.75rem = 60px
+                    expectedHeight = 24; // h-6 = 1.5rem = 24px
+                    break;
+                case 'decision':
+                    expectedWidth = 32; // w-8 = 2rem = 32px
+                    expectedHeight = 32; // h-8 = 2rem = 32px
+                    break;
+                case 'connector':
+                    expectedWidth = 60; // w-15 = 3.75rem = 60px
+                    expectedHeight = 24; // h-6 = 1.5rem = 24px
+                    break;
+                default:
+                    expectedWidth = 60; // Default to w-15
+                    expectedHeight = 24; // Default to h-6
+            }
+
+            return {
+                width: actualWidth || expectedWidth,
+                height: actualHeight || expectedHeight,
+            };
         }
 
         function drawConnectionLine(ctx, from, to, scaleX) {
@@ -1655,12 +3136,23 @@
             const fromLabel = from.isConnector ? 'connector' : `symbol ${from.sequentialNumber}`;
             const toLabel = to.isConnector ? 'connector' : `symbol ${to.sequentialNumber}`;
 
+            // Deteksi mode print
+            const isPrinting = document.body.classList.contains('printing');
+            const pageElement = from.element.closest('.page-preview');
+            const isPrintPage = pageElement && pageElement.classList.contains('print-full-size');
+
             // Save context state
             ctx.save();
 
             // Set clean stroke style
             ctx.strokeStyle = '#000000';
-            ctx.lineWidth = 2;
+
+            if (isPrinting || isPrintPage) {
+                ctx.lineWidth = 2; // Fixed width untuk print
+            } else {
+                ctx.lineWidth = Math.max(2 * scaleX, 2);
+            }
+
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
 
@@ -1705,7 +3197,7 @@
                     lineEndX,
                     horizontalY,
                     scaleX,
-                    true, // isPrintMode
+                    isPrinting || isPrintPage,
                 );
             } else {
                 // Different rows: use the existing L-shaped connection
@@ -1714,147 +3206,42 @@
                 ctx.lineTo(endX, endY);
                 ctx.stroke();
 
-                // Draw arrow at the end
-                drawPreviewArrow(ctx, endX, (startY + endY) / 2, endX, endY, scaleX, true);
+                // Gambar panah di ujung garis
+                drawPreviewArrow(ctx, endX, (startY + endY) / 2, endX, endY, scaleX, isPrinting || isPrintPage);
             }
 
             // Restore context state
             ctx.restore();
         }
 
-        function drawDecisionLineWithCollisionDetection(ctx, decisionCenter, targetSymbol, allCenters) {
-            const decisionType = getSymbolType(decisionCenter.element);
-            const targetType = getSymbolType(targetSymbol.element);
-            const decisionDim = getSymbolDimensions(decisionCenter.element, decisionType);
-            const targetDim = getSymbolDimensions(targetSymbol.element, targetType);
-
-            const horizontalOffset = Math.max(decisionDim.width / 2 + 10, 25);
-            const curveOffset = Math.max(horizontalOffset + 15, 40);
-
-            // Check for potential collision with main flow lines (black lines)
-            const useRightSide = shouldUseRightSideForDecisionLine(decisionCenter, targetSymbol, allCenters);
-
-            ctx.save();
-            ctx.strokeStyle = '#ef4444';
-            ctx.lineWidth = 2;
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-
-            let startX, startY, endX, endY, midX;
-
-            if (useRightSide) {
-                // Draw on the right side to avoid collision
-                startX = decisionCenter.x + (decisionDim.width / 2 + 8);
-                startY = decisionCenter.y;
-                endX = targetSymbol.x + (targetDim.width / 2 + 8);
-                endY = targetSymbol.y;
-                midX = startX + curveOffset;
-            } else {
-                // Draw on the left side (original behavior)
-                startX = decisionCenter.x - (decisionDim.width / 2 + 8);
-                startY = decisionCenter.y;
-                endX = targetSymbol.x - (targetDim.width / 2 + 8);
-                endY = targetSymbol.y;
-                midX = startX - curveOffset;
-            }
-
-            ctx.beginPath();
-            ctx.moveTo(startX, startY);
-            ctx.lineTo(midX, startY);
-            ctx.lineTo(midX, endY);
-            ctx.lineTo(endX, endY);
-            ctx.stroke();
-
-            drawPreviewArrow(ctx, midX, endY, endX, endY, 1, true);
-
-            // Add "Tidak" text
-            const labelText = 'Tidak';
-            ctx.fillStyle = '#ef4444';
-            ctx.font = '12px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-
-            const textX = midX;
-            const textY = startY + (endY - startY) * 0.3;
-
-            // White background for text
-            const textMetrics = ctx.measureText(labelText);
-            const textWidth = textMetrics.width;
-            const textHeight = 15;
-
-            ctx.fillStyle = 'white';
-            ctx.fillRect(textX - textWidth / 2 - 2, textY - textHeight / 2 - 1, textWidth + 4, textHeight + 2);
-
-            ctx.fillStyle = '#ef4444';
-            ctx.fillText(labelText, textX, textY);
-
-            ctx.restore();
-        }
-
-        function shouldUseRightSideForDecisionLine(decisionCenter, targetSymbol, allCenters) {
-            // LOGIC SESUAI PERMINTAAN USER:
-            // Jika target symbol (proses) berada di KANAN decision symbol,
-            // maka garis merah keluar dari KIRI decision diamond
-            if (targetSymbol.cellIndex > decisionCenter.cellIndex) {
-                return false; // false = left side
-            }
-            // Jika target symbol (proses) berada di KIRI decision symbol,
-            // maka garis merah keluar dari KANAN decision diamond
-            else if (targetSymbol.cellIndex < decisionCenter.cellIndex) {
-                return true; // true = right side
-            }
-            // Jika di kolom yang sama, gunakan sisi kiri sebagai default
-            else {
-                return false; // false = left side
-            }
-        }
-
-        function getSymbolDimensions(element, symbolType) {
-            const actualWidth = element.offsetWidth;
-            const actualHeight = element.offsetHeight;
-
-            let expectedWidth, expectedHeight;
-            switch (symbolType) {
-                case 'start':
-                case 'process':
-                    expectedWidth = 40;
-                    expectedHeight = 24;
-                    break;
-                case 'decision':
-                    expectedWidth = 32;
-                    expectedHeight = 32;
-                    break;
-                case 'connector':
-                    expectedWidth = 40;
-                    expectedHeight = 40;
-                    break;
-                default:
-                    expectedWidth = 40;
-                    expectedHeight = 24;
-                    break;
-            }
-
-            return {
-                width: actualWidth || expectedWidth,
-                height: actualHeight || expectedHeight,
-            };
-        }
-
         function drawPreviewArrow(ctx, fromX, fromY, toX, toY, scaleX = 1, isPrintMode = false) {
+            // Save context state
             ctx.save();
 
-            // Arrow size configuration
+            // Dynamic arrow size based on scale and minimum size
             const baseHeadlen = 8;
-            const headlen = isPrintMode ? baseHeadlen : Math.max(baseHeadlen * scaleX, 6);
+            let headlen;
+
+            if (isPrintMode) {
+                headlen = baseHeadlen; // Fixed size untuk print
+            } else {
+                headlen = Math.max(baseHeadlen * scaleX, 6); // Minimum 6px, scales with zoom
+            }
+
             const angle = Math.atan2(toY - fromY, toX - fromX);
 
-            // Set arrow style
+            // Set clean stroke style for arrow
             ctx.strokeStyle = '#000000';
-            ctx.lineWidth = isPrintMode ? 2 : Math.max(2 * scaleX, 2);
+
+            if (isPrintMode) {
+                ctx.lineWidth = 2; // Fixed width untuk print
+            } else {
+                ctx.lineWidth = Math.max(2 * scaleX, 2);
+            }
+
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
 
-            // Draw arrow head
             ctx.beginPath();
             ctx.moveTo(toX, toY);
             ctx.lineTo(toX - headlen * Math.cos(angle - Math.PI / 6), toY - headlen * Math.sin(angle - Math.PI / 6));
@@ -1862,7 +3249,91 @@
             ctx.lineTo(toX - headlen * Math.cos(angle + Math.PI / 6), toY - headlen * Math.sin(angle + Math.PI / 6));
             ctx.stroke();
 
+            // Restore context state
             ctx.restore();
+        }
+
+        // Initialize preview table on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            // Sync rowCount with actual table rows
+            const tbody = document.getElementById('tbody-flow');
+            if (tbody) {
+                const actualRowCount = tbody.children.length;
+                rowCount = Math.max(rowCount, actualRowCount);
+            }
+
+            syncPreviewTable();
+
+            // Add event listeners to existing elements
+            document
+                .querySelectorAll(
+                    '#editor-tabel textarea, #editor-tabel input[name^="return_to_"], #editor-tabel select',
+                )
+                .forEach((element) => {
+                    const eventType = element.tagName === 'SELECT' ? 'change' : 'input';
+                    element.addEventListener(eventType, syncPreviewTable);
+                });
+
+            // Observer for preview changes
+            const previewObserver = new MutationObserver(() => {
+                setTimeout(() => {
+                    drawAllPageConnections();
+                    debouncedAutoScale();
+                }, 150);
+            });
+
+            const pagesContainer = document.getElementById('pages-container');
+            if (pagesContainer) {
+                previewObserver.observe(pagesContainer, {
+                    childList: true,
+                    subtree: true,
+                    attributes: true,
+                    attributeFilter: ['class'],
+                });
+            }
+
+            window.addEventListener('resize', () => {
+                setTimeout(() => {
+                    debouncedAutoScale();
+                    drawAllPageConnections();
+                }, 150);
+            });
+
+            setTimeout(() => {
+                drawAllPageConnections();
+                debouncedAutoScale();
+            }, 1500);
+        });
+
+        // Function to show multi direction info
+        function showMultiDirectionInfo() {
+            Swal.fire({
+                title: 'Multi Direction untuk Symbol Proses',
+                html: `
+                    <div class="text-left space-y-3">
+                        <p><strong>Cara Menggunakan:</strong></p>
+                        <ol class="list-decimal list-inside space-y-2">
+                            <li>Pilih symbol <span class="bg-green-500 text-white px-2 py-1 rounded">Proses</span> (hijau)</li>
+                            <li>Akan muncul input "Hubungkan ke nomor"</li>
+                            <li>Masukkan nomor target yang dipisahkan koma</li>
+                            <li>Contoh: <code class="bg-gray-100 px-1 rounded">2,3</code> akan menghubungkan ke symbol nomor 2 dan 3</li>
+                            <li>Garis akan muncul dengan warna berbeda untuk setiap koneksi</li>
+                        </ol>
+                        <div class="mt-4 p-3 bg-blue-50 rounded">
+                            <p><strong>Catatan:</strong></p>
+                            <ul class="list-disc list-inside space-y-1 text-sm">
+                                <li>Warna garis akan berbeda untuk setiap koneksi</li>
+                                <li>Garis pertama: hijau, kedua: biru, dst.</li>
+                                <li>Nomor mengacu pada urutan penomoran symbol</li>
+                            </ul>
+                        </div>
+                    </div>
+                `,
+                icon: 'info',
+                confirmButtonText: 'Mengerti',
+                confirmButtonColor: '#10b981',
+                width: '600px',
+            });
         }
     </script>
 </x-layout>
