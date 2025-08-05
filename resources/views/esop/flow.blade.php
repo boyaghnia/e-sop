@@ -1284,8 +1284,8 @@
 
         // Function to calculate rows per page based on F4 dimensions
         function calculateRowsPerPage() {
-            // F4 landscape: 330mm x 250mm
-            const f4LandscapeHeight = 260; // mm
+            // F4 landscape: 330mm x 210mm
+            const f4LandscapeHeight = 210; // mm
             const availableHeightPx = (f4LandscapeHeight / 25.4) * 96;
 
             // Ambil header height dari tabel preview jika ada
@@ -1921,11 +1921,21 @@
         }
 
         function drawAllPageConnections() {
+            console.log('=== Drawing connections for all pages ===');
+            console.log('Current symbolOrder:', symbolOrder);
+            console.log(
+                'SymbolOrder keys:',
+                symbolOrder.map((item) => item.key),
+            );
             const pages = document.querySelectorAll('.page-preview');
+            console.log('Found', pages.length, 'pages');
             pages.forEach((page, pageIndex) => {
                 const canvas = page.querySelector('.page-canvas');
                 if (canvas) {
+                    console.log('Drawing connections for page', pageIndex + 1);
                     drawPageConnections(canvas, page, pageIndex + 1);
+                } else {
+                    console.log('No canvas found for page', pageIndex + 1);
                 }
             });
         }
@@ -1968,6 +1978,18 @@
                 '.symbol-preview > div:first-child, .symbol-preview > svg.connector-symbol-svg',
             );
 
+            console.log('Page', pageNumber, 'found', symbols.length, 'total elements');
+
+            // Debug: let's see what HTML we have for symbols
+            if (pageNumber > 1) {
+                console.log('Page', pageNumber, 'table HTML:', table.innerHTML.substring(0, 1000));
+                const symbolPreviews = table.querySelectorAll('.symbol-preview');
+                console.log('Found', symbolPreviews.length, 'symbol-preview elements on page', pageNumber);
+                symbolPreviews.forEach((preview, idx) => {
+                    console.log('Symbol preview', idx, ':', preview.innerHTML);
+                });
+            }
+
             if (symbols.length === 0) {
                 // Set canvas size berdasarkan mode
                 if (isPrinting || isPrintPage) {
@@ -2005,19 +2027,14 @@
                     isConnector = true;
                     sequentialNumber = -1; // Connector tidak punya nomor berurutan
                 } else {
-                    // Dapatkan nomor berurutan dari sistem symbolOrder
-                    const pageRows = table.querySelectorAll('tbody tr:not(.buffer-row)');
-                    const rowInPage = Array.from(pageRows).indexOf(row);
-                    const rowsPerPage = ROWS_PER_PAGE;
-                    const actualRowNumber = (pageNumber - 1) * rowsPerPage + rowInPage + 1;
-                    const actualColIndex = cellIndex - 2; // Column index dalam pelaksana
-                    const key = `${actualRowNumber}_${actualColIndex}`;
-
-                    const symbolOrderItem = symbolOrder.find((item) => item.key === key);
-                    if (symbolOrderItem) {
-                        sequentialNumber = symbolOrderItem.number;
+                    // NEW APPROACH: Instead of calculating keys, extract the sequential number directly from the HTML
+                    const symbolNumberDiv = symbolPreview.querySelector('.symbol-number');
+                    if (symbolNumberDiv) {
+                        sequentialNumber = parseInt(symbolNumberDiv.textContent);
+                        console.log('Found symbol with sequential number from HTML:', sequentialNumber);
                     } else {
                         sequentialNumber = 0; // Tidak ada nomor jika tidak ditemukan
+                        console.log('No symbol number found in HTML for element:', el.className);
                     }
                 }
 
@@ -2081,6 +2098,16 @@
                 (center) => !center.isConnector && center.sequentialNumber > 0,
             );
             const connectorSymbols = activeSymbols.filter((center) => center.isConnector);
+
+            console.log(
+                'Page',
+                pageNumber,
+                ': Found',
+                sequentialSymbols.length,
+                'symbols,',
+                connectorSymbols.length,
+                'connectors',
+            );
 
             // Sort sequential symbols by their number
             sequentialSymbols.sort((a, b) => a.sequentialNumber - b.sequentialNumber);
@@ -2160,27 +2187,98 @@
 
             // Handle connectors - connect them to the flow properly
             connectorSymbols.forEach((connector) => {
-                if (sequentialSymbols.length > 0) {
-                    // For page continuity connectors (like on page 2),
-                    // they should connect TO the next symbol, not FROM a previous symbol
+                console.log('Processing connector at row', connector.rowIndex, 'page', pageNumber);
+                console.log('Connector element:', connector.element.outerHTML.substring(0, 100));
+                console.log(
+                    'Sequential symbols on this page:',
+                    sequentialSymbols.map((s) => s.sequentialNumber),
+                );
 
-                    // Check if this is a continuation connector (at top of page)
-                    const isTopConnector =
-                        connector.rowIndex === 0 ||
-                        (connector.rowIndex === 1 &&
-                            connector.element.closest('tr').previousElementSibling?.classList.contains('buffer-row'));
+                // Check if this is a continuation connector (at top of page)
+                const isTopConnector =
+                    connector.rowIndex === 0 ||
+                    (connector.rowIndex === 1 &&
+                        connector.element.closest('tr').previousElementSibling?.classList.contains('buffer-row'));
 
-                    if (isTopConnector) {
-                        // This is a page continuation connector - connect TO next symbol
-                        const nextSymbol = sequentialSymbols.find((symbol) => symbol.rowIndex > connector.rowIndex);
-                        if (nextSymbol) {
-                            drawConnectionLine(ctx, connector, nextSymbol, lineScale);
+                console.log('Is top connector:', isTopConnector);
+
+                if (isTopConnector) {
+                    // This is a page continuation connector
+                    // Find the symbol on this page that should continue the flow from previous page
+                    if (sequentialSymbols.length > 0) {
+                        // SIMPLIFIED APPROACH: Since we now have sequential numbers directly from HTML,
+                        // we can find the next symbol more easily
+
+                        // Get the highest sequential number from all previous pages
+                        let highestPreviousNumber = 0;
+                        const allPages = document.querySelectorAll('.page-preview');
+
+                        for (let i = 0; i < pageNumber - 1; i++) {
+                            const prevPage = allPages[i];
+                            if (prevPage) {
+                                const prevSymbolNumbers = prevPage.querySelectorAll('.symbol-number');
+                                prevSymbolNumbers.forEach((numberDiv) => {
+                                    const num = parseInt(numberDiv.textContent);
+                                    if (num > highestPreviousNumber) {
+                                        highestPreviousNumber = num;
+                                    }
+                                });
+                            }
                         }
-                    } else {
-                        // This is a page ending connector - connect FROM previous symbol
-                        const previousSymbol = findNearestSequentialSymbol(connector, sequentialSymbols);
-                        if (previousSymbol) {
-                            drawConnectionLine(ctx, previousSymbol, connector, lineScale);
+
+                        console.log('Highest symbol number from previous pages:', highestPreviousNumber);
+
+                        // Find the next symbol (should be highestPreviousNumber + 1)
+                        const nextSequentialNumber = highestPreviousNumber + 1;
+                        const targetSymbol = sequentialSymbols.find((s) => s.sequentialNumber === nextSequentialNumber);
+
+                        console.log(
+                            'Looking for next symbol after',
+                            highestPreviousNumber,
+                            'expecting number:',
+                            nextSequentialNumber,
+                            'found:',
+                            !!targetSymbol,
+                            'symbol number:',
+                            targetSymbol ? targetSymbol.sequentialNumber : 'none',
+                        );
+
+                        if (targetSymbol) {
+                            console.log('Drawing line from connector to symbol', targetSymbol.sequentialNumber);
+                            drawConnectionLine(ctx, connector, targetSymbol, lineScale);
+                        } else {
+                            // Fallback: connect to first symbol on page
+                            const firstSymbolOnPage = sequentialSymbols.reduce((prev, current) =>
+                                current.sequentialNumber < prev.sequentialNumber ? current : prev,
+                            );
+                            if (firstSymbolOnPage) {
+                                console.log(
+                                    'Fallback: Drawing line from connector to first symbol',
+                                    firstSymbolOnPage.sequentialNumber,
+                                );
+                                drawConnectionLine(ctx, connector, firstSymbolOnPage, lineScale);
+                            }
+                        }
+                    }
+                } else {
+                    // This is a page ending connector - connect FROM the last symbol on this page
+                    if (sequentialSymbols.length > 0) {
+                        const lastSymbolOnPage = sequentialSymbols.reduce((prev, current) =>
+                            current.sequentialNumber > prev.sequentialNumber ? current : prev,
+                        );
+                        console.log(
+                            'Last symbol on page found:',
+                            !!lastSymbolOnPage,
+                            'symbol number:',
+                            lastSymbolOnPage ? lastSymbolOnPage.sequentialNumber : 'none',
+                        );
+                        if (lastSymbolOnPage) {
+                            console.log(
+                                'Drawing line from symbol',
+                                lastSymbolOnPage.sequentialNumber,
+                                'to bottom connector',
+                            );
+                            drawConnectionLine(ctx, lastSymbolOnPage, connector, lineScale);
                         }
                     }
                 }
@@ -3010,5 +3108,13 @@
                 width: '600px',
             });
         }
+    </script>
+
+    <script>
+        document.addEventListener('keydown', function (e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+                e.preventDefault();
+            }
+        });
     </script>
 </x-layout>

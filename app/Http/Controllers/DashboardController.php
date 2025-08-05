@@ -24,6 +24,12 @@ class DashboardController extends Controller
         if ($user->role === 'admin') {
             // Admin dapat melihat semua ESOP
             // Tidak ada filter tambahan
+        } elseif ($user->role === 'sekretariat' || $user->role === 'direktorat') {
+            // Sekretariat dan Direktorat dapat melihat ESOP dari role 'obu', 'upbu' dan milik sendiri
+            // OBU dapat melihat ESOP dari role 'upbu'
+            $allEsopsQuery->whereHas('user', function($userQuery) {
+                $userQuery->where('role', 'obu')->orWhere('role', 'upbu');
+            });
         } elseif ($user->role === 'obu') {
             // OBU dapat melihat ESOP dari role 'upbu'
             $allEsopsQuery->whereHas('user', function($userQuery) {

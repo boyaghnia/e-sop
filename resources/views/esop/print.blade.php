@@ -473,7 +473,7 @@
                 margin: 0 !important;
                 padding: 0 !important;
                 z-index: 2;
-                background-color: rgba(16, 185, 129, 0.2) !important;
+                /* background-color: rgba(16, 185, 129, 0.2) !important; */
             }
 
             /* Hide print controls and editor table saat print */
@@ -544,7 +544,7 @@
                 max-width: none !important;
                 min-height: auto !important;
                 overflow: hidden !important;
-                background-color: rgba(245, 158, 11, 0.2) !important;
+                /* background-color: rgba(245, 158, 11, 0.2) !important; */
             }
 
             .page-preview:last-child {
@@ -947,7 +947,7 @@
         </div>
     </div>
 
-    <div id="editor-tabel">
+    <div id="editor-tabel" class="hidden">
         <form id="esopForm" action="{{ route('flow.update', $esop->id) }}" method="POST">
             @csrf
             <div class="main-content rounded-sm bg-white p-4 shadow-sm">
@@ -1564,14 +1564,14 @@
             clearSavedSymbolOrder();
         }
 
-        // Function to debug current symbol order
+        // Function to debug current symbol order (for cross-page connection debugging only)
         function debugSymbolOrder() {
             console.log('Current symbol order:', symbolOrder);
             console.log('Next symbol number:', nextSymbolNumber);
 
             // Show current sequential numbering
             symbolOrder.forEach((item) => {
-                console.log(`Symbol ${item.number}: Row ${item.rowNumber}, Col ${item.colIndex}`);
+                console.log('Symbol', item.number, ': Row', item.rowNumber, ', Col', item.colIndex);
             });
         }
 
@@ -2213,6 +2213,7 @@
         }
 
         function createConnectorRowHTML(connectorColumn = 0) {
+            console.log('Creating connector row with polygon in column', connectorColumn);
             let pelaksanaHTML = '';
             for (let i = 0; i < jumlahPelaksana; i++) {
                 if (i === connectorColumn) {
@@ -2247,11 +2248,21 @@
         }
 
         function drawAllPageConnections() {
+            console.log('=== Drawing connections for all pages ===');
+            console.log('Current symbolOrder:', symbolOrder);
+            console.log(
+                'SymbolOrder keys:',
+                symbolOrder.map((item) => item.key),
+            );
             const pages = document.querySelectorAll('.page-preview');
+            console.log('Found', pages.length, 'pages');
             pages.forEach((page, pageIndex) => {
                 const canvas = page.querySelector('.page-canvas');
                 if (canvas) {
+                    console.log('Drawing connections for page', pageIndex + 1);
                     drawPageConnections(canvas, page, pageIndex + 1);
+                } else {
+                    console.log('No canvas found for page', pageIndex + 1);
                 }
             });
         }
@@ -2294,6 +2305,18 @@
                 '.symbol-preview > div:first-child, .symbol-preview > svg.connector-symbol-svg',
             );
 
+            console.log('Page', pageNumber, 'found', symbols.length, 'total elements');
+
+            // Debug: let's see what HTML we have for symbols
+            if (pageNumber > 1) {
+                console.log('Page', pageNumber, 'table HTML:', table.innerHTML.substring(0, 1000));
+                const symbolPreviews = table.querySelectorAll('.symbol-preview');
+                console.log('Found', symbolPreviews.length, 'symbol-preview elements on page', pageNumber);
+                symbolPreviews.forEach((preview, idx) => {
+                    console.log('Symbol preview', idx, ':', preview.innerHTML);
+                });
+            }
+
             if (symbols.length === 0) {
                 // Set canvas size berdasarkan mode
                 if (isPrinting || isPrintPage) {
@@ -2331,19 +2354,14 @@
                     isConnector = true;
                     sequentialNumber = -1; // Connector tidak punya nomor berurutan
                 } else {
-                    // Dapatkan nomor berurutan dari sistem symbolOrder
-                    const pageRows = table.querySelectorAll('tbody tr:not(.buffer-row)');
-                    const rowInPage = Array.from(pageRows).indexOf(row);
-                    const rowsPerPage = ROWS_PER_PAGE;
-                    const actualRowNumber = (pageNumber - 1) * rowsPerPage + rowInPage + 1;
-                    const actualColIndex = cellIndex - 2; // Column index dalam pelaksana
-                    const key = `${actualRowNumber}_${actualColIndex}`;
-
-                    const symbolOrderItem = symbolOrder.find((item) => item.key === key);
-                    if (symbolOrderItem) {
-                        sequentialNumber = symbolOrderItem.number;
+                    // NEW APPROACH: Instead of calculating keys, extract the sequential number directly from the HTML
+                    const symbolNumberDiv = symbolPreview.querySelector('.symbol-number');
+                    if (symbolNumberDiv) {
+                        sequentialNumber = parseInt(symbolNumberDiv.textContent);
+                        console.log('Found symbol with sequential number from HTML:', sequentialNumber);
                     } else {
                         sequentialNumber = 0; // Tidak ada nomor jika tidak ditemukan
+                        console.log('No symbol number found in HTML for element:', el.className);
                     }
                 }
 
@@ -2408,105 +2426,258 @@
             );
             const connectorSymbols = activeSymbols.filter((center) => center.isConnector);
 
+            console.log(
+                'Page',
+                pageNumber,
+                ': Found',
+                sequentialSymbols.length,
+                'symbols,',
+                connectorSymbols.length,
+                'connectors',
+            );
+
             // Sort sequential symbols by their number
             sequentialSymbols.sort((a, b) => a.sequentialNumber - b.sequentialNumber);
 
             // Draw connections between sequential symbols (following the order of selection)
             const lineScale = isPrinting || isPrintPage ? 1 : scaleFactor;
-            for (let i = 0; i < sequentialSymbols.length - 1; i++) {
-                const from = sequentialSymbols[i];
-                const to = sequentialSymbols[i + 1];
 
-                let shouldSkipLine = false;
+            // For page 1, draw normal connections between symbols and to bottom connector if exists
+            if (pageNumber === 1) {
+                for (let i = 0; i < sequentialSymbols.length - 1; i++) {
+                    const from = sequentialSymbols[i];
+                    const to = sequentialSymbols[i + 1];
 
-                // Check if the 'from' symbol has multi-direction connections that target this 'to' symbol
-                const globalRowIndexFrom = (pageNumber - 1) * rowsPerPage + from.rowIndex;
-                if (globalRowIndexFrom < editorRows.length) {
-                    const originalRowFrom = editorRows[globalRowIndexFrom];
-                    const originalCellFrom = originalRowFrom ? originalRowFrom.children[from.cellIndex] : null;
-                    const connectToInputFrom = originalCellFrom
-                        ? originalCellFrom.querySelector('input[name^="connect_to_"]')
-                        : null;
+                    let shouldSkipLine = false;
 
-                    // Check if this specific 'to' symbol is in the multi-direction targets from 'from' symbol
-                    if (connectToInputFrom && connectToInputFrom.value && connectToInputFrom.value.trim()) {
-                        const targetNumbers = connectToInputFrom.value
-                            .split(',')
-                            .map((num) => parseInt(num.trim()))
-                            .filter((num) => !isNaN(num) && num > 0);
+                    // Check if the 'from' symbol has multi-direction connections that target this 'to' symbol
+                    const globalRowIndexFrom = (pageNumber - 1) * rowsPerPage + from.rowIndex;
+                    if (globalRowIndexFrom < editorRows.length) {
+                        const originalRowFrom = editorRows[globalRowIndexFrom];
+                        const originalCellFrom = originalRowFrom ? originalRowFrom.children[from.cellIndex] : null;
+                        const connectToInputFrom = originalCellFrom
+                            ? originalCellFrom.querySelector('input[name^="connect_to_"]')
+                            : null;
 
-                        // If this 'to' symbol is targeted by multi-direction from 'from', skip line
-                        if (targetNumbers.includes(to.sequentialNumber)) {
-                            shouldSkipLine = true;
+                        // Check if this specific 'to' symbol is in the multi-direction targets from 'from' symbol
+                        if (connectToInputFrom && connectToInputFrom.value && connectToInputFrom.value.trim()) {
+                            const targetNumbers = connectToInputFrom.value
+                                .split(',')
+                                .map((num) => parseInt(num.trim()))
+                                .filter((num) => !isNaN(num) && num > 0);
+
+                            // If this 'to' symbol is targeted by multi-direction from 'from', skip line
+                            if (targetNumbers.includes(to.sequentialNumber)) {
+                                shouldSkipLine = true;
+                            }
                         }
                     }
-                }
 
-                // Also check if the 'to' symbol is targeted by ANY multi-direction from other symbols
-                if (!shouldSkipLine) {
-                    for (let j = 0; j < sequentialSymbols.length; j++) {
-                        const sourceSymbol = sequentialSymbols[j];
-                        if (sourceSymbol.sequentialNumber === to.sequentialNumber) continue; // Skip self
+                    // Also check if the 'to' symbol is targeted by ANY multi-direction from other symbols
+                    if (!shouldSkipLine) {
+                        for (let j = 0; j < sequentialSymbols.length; j++) {
+                            const sourceSymbol = sequentialSymbols[j];
+                            if (sourceSymbol.sequentialNumber === to.sequentialNumber) continue; // Skip self
 
-                        const globalRowIndexSource = (pageNumber - 1) * rowsPerPage + sourceSymbol.rowIndex;
-                        if (globalRowIndexSource < editorRows.length) {
-                            const originalRowSource = editorRows[globalRowIndexSource];
-                            const originalCellSource = originalRowSource
-                                ? originalRowSource.children[sourceSymbol.cellIndex]
-                                : null;
-                            const connectToInputSource = originalCellSource
-                                ? originalCellSource.querySelector('input[name^="connect_to_"]')
-                                : null;
+                            const globalRowIndexSource = (pageNumber - 1) * rowsPerPage + sourceSymbol.rowIndex;
+                            if (globalRowIndexSource < editorRows.length) {
+                                const originalRowSource = editorRows[globalRowIndexSource];
+                                const originalCellSource = originalRowSource
+                                    ? originalRowSource.children[sourceSymbol.cellIndex]
+                                    : null;
+                                const connectToInputSource = originalCellSource
+                                    ? originalCellSource.querySelector('input[name^="connect_to_"]')
+                                    : null;
 
-                            if (
-                                connectToInputSource &&
-                                connectToInputSource.value &&
-                                connectToInputSource.value.trim()
-                            ) {
-                                const targetNumbers = connectToInputSource.value
-                                    .split(',')
-                                    .map((num) => parseInt(num.trim()))
-                                    .filter((num) => !isNaN(num) && num > 0);
+                                if (
+                                    connectToInputSource &&
+                                    connectToInputSource.value &&
+                                    connectToInputSource.value.trim()
+                                ) {
+                                    const targetNumbers = connectToInputSource.value
+                                        .split(',')
+                                        .map((num) => parseInt(num.trim()))
+                                        .filter((num) => !isNaN(num) && num > 0);
 
-                                // If this 'to' symbol is targeted by multi-direction from any source, skip line
-                                if (targetNumbers.includes(to.sequentialNumber)) {
-                                    shouldSkipLine = true;
-                                    break;
+                                    // If this 'to' symbol is targeted by multi-direction from any source, skip line
+                                    if (targetNumbers.includes(to.sequentialNumber)) {
+                                        shouldSkipLine = true;
+                                        break;
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-                // Draw normal black connection line only if not targeted by any multi-direction
-                if (!shouldSkipLine) {
-                    drawConnectionLine(ctx, from, to, lineScale);
+                    // Draw normal black connection line only if not targeted by any multi-direction
+                    if (!shouldSkipLine) {
+                        drawConnectionLine(ctx, from, to, lineScale);
+                    }
+                }
+            } else {
+                // For pages 2 and beyond, only draw connections between symbols within the same page
+                // The connector will handle the connection from previous page
+                for (let i = 0; i < sequentialSymbols.length - 1; i++) {
+                    const from = sequentialSymbols[i];
+                    const to = sequentialSymbols[i + 1];
+
+                    let shouldSkipLine = false;
+
+                    // Check multi-direction logic same as page 1
+                    const globalRowIndexFrom = (pageNumber - 1) * rowsPerPage + from.rowIndex;
+                    if (globalRowIndexFrom < editorRows.length) {
+                        const originalRowFrom = editorRows[globalRowIndexFrom];
+                        const originalCellFrom = originalRowFrom ? originalRowFrom.children[from.cellIndex] : null;
+                        const connectToInputFrom = originalCellFrom
+                            ? originalCellFrom.querySelector('input[name^="connect_to_"]')
+                            : null;
+
+                        if (connectToInputFrom && connectToInputFrom.value && connectToInputFrom.value.trim()) {
+                            const targetNumbers = connectToInputFrom.value
+                                .split(',')
+                                .map((num) => parseInt(num.trim()))
+                                .filter((num) => !isNaN(num) && num > 0);
+
+                            if (targetNumbers.includes(to.sequentialNumber)) {
+                                shouldSkipLine = true;
+                            }
+                        }
+                    }
+
+                    if (!shouldSkipLine) {
+                        for (let j = 0; j < sequentialSymbols.length; j++) {
+                            const sourceSymbol = sequentialSymbols[j];
+                            if (sourceSymbol.sequentialNumber === to.sequentialNumber) continue;
+
+                            const globalRowIndexSource = (pageNumber - 1) * rowsPerPage + sourceSymbol.rowIndex;
+                            if (globalRowIndexSource < editorRows.length) {
+                                const originalRowSource = editorRows[globalRowIndexSource];
+                                const originalCellSource = originalRowSource
+                                    ? originalRowSource.children[sourceSymbol.cellIndex]
+                                    : null;
+                                const connectToInputSource = originalCellSource
+                                    ? originalCellSource.querySelector('input[name^="connect_to_"]')
+                                    : null;
+
+                                if (
+                                    connectToInputSource &&
+                                    connectToInputSource.value &&
+                                    connectToInputSource.value.trim()
+                                ) {
+                                    const targetNumbers = connectToInputSource.value
+                                        .split(',')
+                                        .map((num) => parseInt(num.trim()))
+                                        .filter((num) => !isNaN(num) && num > 0);
+
+                                    if (targetNumbers.includes(to.sequentialNumber)) {
+                                        shouldSkipLine = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (!shouldSkipLine) {
+                        drawConnectionLine(ctx, from, to, lineScale);
+                    }
                 }
             }
 
             // Handle connectors - connect them to the flow properly
             connectorSymbols.forEach((connector) => {
-                if (sequentialSymbols.length > 0) {
-                    // For page continuity connectors (like on page 2),
-                    // they should connect TO the next symbol, not FROM a previous symbol
+                console.log('Processing connector at row', connector.rowIndex, 'page', pageNumber);
+                console.log('Connector element:', connector.element.outerHTML.substring(0, 100));
+                console.log(
+                    'Sequential symbols on this page:',
+                    sequentialSymbols.map((s) => s.sequentialNumber),
+                );
 
-                    // Check if this is a continuation connector (at top of page)
-                    const isTopConnector =
-                        connector.rowIndex === 0 ||
-                        (connector.rowIndex === 1 &&
-                            connector.element.closest('tr').previousElementSibling?.classList.contains('buffer-row'));
+                // Check if this is a continuation connector (at top of page)
+                const isTopConnector =
+                    connector.rowIndex === 0 ||
+                    (connector.rowIndex === 1 &&
+                        connector.element.closest('tr').previousElementSibling?.classList.contains('buffer-row'));
 
-                    if (isTopConnector) {
-                        // This is a page continuation connector - connect TO next symbol
-                        const nextSymbol = sequentialSymbols.find((symbol) => symbol.rowIndex > connector.rowIndex);
-                        if (nextSymbol) {
-                            drawConnectionLine(ctx, connector, nextSymbol, lineScale);
+                console.log('Is top connector:', isTopConnector);
+
+                if (isTopConnector) {
+                    // This is a page continuation connector
+                    // Find the symbol on this page that should continue the flow from previous page
+                    if (sequentialSymbols.length > 0) {
+                        // SIMPLIFIED APPROACH: Since we now have sequential numbers directly from HTML,
+                        // we can find the next symbol more easily
+
+                        // Get the highest sequential number from all previous pages
+                        let highestPreviousNumber = 0;
+                        const allPages = document.querySelectorAll('.page-preview');
+
+                        for (let i = 0; i < pageNumber - 1; i++) {
+                            const prevPage = allPages[i];
+                            if (prevPage) {
+                                const prevSymbolNumbers = prevPage.querySelectorAll('.symbol-number');
+                                prevSymbolNumbers.forEach((numberDiv) => {
+                                    const num = parseInt(numberDiv.textContent);
+                                    if (num > highestPreviousNumber) {
+                                        highestPreviousNumber = num;
+                                    }
+                                });
+                            }
                         }
-                    } else {
-                        // This is a page ending connector - connect FROM previous symbol
-                        const previousSymbol = findNearestSequentialSymbol(connector, sequentialSymbols);
-                        if (previousSymbol) {
-                            drawConnectionLine(ctx, previousSymbol, connector, lineScale);
+
+                        console.log('Highest symbol number from previous pages:', highestPreviousNumber);
+
+                        // Find the next symbol (should be highestPreviousNumber + 1)
+                        const nextSequentialNumber = highestPreviousNumber + 1;
+                        const targetSymbol = sequentialSymbols.find((s) => s.sequentialNumber === nextSequentialNumber);
+
+                        console.log(
+                            'Looking for next symbol after',
+                            highestPreviousNumber,
+                            'expecting number:',
+                            nextSequentialNumber,
+                            'found:',
+                            !!targetSymbol,
+                            'symbol number:',
+                            targetSymbol ? targetSymbol.sequentialNumber : 'none',
+                        );
+
+                        if (targetSymbol) {
+                            console.log('Drawing line from connector to symbol', targetSymbol.sequentialNumber);
+                            drawConnectionLine(ctx, connector, targetSymbol, lineScale);
+                        } else {
+                            // Fallback: connect to first symbol on page
+                            const firstSymbolOnPage = sequentialSymbols.reduce((prev, current) =>
+                                current.sequentialNumber < prev.sequentialNumber ? current : prev,
+                            );
+                            if (firstSymbolOnPage) {
+                                console.log(
+                                    'Fallback: Drawing line from connector to first symbol',
+                                    firstSymbolOnPage.sequentialNumber,
+                                );
+                                drawConnectionLine(ctx, connector, firstSymbolOnPage, lineScale);
+                            }
+                        }
+                    }
+                } else {
+                    // This is a page ending connector - connect FROM the last symbol on this page
+                    if (sequentialSymbols.length > 0) {
+                        const lastSymbolOnPage = sequentialSymbols.reduce((prev, current) =>
+                            current.sequentialNumber > prev.sequentialNumber ? current : prev,
+                        );
+                        console.log(
+                            'Last symbol on page found:',
+                            !!lastSymbolOnPage,
+                            'symbol number:',
+                            lastSymbolOnPage ? lastSymbolOnPage.sequentialNumber : 'none',
+                        );
+                        if (lastSymbolOnPage) {
+                            console.log(
+                                'Drawing line from symbol',
+                                lastSymbolOnPage.sequentialNumber,
+                                'to bottom connector',
+                            );
+                            drawConnectionLine(ctx, lastSymbolOnPage, connector, lineScale);
                         }
                     }
                 }
@@ -2716,7 +2887,6 @@
         }
 
         function drawMultiDirectionLines(ctx, centers, pageNumber, lineScale) {
-            console.log(`Drawing multi-direction lines for page ${pageNumber}`);
             // Find all symbols that have connect_to values (process, start, decision)
             const editorRows = document.querySelectorAll('#editor-tabel tbody tr');
             const rowsPerPage = getCurrentRowsPerPage(); // Use dynamic calculation
@@ -2728,17 +2898,10 @@
                         center.symbolType === 'decision') &&
                     center.sequentialNumber > 0
                 ) {
-                    console.log(
-                        `Checking symbol ${center.sequentialNumber} (${center.symbolType}) for multi-direction connections`,
-                    );
                     // Calculate which editor row this symbol corresponds to
                     const pageRows = document.querySelectorAll(`#page-${pageNumber} tbody tr:not(.buffer-row)`);
                     const rowInPage = Array.from(pageRows).indexOf(center.element.closest('tr'));
                     const globalRowIndex = (pageNumber - 1) * rowsPerPage + rowInPage;
-
-                    console.log(
-                        `Symbol ${center.sequentialNumber}: rowInPage=${rowInPage}, globalRowIndex=${globalRowIndex}, rowsPerPage=${rowsPerPage}`,
-                    );
 
                     if (globalRowIndex < editorRows.length) {
                         const originalRow = editorRows[globalRowIndex];
@@ -2747,16 +2910,12 @@
                             ? originalCell.querySelector('input[name^="connect_to_"]')
                             : null;
 
-                        console.log(`Connect-to input for symbol ${center.sequentialNumber}:`, connectToInput?.value);
-
                         if (connectToInput && connectToInput.value) {
                             // Parse comma-separated values
                             const targetNumbers = connectToInput.value
                                 .split(',')
                                 .map((num) => parseInt(num.trim()))
                                 .filter((num) => !isNaN(num) && num > 0);
-
-                            console.log(`Symbol ${center.sequentialNumber} connects to:`, targetNumbers);
 
                             // Draw lines to each target with stacking
                             targetNumbers.forEach((targetNumber, index) => {
@@ -2765,18 +2924,11 @@
 
                                 // If not found in current page, search across all pages using symbolOrder
                                 if (!targetSymbol) {
-                                    console.log(
-                                        `Target symbol ${targetNumber} not found in current page, searching across all pages`,
-                                    );
-
                                     // Find target in symbolOrder first
                                     const targetOrderItem = symbolOrder.find((item) => item.number === targetNumber);
                                     if (targetOrderItem) {
-                                        console.log(`Found target ${targetNumber} in symbolOrder:`, targetOrderItem);
-
                                         // Calculate which page the target is on
                                         const targetPage = Math.ceil(targetOrderItem.rowNumber / rowsPerPage);
-                                        console.log(`Target symbol ${targetNumber} should be on page ${targetPage}`);
 
                                         // Find the target symbol element in the target page
                                         const targetPageElement = document.querySelector(`#page-${targetPage}`);
@@ -2817,11 +2969,6 @@
                                                             symbolType: getSymbolType(symbolElement),
                                                             isConnector: false,
                                                         };
-
-                                                        console.log(
-                                                            `Created cross-page target symbol ${targetNumber}:`,
-                                                            targetSymbol,
-                                                        );
                                                     }
                                                 }
                                             });
@@ -2830,9 +2977,6 @@
                                 }
 
                                 if (targetSymbol) {
-                                    console.log(
-                                        `Drawing multi-direction line from symbol ${center.sequentialNumber} to ${targetSymbol.sequentialNumber}`,
-                                    );
                                     drawStackedMultiDirectionLine(
                                         ctx,
                                         center,
@@ -2841,8 +2985,6 @@
                                         lineScale,
                                         center.symbolType,
                                     );
-                                } else {
-                                    console.log(`Target symbol ${targetNumber} not found for multi-direction line`);
                                 }
                             });
                         }
