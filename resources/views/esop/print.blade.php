@@ -21,6 +21,7 @@
         table {
             table-layout: fixed;
             border-collapse: collapse;
+            width: 100%;
         }
 
         /* Flow table styling */
@@ -256,14 +257,11 @@
             width: 100%;
             border-collapse: collapse;
             table-layout: fixed;
-            min-width: 100%;
-            max-width: 100%;
             font-size: 10px;
             height: calc(100% - 60px);
         }
 
         .page-preview .flow-table colgroup col {
-            width: auto;
         }
 
         .page-preview .flow-table thead th,
@@ -317,7 +315,9 @@
             z-index: 10;
             background: transparent;
         }
+    </style>
 
+    <style>
         /* ===== PRINT STYLES ===== */
         @media print {
             /* Reset all elements */
@@ -473,6 +473,7 @@
                 margin: 0 !important;
                 padding: 0 !important;
                 z-index: 2;
+                background-color: rgba(16, 185, 129, 0.2) !important;
             }
 
             /* Hide print controls and editor table saat print */
@@ -543,6 +544,7 @@
                 max-width: none !important;
                 min-height: auto !important;
                 overflow: hidden !important;
+                background-color: rgba(245, 158, 11, 0.2) !important;
             }
 
             .page-preview:last-child {
@@ -573,7 +575,6 @@
             .page-preview .flow-table td {
                 border: 1px solid #000 !important;
                 padding: 4px 3px;
-                font-size: 9px;
                 word-wrap: break-word;
                 overflow-wrap: break-word;
                 box-sizing: border-box;
@@ -607,11 +608,8 @@
                 font-size: 8px !important;
             }
 
-            /* Uraian kegiatan column for print */
-            .page-preview .flow-table tbody td:nth-child(2) {
-                overflow-y: hidden !important;
-                font-size: 8px !important;
-                line-height: 1.1 !important;
+            .page-preview .flow-table tbody td > div {
+                font-size: 1vh !important;
             }
 
             /* Symbol styling for print */
@@ -956,22 +954,22 @@
                 <div class="table-container">
                     <table class="flow-table border border-gray-400 text-sm text-gray-800">
                         <colgroup>
-                            <col style="width: 50px" />
+                            <col style="width: 4%" />
                             <!-- No -->
-                            <col style="width: 300px" />
+                            <col style="width: 15%" />
                             <!-- Uraian Kegiatan lebih lebar untuk F4 -->
                             @for ($i = 0; $i < $jumlahPelaksana; $i++)
-                                <col style="width: 150px" />
+                                <col style="width: {{ 35 / $jumlahPelaksana }}%" />
                                 <!-- Pelaksana columns lebih lebar -->
                             @endfor
 
-                            <col style="width: 125px" />
+                            <col style="width: 8%" />
                             <!-- Kelengkapan lebih lebar -->
-                            <col style="width: 125px" />
+                            <col style="width: 8%" />
                             <!-- Waktu -->
-                            <col style="width: 125px" />
+                            <col style="width: 8%" />
                             <!-- Output lebih lebar -->
-                            <col style="width: 125px" />
+                            <col style="width: 8%" />
                             <!-- Keterangan -->
                         </colgroup>
                         <thead>
@@ -1609,8 +1607,8 @@
 
         // Function to calculate rows per page based on F4 dimensions
         function calculateRowsPerPage() {
-            // F4 landscape: 330mm x 250mm
-            const f4LandscapeHeight = 260; // mm
+            // F4 landscape: 330mm x 210mm
+            const f4LandscapeHeight = 210; // mm
             const availableHeightPx = (f4LandscapeHeight / 25.4) * 96;
 
             // Ambil header height dari tabel preview jika ada
@@ -2037,16 +2035,19 @@
             pageDiv.className = 'page-preview';
             pageDiv.id = `page-${page.number}`;
 
+            const totalPelaksana = jumlahPelaksana;
+            const pelaksanaWidth = 35 / totalPelaksana;
+
             // Create table header
             const tableHeader = `
                 <colgroup>
-                    <col style="width: 50px" />
-                    <col style="width: 300px" />
-                    ${Array(jumlahPelaksana).fill('<col style="width: 120px" />').join('')}
-                    <col style="width: 125px" />
-                    <col style="width: 125px" />
-                    <col style="width: 125px" />
-                    <col style="width: 125px" />
+                    <col style="width: 4%" />
+                    <col style="width: 15%" />
+                    ${Array(jumlahPelaksana).fill(`<col style="width: ${pelaksanaWidth}%;" />`).join('')}
+                    <col style="width: 8%" />
+                    <col style="width: 8%" />
+                    <col style="width: 8%" />
+                    <col style="width: 8%" />
                 </colgroup>
                 <thead>
                     <tr class="bg-gray-100 text-center font-semibold">
@@ -2942,22 +2943,6 @@
             ctx.restore();
         }
 
-        function drawMultiDirectionArrow(ctx, x, y, toSymbol, scaleX, isPrint) {
-            const arrowSize = isPrint ? 8 : Math.max(8 * scaleX, 6);
-
-            ctx.save();
-            ctx.fillStyle = ctx.strokeStyle; // Use same color as line
-
-            ctx.beginPath();
-            ctx.moveTo(x, y);
-            ctx.lineTo(x - arrowSize, y - arrowSize / 2);
-            ctx.lineTo(x - arrowSize, y + arrowSize / 2);
-            ctx.closePath();
-            ctx.fill();
-
-            ctx.restore();
-        }
-
         function drawStackedMultiDirectionLine(ctx, fromSymbol, toSymbol, connectionIndex, scaleX, symbolType) {
             // Deteksi mode print
             const isPrinting = document.body.classList.contains('printing');
@@ -2966,7 +2951,7 @@
 
             ctx.save();
 
-            // Use red color for all multi-direction lines (as shown in example)
+            // Use red color for all multi-direction lines (as shown in the example)
             ctx.strokeStyle = '#ef4444'; // Red color like in the example
 
             // Set line width berdasarkan mode
@@ -3037,6 +3022,22 @@
             // White background for label
             const textMetrics = ctx.measureText(labelText);
             const textWidth = textMetrics.width;
+            const textHeight = isPrinting || isPrintPage ? 12 : 12 * scaleX;
+
+            ctx.fillStyle = 'white';
+            ctx.fillRect(labelX - textWidth / 2 - 2, labelY - textHeight / 2 - 1, textWidth + 4, textHeight + 2);
+
+            ctx.fillStyle = '#ef4444';
+            ctx.fillText(labelText, labelX, labelY);
+
+            ctx.restore();
+        }
+
+        function drawArrow(ctx, x, y, scaleX, isPrint, direction = 'right') {
+            const arrowSize = isPrint ? 8 : Math.max(8 * scaleX, 6);
+
+            ctx.save();
+            ctx.fillStyle = ctx.strokeStyle; // Use same color as line
             const textHeight = isPrinting || isPrintPage ? 12 : 12 * scaleX;
 
             ctx.fillStyle = 'white';
