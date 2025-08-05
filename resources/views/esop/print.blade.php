@@ -2899,11 +2899,30 @@
                     center.sequentialNumber > 0
                 ) {
                     // Calculate which editor row this symbol corresponds to
-                    const pageRows = document.querySelectorAll(`#page-${pageNumber} tbody tr:not(.buffer-row)`);
-                    const rowInPage = Array.from(pageRows).indexOf(center.element.closest('tr'));
-                    const globalRowIndex = (pageNumber - 1) * rowsPerPage + rowInPage;
+                    // Instead of relying on page structure, use symbolOrder as source of truth
+                    let globalRowIndex = -1;
 
-                    if (globalRowIndex < editorRows.length) {
+                    if (center.sequentialNumber > 0) {
+                        const symbolOrderItem = symbolOrder.find((item) => item.number === center.sequentialNumber);
+                        if (symbolOrderItem) {
+                            // Use the row number from symbolOrder (1-based, convert to 0-based)
+                            globalRowIndex = symbolOrderItem.rowNumber - 1;
+                        } else {
+                            // Fallback to page-based calculation
+                            const pageRows = document.querySelectorAll(
+                                `.page-preview:nth-child(${pageNumber}) tbody tr:not(.buffer-row)`,
+                            );
+                            const rowInPage = Array.from(pageRows).indexOf(center.element.closest('tr'));
+
+                            if (pageNumber === 1) {
+                                globalRowIndex = rowInPage;
+                            } else {
+                                globalRowIndex = (pageNumber - 1) * rowsPerPage + rowInPage;
+                            }
+                        }
+                    }
+
+                    if (globalRowIndex >= 0 && globalRowIndex < editorRows.length) {
                         const originalRow = editorRows[globalRowIndex];
                         const originalCell = originalRow ? originalRow.children[center.cellIndex] : null;
                         const connectToInput = originalCell
@@ -2930,8 +2949,10 @@
                                         // Calculate which page the target is on
                                         const targetPage = Math.ceil(targetOrderItem.rowNumber / rowsPerPage);
 
-                                        // Find the target symbol element in the target page
-                                        const targetPageElement = document.querySelector(`#page-${targetPage}`);
+                                        // Find the target symbol element in the target page using nth-child selector
+                                        const targetPageElement = document.querySelector(
+                                            `.page-preview:nth-child(${targetPage})`,
+                                        );
                                         if (targetPageElement) {
                                             const targetTable = targetPageElement.querySelector('.flow-table');
                                             const targetSymbolElements = targetTable.querySelectorAll(
@@ -2950,7 +2971,7 @@
                                                     ) {
                                                         const rect = symbolElement.getBoundingClientRect();
                                                         const currentPageTable = document.querySelector(
-                                                            `#page-${pageNumber} .flow-table`,
+                                                            `.page-preview:nth-child(${pageNumber}) .flow-table`,
                                                         );
                                                         const currentTableRect =
                                                             currentPageTable.getBoundingClientRect();
@@ -2965,6 +2986,13 @@
                                                             element: symbolElement,
                                                             x: centerX,
                                                             y: centerY,
+                                                            rowIndex:
+                                                                Math.floor(
+                                                                    (targetOrderItem.rowNumber - 1) / rowsPerPage,
+                                                                ) *
+                                                                    rowsPerPage +
+                                                                ((targetOrderItem.rowNumber - 1) % rowsPerPage),
+                                                            cellIndex: targetOrderItem.colIndex,
                                                             sequentialNumber: targetNumber,
                                                             symbolType: getSymbolType(symbolElement),
                                                             isConnector: false,
@@ -3093,7 +3121,7 @@
 
             ctx.save();
 
-            // Use red color for all multi-direction lines (as shown in the example)
+            // Use red color for all multi-direction lines (as shown in example)
             ctx.strokeStyle = '#ef4444'; // Red color like in the example
 
             // Set line width berdasarkan mode
@@ -3110,41 +3138,117 @@
             const fromDim = getSymbolDimensions(fromSymbol.element, fromSymbol.symbolType);
             const toDim = getSymbolDimensions(toSymbol.element, toSymbol.symbolType);
 
-            // Konfigurasi untuk garis horizontal tunggal yang bercabang vertikal
-            const horizontalDistance = 60; // Jarak horizontal dari symbol source
+            // Determine the direction of connection based on relative positions
+            const isTargetBelow = toSymbol.rowIndex > fromSymbol.rowIndex;
+            const isTargetRight = toSymbol.cellIndex > fromSymbol.cellIndex;
+            const isTargetLeft = toSymbol.cellIndex < fromSymbol.cellIndex;
+            const isSameColumn = toSymbol.cellIndex === fromSymbol.cellIndex;
 
-            // Start point - dari kanan tengah symbol source
-            const startX = fromSymbol.x + fromDim.width / 2;
-            const startY = fromSymbol.y;
+            let startX, startY, endX, endY, branchX, branchY, labelX, labelY;
+            let pathType = '';
 
-            // End point - ke atas tengah symbol target dengan jarak sedikit
-            const endX = toSymbol.x;
-            const endY = toSymbol.y - toDim.height / 2 - 8; // Tambah jarak 8px
+            if (isTargetBelow) {
+                // Target is below: start from bottom of source symbol
+                if (isTargetRight) {
+                    // Target is below and to the right: bottom -> right -> down
+                    pathType = 'bottom-right-down';
+                    startX = fromSymbol.x;
+                    startY = fromSymbol.y + fromDim.height / 2;
+                    endX = toSymbol.x;
+                    endY = toSymbol.y - toDim.height / 2 - 8;
 
-            // Titik cabang horizontal (satu garis ke kanan)
-            const branchX = startX + horizontalDistance;
-            const branchY = startY;
+                    // Branch point: go down first, then right
+                    const verticalDistance = 40;
+                    branchX = startX;
+                    branchY = startY + verticalDistance;
 
-            // Draw the path
-            ctx.beginPath();
+                    ctx.beginPath();
+                    ctx.moveTo(startX, startY);
+                    ctx.lineTo(branchX, branchY); // Vertical down
+                    ctx.lineTo(endX, branchY); // Horizontal right
+                    ctx.lineTo(endX, endY); // Vertical down to target
+                    ctx.stroke();
 
-            // Garis horizontal ke kanan dari symbol source
-            ctx.moveTo(startX, startY);
-            ctx.lineTo(branchX, branchY);
+                    // Arrow pointing down into target
+                    drawPreviewArrow(ctx, endX, branchY, endX, endY, scaleX, isPrinting || isPrintPage);
 
-            // Dari titik cabang, garis horizontal ke kolom target
-            ctx.moveTo(branchX, branchY);
-            ctx.lineTo(endX, branchY);
+                    // Label position on horizontal segment
+                    labelX = startX + (endX - startX) / 2;
+                    labelY = branchY - 8;
+                } else if (isTargetLeft) {
+                    // Target is below and to the left: bottom -> left -> down
+                    pathType = 'bottom-left-down';
+                    startX = fromSymbol.x;
+                    startY = fromSymbol.y + fromDim.height / 2;
+                    endX = toSymbol.x;
+                    endY = toSymbol.y - toDim.height / 2 - 8;
 
-            // Garis vertikal ke bawah menuju symbol target
-            ctx.lineTo(endX, endY);
+                    // Branch point: go down first, then left
+                    const verticalDistance = 40;
+                    branchX = startX;
+                    branchY = startY + verticalDistance;
 
-            ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(startX, startY);
+                    ctx.lineTo(branchX, branchY); // Vertical down
+                    ctx.lineTo(endX, branchY); // Horizontal left
+                    ctx.lineTo(endX, endY); // Vertical down to target
+                    ctx.stroke();
 
-            // Draw arrow using the same function as black arrows
-            drawPreviewArrow(ctx, endX, branchY, endX, endY, scaleX, isPrinting || isPrintPage);
+                    // Arrow pointing down into target
+                    drawPreviewArrow(ctx, endX, branchY, endX, endY, scaleX, isPrinting || isPrintPage);
 
-            // Add connection index label on the horizontal segment
+                    // Label position on horizontal segment
+                    labelX = endX + (startX - endX) / 2;
+                    labelY = branchY - 8;
+                } else {
+                    // Target is directly below: straight down
+                    pathType = 'straight-down';
+                    startX = fromSymbol.x;
+                    startY = fromSymbol.y + fromDim.height / 2;
+                    endX = toSymbol.x;
+                    endY = toSymbol.y - toDim.height / 2 - 8;
+
+                    ctx.beginPath();
+                    ctx.moveTo(startX, startY);
+                    ctx.lineTo(endX, endY);
+                    ctx.stroke();
+
+                    // Arrow pointing down into target
+                    drawPreviewArrow(ctx, startX, startY, endX, endY, scaleX, isPrinting || isPrintPage);
+
+                    // Label position in middle of line
+                    labelX = startX;
+                    labelY = startY + (endY - startY) / 2;
+                }
+            } else {
+                // Target is at same level or above: use original right-based logic
+                pathType = 'right-based';
+                const horizontalDistance = 60;
+
+                startX = fromSymbol.x + fromDim.width / 2;
+                startY = fromSymbol.y;
+                endX = toSymbol.x;
+                endY = toSymbol.y - toDim.height / 2 - 8;
+                branchX = startX + horizontalDistance;
+                branchY = startY;
+
+                ctx.beginPath();
+                ctx.moveTo(startX, startY);
+                ctx.lineTo(branchX, branchY); // Horizontal right
+                ctx.lineTo(endX, branchY); // Horizontal to target column
+                ctx.lineTo(endX, endY); // Vertical to target
+                ctx.stroke();
+
+                // Arrow pointing down into target
+                drawPreviewArrow(ctx, endX, branchY, endX, endY, scaleX, isPrinting || isPrintPage);
+
+                // Label position on horizontal segment
+                labelX = startX + horizontalDistance / 2;
+                labelY = startY - 8;
+            }
+
+            // Add connection index label
             const labelText = `${connectionIndex + 1}`;
 
             ctx.fillStyle = '#ef4444'; // Same red color
@@ -3156,10 +3260,6 @@
 
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-
-            // Position label in the middle of horizontal line
-            const labelX = startX + horizontalDistance / 2;
-            const labelY = startY - 8;
 
             // White background for label
             const textMetrics = ctx.measureText(labelText);
@@ -3180,18 +3280,48 @@
 
             ctx.save();
             ctx.fillStyle = ctx.strokeStyle; // Use same color as line
-            const textHeight = isPrinting || isPrintPage ? 12 : 12 * scaleX;
 
-            ctx.fillStyle = 'white';
-            ctx.fillRect(labelX - textWidth / 2 - 2, labelY - textHeight / 2 - 1, textWidth + 4, textHeight + 2);
+            ctx.beginPath();
 
-            ctx.fillStyle = '#ef4444';
-            ctx.fillText(labelText, labelX, labelY);
+            switch (direction) {
+                case 'down':
+                    // Arrow pointing down (into symbol from above)
+                    ctx.moveTo(x, y);
+                    ctx.lineTo(x - arrowSize / 2, y - arrowSize);
+                    ctx.lineTo(x + arrowSize / 2, y - arrowSize);
+                    break;
+                case 'up':
+                    // Arrow pointing up
+                    ctx.moveTo(x, y);
+                    ctx.lineTo(x - arrowSize / 2, y + arrowSize);
+                    ctx.lineTo(x + arrowSize / 2, y + arrowSize);
+                    break;
+                case 'right':
+                    // Arrow pointing right
+                    ctx.moveTo(x, y);
+                    ctx.lineTo(x - arrowSize, y - arrowSize / 2);
+                    ctx.lineTo(x - arrowSize, y + arrowSize / 2);
+                    break;
+                case 'left':
+                    // Arrow pointing left
+                    ctx.moveTo(x, y);
+                    ctx.lineTo(x + arrowSize, y - arrowSize / 2);
+                    ctx.lineTo(x + arrowSize, y + arrowSize / 2);
+                    break;
+                default:
+                    // Default right arrow
+                    ctx.moveTo(x, y);
+                    ctx.lineTo(x - arrowSize, y - arrowSize / 2);
+                    ctx.lineTo(x - arrowSize, y + arrowSize / 2);
+            }
+
+            ctx.closePath();
+            ctx.fill();
 
             ctx.restore();
         }
 
-        function drawStackedArrow(ctx, x, y, scaleX, isPrint, direction = 'right') {
+        function drawStackedArrow(ctx, x, y, scaleX, isPrint, direction = 'down') {
             const arrowSize = isPrint ? 8 : Math.max(8 * scaleX, 6);
 
             ctx.save();
@@ -3199,16 +3329,36 @@
 
             ctx.beginPath();
 
-            if (direction === 'down') {
-                // Arrow pointing down (into symbol from above)
-                ctx.moveTo(x, y);
-                ctx.lineTo(x - arrowSize / 2, y - arrowSize);
-                ctx.lineTo(x + arrowSize / 2, y - arrowSize);
-            } else {
-                // Default right arrow
-                ctx.moveTo(x, y);
-                ctx.lineTo(x - arrowSize, y - arrowSize / 2);
-                ctx.lineTo(x - arrowSize, y + arrowSize / 2);
+            switch (direction) {
+                case 'down':
+                    // Arrow pointing down (into symbol from above)
+                    ctx.moveTo(x, y);
+                    ctx.lineTo(x - arrowSize / 2, y - arrowSize);
+                    ctx.lineTo(x + arrowSize / 2, y - arrowSize);
+                    break;
+                case 'up':
+                    // Arrow pointing up
+                    ctx.moveTo(x, y);
+                    ctx.lineTo(x - arrowSize / 2, y + arrowSize);
+                    ctx.lineTo(x + arrowSize / 2, y + arrowSize);
+                    break;
+                case 'right':
+                    // Arrow pointing right
+                    ctx.moveTo(x, y);
+                    ctx.lineTo(x - arrowSize, y - arrowSize / 2);
+                    ctx.lineTo(x - arrowSize, y + arrowSize / 2);
+                    break;
+                case 'left':
+                    // Arrow pointing left
+                    ctx.moveTo(x, y);
+                    ctx.lineTo(x + arrowSize, y - arrowSize / 2);
+                    ctx.lineTo(x + arrowSize, y + arrowSize / 2);
+                    break;
+                default:
+                    // Default down arrow
+                    ctx.moveTo(x, y);
+                    ctx.lineTo(x - arrowSize / 2, y - arrowSize);
+                    ctx.lineTo(x + arrowSize / 2, y - arrowSize);
             }
 
             ctx.closePath();
