@@ -1,25 +1,7 @@
 <x-layout>
-    <div class="flex w-full space-x-3">
-        {{-- 1 Kiri - Diagram Doughnut Draft/Disahkan/Total --}}
-        <div class="flex h-[410px] flex-col">
-            <div class="mt-1 mb-3 flex w-full items-center justify-between pl-3">
-                <div>
-                    <h3 class="text-lg font-semibold text-slate-800">Statistik Draft & Disahkan</h3>
-                    <p class="text-sm text-slate-600">Perbandingan jumlah</p>
-                </div>
-            </div>
-            <div
-                class="relative mb-5 flex h-full w-full flex-col rounded-sm bg-white bg-clip-border p-6 text-gray-700 shadow-sm"
-            >
-                <div class="flex min-h-[317px] w-full flex-1 items-center justify-center">
-                    <canvas id="sopDoughnutChart" width="300" height="317"></canvas>
-                </div>
-                <div id="sopDoughnutLegend" class="mt-4 flex flex-col items-center space-y-2"></div>
-            </div>
-        </div>
-
-        {{-- 2 Tengah - Diagram Statistik Role --}}
-        <div class="flex h-[410px] flex-col">
+    <div class="flex space-x-4">
+        {{-- 1 Kiri - Diagram Statistik Role --}}
+        <div class="">
             <div class="mt-1 mb-3 flex w-full items-center justify-between pl-3">
                 <div>
                     <h3 class="text-lg font-semibold text-slate-800">Statistik SOP Berdasarkan Role</h3>
@@ -28,14 +10,14 @@
             </div>
 
             <div
-                class="relative mb-5 flex h-full w-full flex-col rounded-sm bg-white bg-clip-border p-6 text-gray-700 shadow-sm"
+                class="relative mb-5 flex w-full flex-col rounded-sm bg-white bg-clip-border p-6 text-gray-700 shadow-sm"
             >
-                <canvas id="roleStatsChart" width="400" height="366"></canvas>
+                <canvas id="roleStatsChart" width="400" height="300"></canvas>
             </div>
         </div>
 
-        <div class="flex h-[410px] w-full flex-col">
-            {{-- 3 Kanan --}}
+        <div class="">
+            {{-- 2 Kanan --}}
             <div class="mt-1 mb-3 flex w-full items-center justify-between pl-3">
                 <div>
                     @if (Auth::user()->role == 'admin')
@@ -50,7 +32,7 @@
                     @endif
                 </div>
                 <div class="ml-3">
-                    <div class="relative w-full max-w-sm">
+                    <div class="relative w-full max-w-sm min-w-[200px]">
                         <div class="relative w-80">
                             <input
                                 id="searchInputUnitStats"
@@ -83,7 +65,7 @@
             </div>
 
             <div
-                class="relative mb-5 flex h-full w-full flex-col overflow-scroll rounded-sm bg-white bg-clip-border text-gray-700 shadow-sm"
+                class="relative mb-5 flex w-full flex-col overflow-scroll rounded-sm bg-white bg-clip-border text-gray-700 shadow-sm"
             >
                 <table class="w-full table-auto text-left">
                     <thead>
@@ -372,113 +354,12 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Doughnut Chart Draft/Disahkan
-            const doughnutCtx = document.getElementById('sopDoughnutChart');
-            if (doughnutCtx) {
-                // Ambil semua data SOP dari seluruh table (tanpa pagination)
-                fetch('/dashboard/search?table=all')
-                    .then((response) => response.json())
-                    .then((result) => {
-                        let draft = 0;
-                        let disahkan = 0;
-                        if (result.success && result.data) {
-                            result.data.forEach((esop) => {
-                                if (esop.file_path && esop.file_name) {
-                                    disahkan++;
-                                } else {
-                                    draft++;
-                                }
-                            });
-                        }
-                        const total = draft + disahkan;
-
-                        const doughnutData = {
-                            labels: ['Draft', 'Disahkan'],
-                            datasets: [
-                                {
-                                    data: [draft, disahkan],
-                                    backgroundColor: [
-                                        'rgba(59, 130, 246, 0.8)', // Blue
-                                        'rgba(16, 185, 129, 0.8)', // Green
-                                    ],
-                                    borderColor: ['rgba(59, 130, 246, 1)', 'rgba(16, 185, 129, 1)'],
-                                    borderWidth: 1,
-                                },
-                            ],
-                        };
-
-                        new Chart(doughnutCtx, {
-                            type: 'doughnut',
-                            data: doughnutData,
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: {
-                                    legend: {
-                                        display: true,
-                                        position: 'bottom',
-                                        labels: {
-                                            font: { size: 14 },
-                                            color: '#334155',
-                                            usePointStyle: true,
-                                            padding: 20,
-                                            generateLabels: function (chart) {
-                                                const data = chart.data;
-                                                if (data.labels.length && data.datasets.length) {
-                                                    return data.labels.map((label, i) => {
-                                                        return {
-                                                            text: `${label} (${data.datasets[0].data[i]})`,
-                                                            fillStyle: data.datasets[0].backgroundColor[i],
-                                                            strokeStyle: data.datasets[0].borderColor[i],
-                                                            lineWidth: 2,
-                                                            hidden: false,
-                                                            index: i,
-                                                        };
-                                                    });
-                                                }
-                                                return [];
-                                            },
-                                        },
-                                    },
-                                    title: {
-                                        display: true,
-                                        text: 'Draft vs Disahkan',
-                                    },
-                                    tooltip: {
-                                        callbacks: {
-                                            label: function (context) {
-                                                let label = context.label || '';
-                                                let value = context.parsed;
-                                                return `${label}: ${value}`;
-                                            },
-                                        },
-                                    },
-                                },
-                                cutout: '70%',
-                            },
-                        });
-
-                        // Tambahkan legend total di bawah chart
-                        const legendContainer = document.getElementById('sopDoughnutLegend');
-                        legendContainer.innerHTML = '';
-                        const legendTotal = document.createElement('div');
-                        legendTotal.className = 'mt-2 text-base font-semibold text-slate-700';
-                        legendTotal.innerHTML = `Total SOP: <span class="text-slate-900">${total}</span>`;
-                        legendContainer.appendChild(legendTotal);
-                    });
-            }
             // Role Statistics Chart
             const ctx = document.getElementById('roleStatsChart');
             if (ctx) {
                 const roleData = @json($roleStats);
 
-                // Urutan role yang diinginkan
-                const roleOrder = ['sekretariat', 'direktorat', 'balai', 'obu', 'upbu'];
-                // Sort roleData sesuai urutan roleOrder
-                const sortedRoleData = roleOrder
-                    .map((role) => roleData.find((item) => item.role === role))
-                    .filter(Boolean); // Hapus undefined jika ada role yang tidak ditemukan
-
+                // Prepare data for chart
                 const labels = [];
                 const data = [];
                 const backgroundColors = [
@@ -489,23 +370,23 @@
                     'rgba(139, 69, 219, 0.8)', // Purple
                 ];
 
-                sortedRoleData.forEach((item, index) => {
+                roleData.forEach((item, index) => {
                     let roleName = item.role;
                     switch (item.role) {
-                        case 'sekretariat':
-                            roleName = 'Sekretariat';
-                            break;
-                        case 'direktorat':
-                            roleName = 'Direktorat';
-                            break;
-                        case 'balai':
-                            roleName = 'Balai';
+                        case 'admin':
+                            roleName = 'Admin';
                             break;
                         case 'obu':
                             roleName = 'OBU';
                             break;
                         case 'upbu':
                             roleName = 'UPBU';
+                            break;
+                        case 'sekretariat':
+                            roleName = 'Sekretariat';
+                            break;
+                        case 'direktorat':
+                            roleName = 'Direktorat';
                             break;
                         default:
                             roleName = item.role.charAt(0).toUpperCase() + item.role.slice(1);

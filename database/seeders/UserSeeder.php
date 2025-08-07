@@ -75,6 +75,18 @@ class UserSeeder extends Seeder
                 'name' => 'Direktorat Angkutan Udara',
                 'password' => Hash::make('password'),
             ],
+            [
+                'role' => 'balai',
+                'id_unor' => 'hatpen',
+                'name' => 'Balai Kesehatan Penerbangan',
+                'password' => Hash::make('password'),
+            ],
+            [
+                'role' => 'balai',
+                'id_unor' => 'btp',
+                'name' => 'Balai Teknik Penerbangan',
+                'password' => Hash::make('password'),
+            ],
         ];
 
         foreach ($users as $user) {
