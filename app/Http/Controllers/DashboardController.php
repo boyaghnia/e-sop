@@ -143,13 +143,18 @@ class DashboardController extends Controller
                     
                     if ($user->role === 'admin') {
                         // Admin dapat melihat semua ESOP
+                    } elseif ($user->role === 'sekretariat' || $user->role === 'direktorat' || $user->role === 'balai') {
+                        // Sekretariat, Direktorat, dan Balai dapat melihat ESOP dari role 'obu' dan 'upbu'
+                        $esopsQuery->whereHas('user', function($userQuery) {
+                            $userQuery->where('role', 'obu')->orWhere('role', 'upbu');
+                        });
                     } elseif ($user->role === 'obu') {
                         // OBU dapat melihat ESOP dari role 'upbu'
                         $esopsQuery->whereHas('user', function($userQuery) {
                             $userQuery->where('role', 'upbu');
                         });
                     } else {
-                        // Role lain hanya melihat ESOP milik sendiri
+                        // Role lain (termasuk upbu) hanya melihat ESOP milik sendiri
                         $esopsQuery->where('user_id', $user->id);
                     }
                     
@@ -173,13 +178,18 @@ class DashboardController extends Controller
                     
                     if ($user->role === 'admin') {
                         // Admin dapat melihat semua ESOP
+                    } elseif ($user->role === 'sekretariat' || $user->role === 'direktorat' || $user->role === 'balai') {
+                        // Sekretariat, Direktorat, dan Balai dapat melihat ESOP dari role 'obu' dan 'upbu'
+                        $esopsQuery->whereHas('user', function($userQuery) {
+                            $userQuery->where('role', 'obu')->orWhere('role', 'upbu');
+                        });
                     } elseif ($user->role === 'obu') {
                         // OBU dapat melihat ESOP dari role 'upbu'
                         $esopsQuery->whereHas('user', function($userQuery) {
                             $userQuery->where('role', 'upbu');
                         });
                     } else {
-                        // Role lain hanya melihat ESOP milik sendiri
+                        // Role lain (termasuk upbu) hanya melihat ESOP milik sendiri
                         $esopsQuery->where('user_id', $user->id);
                     }
                     

@@ -22,7 +22,7 @@ class EsopController extends Controller
         $myEsops = Esop::with('user')
             ->where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
-            ->paginate(5, ['*'], 'my_page');
+            ->paginate(10, ['*'], 'my_page');
         
         // Query untuk table bawah - berdasarkan role
         $allEsopsQuery = Esop::with('user');

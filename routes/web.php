@@ -35,3 +35,11 @@ use App\Http\Controllers\DashboardController;
     Route::get('/esop/print/{id}', [EsopController::class, 'esopPrint'])->name('esop.print');
     Route::post('/esop/upload-file/{id}', [EsopController::class, 'uploadFile'])->name('esop.upload.file');
 
+    Route::get('/faq', function () {
+        return view('faq');
+    });
+    
+    Route::get('/pedoman', function () {
+        return view('pedoman');
+    });
+
