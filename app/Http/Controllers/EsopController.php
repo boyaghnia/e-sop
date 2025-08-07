@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use App\Models\Esop;
 use App\Models\PelaksanaSop;
 use App\Models\Flow;
@@ -648,6 +649,37 @@ class EsopController extends Controller
         $flows = Flow::where('esop_id', $id)->orderBy('no_urutan')->get()->keyBy('no_urutan');
 
         return view('esop.print', compact('esop', 'flows'));
+    }
+
+    public function uploadFile(Request $request, $id)
+    {
+        try {
+            $request->validate([
+                'file' => 'required|file|mimes:pdf|max:1024', // max 1MB
+            ]);
+
+            $esop = Esop::findOrFail($id);
+            
+            // Hapus file lama jika ada
+            if ($esop->file_path && Storage::disk('public')->exists($esop->file_path)) {
+                Storage::disk('public')->delete($esop->file_path);
+            }
+
+            // Upload file baru
+            $file = $request->file('file');
+            $originalName = $file->getClientOriginalName();
+            $filename = time() . '_' . $originalName;
+            $filePath = $file->storeAs('esop_files', $filename, 'public');
+
+        // Update database
+        $esop->update([
+            'file_path' => $filePath,
+            'file_name' => $originalName,
+            'status' => 'Disahkan', // Update status menjadi Disahkan ketika file diupload
+        ]);            return redirect()->back()->with('success', 'File berhasil diupload!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat mengupload file: ' . $e->getMessage());
+        }
     }
     
 }

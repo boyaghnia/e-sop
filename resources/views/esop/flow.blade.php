@@ -1008,10 +1008,20 @@
 
         // Initialize existing symbols on page load
         function initializeExistingSymbols() {
+            console.log('Initializing existing symbols...');
+
             // First try to load from localStorage
             const loadedFromStorage = loadSymbolOrderFromStorage();
 
             if (loadedFromStorage && symbolOrder.length > 0) {
+                console.log('Loaded symbol order from storage:', symbolOrder);
+
+                // Validate the loaded data
+                const wasCleanedUp = validateAndCleanSymbolOrder();
+                if (wasCleanedUp) {
+                    console.log('Symbol order was cleaned up during initialization');
+                }
+
                 // Clear all existing numbers first
                 const allSymbolPreviews = document.querySelectorAll('.symbol-preview');
                 allSymbolPreviews.forEach((preview) => {
@@ -1035,6 +1045,8 @@
                     }
                 });
 
+                console.log('Symbol order after initialization:', symbolOrder);
+                console.log('Next symbol number:', nextSymbolNumber);
                 return; // Exit early if we loaded from storage
             }
 
@@ -1100,10 +1112,15 @@
             if (existingSymbols.length > 0) {
                 saveSymbolOrderToStorage();
             }
+
+            console.log('Fresh initialization completed:');
+            console.log('Symbol order:', symbolOrder);
+            console.log('Next symbol number:', nextSymbolNumber);
         }
 
         // Call initialization after page loads
         document.addEventListener('DOMContentLoaded', function () {
+            // Tunggu sampai halaman benar-benar siap dan semua select element sudah terbentuk
             setTimeout(() => {
                 initializeExistingSymbols();
 
@@ -1114,7 +1131,7 @@
                 });
 
                 syncPreviewTable();
-            }, 100);
+            }, 200); // Increase timeout to ensure all elements are ready
         });
 
         // Function to save symbol order to localStorage
@@ -1131,12 +1148,30 @@
                 try {
                     const parsed = JSON.parse(saved);
                     if (Array.isArray(parsed)) {
-                        symbolOrder = parsed;
-                        nextSymbolNumber = parsed.length + 1;
+                        // Validate that the saved order is still valid
+                        const validParsed = parsed.filter((item) => {
+                            // Check if the symbol select still exists and has a value
+                            const select = document.querySelector(
+                                `select[name="symbol_${item.rowNumber}_${item.colIndex}"]`,
+                            );
+                            return select && select.value && select.value !== '';
+                        });
+
+                        // Re-number if some symbols were filtered out
+                        if (validParsed.length !== parsed.length) {
+                            validParsed.forEach((item, index) => {
+                                item.number = index + 1;
+                            });
+                        }
+
+                        symbolOrder = validParsed;
+                        nextSymbolNumber = validParsed.length + 1;
                         return true;
                     }
                 } catch (e) {
                     console.error('Error parsing saved symbol order:', e);
+                    // Clear corrupted data
+                    clearSavedSymbolOrder();
                 }
             }
             return false;
@@ -1156,6 +1191,16 @@
 
             if (existingIndex !== -1) {
                 return symbolOrder[existingIndex].number;
+            }
+
+            // Pastikan nextSymbolNumber selalu sinkron dengan symbolOrder yang ada
+            const maxNumber = symbolOrder.length > 0 ? Math.max(...symbolOrder.map((item) => item.number)) : 0;
+            const correctNextNumber = maxNumber + 1;
+
+            // Update nextSymbolNumber jika tidak sinkron
+            if (nextSymbolNumber !== correctNextNumber) {
+                console.log(`Correcting nextSymbolNumber from ${nextSymbolNumber} to ${correctNextNumber}`);
+                nextSymbolNumber = correctNextNumber;
             }
 
             // Jika belum ada, tambahkan ke urutan
@@ -1236,20 +1281,79 @@
 
         // Function to reset all symbol numbering (useful for initialization or reset)
         function resetSymbolOrder() {
+            console.log('Resetting symbol order...');
             symbolOrder = [];
             nextSymbolNumber = 1;
             clearSavedSymbolOrder();
+
+            // Clear all existing symbol numbers from display
+            const allSymbolPreviews = document.querySelectorAll('.symbol-preview');
+            allSymbolPreviews.forEach((preview) => {
+                const numberDiv = preview.querySelector('.symbol-number');
+                if (numberDiv) {
+                    numberDiv.remove();
+                }
+            });
+        }
+
+        // Function to validate and clean symbol order
+        function validateAndCleanSymbolOrder() {
+            const validItems = [];
+            let hasChanges = false;
+
+            symbolOrder.forEach((item) => {
+                const select = document.querySelector(`select[name="symbol_${item.rowNumber}_${item.colIndex}"]`);
+                if (select && select.value && select.value !== '') {
+                    validItems.push(item);
+                } else {
+                    hasChanges = true;
+                    console.log(`Removing invalid symbol from order: ${item.key}`);
+                }
+            });
+
+            if (hasChanges) {
+                // Re-number the valid items
+                validItems.forEach((item, index) => {
+                    item.number = index + 1;
+                });
+
+                symbolOrder = validItems;
+                nextSymbolNumber = validItems.length + 1;
+                saveSymbolOrderToStorage();
+
+                console.log('Symbol order cleaned and re-numbered');
+                return true;
+            }
+
+            return false;
         }
 
         // Function to debug current symbol order
         function debugSymbolOrder() {
+            console.log('=== DEBUG SYMBOL ORDER ===');
             console.log('Current symbol order:', symbolOrder);
             console.log('Next symbol number:', nextSymbolNumber);
+            console.log('SymbolOrder length:', symbolOrder.length);
+
+            // Validate that nextSymbolNumber is correct
+            const maxNumber = symbolOrder.length > 0 ? Math.max(...symbolOrder.map((item) => item.number)) : 0;
+            const expectedNext = maxNumber + 1;
+            console.log('Expected next number:', expectedNext);
+
+            if (nextSymbolNumber !== expectedNext) {
+                console.warn(`INCONSISTENCY: nextSymbolNumber is ${nextSymbolNumber} but should be ${expectedNext}`);
+            }
 
             // Show current sequential numbering
             symbolOrder.forEach((item) => {
-                console.log(`Symbol ${item.number}: Row ${item.rowNumber}, Col ${item.colIndex}`);
+                const select = document.querySelector(`select[name="symbol_${item.rowNumber}_${item.colIndex}"]`);
+                const actualValue = select ? select.value : 'NOT_FOUND';
+                console.log(
+                    `Symbol ${item.number}: Row ${item.rowNumber}, Col ${item.colIndex}, Value: ${actualValue}`,
+                );
             });
+
+            console.log('=== END DEBUG ===');
         }
 
         function calculateActualRowHeights() {

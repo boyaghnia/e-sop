@@ -3629,4 +3629,11 @@
             });
         }
     </script>
+
+    <script>
+        window.onload = async function () {
+            await new Promise((resolve) => setTimeout(resolve, 1100)); // delay 1100ms
+            window.print();
+        };
+    </script>
 </x-layout>

@@ -30,6 +30,9 @@ return new class extends Migration
         $table->text('peringatan')->nullable();
         $table->text('pencatatan_pendataan')->nullable();
         $table->text('cara_mengatasi')->nullable();
+        $table->string('file_path')->nullable();
+        $table->string('file_name')->nullable();
+        $table->string('status')->nullable()->default('Draft');
         $table->timestamps();
     });
         

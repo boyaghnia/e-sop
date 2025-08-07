@@ -12,16 +12,19 @@ return new class extends Migration
     public function up()
     {
         Schema::create('flows', function (Blueprint $table) {
-        $table->id();
-        $table->foreignId('esop_id')->constrained()->onDelete('cascade');
-        $table->integer('no_urutan')->default(0);
-        $table->text('uraian_kegiatan');
-        $table->text('kelengkapan')->nullable();
-        $table->text('waktu')->nullable();
-        $table->text('output')->nullable();
-        $table->text('keterangan')->nullable();
-        $table->timestamps();
-    });
+            $table->id();
+            $table->foreignId('esop_id')->constrained()->onDelete('cascade');
+            $table->integer('no_urutan')->default(0);
+            $table->text('uraian_kegiatan');
+            $table->text('kelengkapan')->nullable();
+            $table->text('waktu')->nullable();
+            $table->text('output')->nullable();
+            $table->text('keterangan')->nullable();
+            $table->json('symbols')->nullable();
+            $table->json('return_to')->nullable();
+            $table->json('connect_to')->nullable();
+            $table->timestamps();
+        });
     }
 
     /**

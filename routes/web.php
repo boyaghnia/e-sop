@@ -33,4 +33,5 @@ use App\Http\Controllers\DashboardController;
     Route::post('/esop/flow/update/{id}', [EsopController::class, 'updateFlow'])->name('flow.update');
     Route::post('/esop/lanjut/{id}', [EsopController::class, 'lanjutFlow'])->name('esop.lanjut.flow');
     Route::get('/esop/print/{id}', [EsopController::class, 'esopPrint'])->name('esop.print');
+    Route::post('/esop/upload-file/{id}', [EsopController::class, 'uploadFile'])->name('esop.upload.file');
 

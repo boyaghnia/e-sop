@@ -28,6 +28,8 @@ class Esop extends Model
         'peringatan',
         'pencatatan_pendataan',
         'cara_mengatasi',
+        'file_path',
+        'file_name',
     ];
 
     public function user()
