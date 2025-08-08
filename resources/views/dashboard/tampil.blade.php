@@ -154,7 +154,30 @@
             @endif
         </div>
         <div class="ml-3">
-            <div class="relative w-full max-w-sm min-w-[200px]">
+            <div class="relative flex w-full max-w-sm min-w-[200px] items-center space-x-2">
+                <div>
+                    <button
+                        id="exportButton"
+                        class="flex w-fit cursor-pointer items-center justify-center rounded-md bg-green-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-400"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke-width="1.5"
+                            stroke="currentColor"
+                            class="size-5"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m.75 12 3 3m0 0 3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"
+                            />
+                        </svg>
+                        <p class="px-2">Export</p>
+                    </button>
+                </div>
+
                 <div class="relative w-80">
                     <input
                         id="searchInputAllEsops"
@@ -471,88 +494,147 @@
             // Role Statistics Chart
             const ctx = document.getElementById('roleStatsChart');
             if (ctx) {
-                const roleData = @json($roleStats);
+                // Fetch data untuk mendapatkan breakdown draft dan disahkan per role
+                fetch('/dashboard/search?table=all')
+                    .then((response) => response.json())
+                    .then((result) => {
+                        if (result.success && result.data) {
+                            // Hitung data per role
+                            const roleStatsData = {};
 
-                // Urutan role yang diinginkan
-                const roleOrder = ['sekretariat', 'direktorat', 'balai', 'obu', 'upbu'];
-                // Sort roleData sesuai urutan roleOrder
-                const sortedRoleData = roleOrder
-                    .map((role) => roleData.find((item) => item.role === role))
-                    .filter(Boolean); // Hapus undefined jika ada role yang tidak ditemukan
+                            // Initialize roles
+                            const roleOrder = ['sekretariat', 'direktorat', 'balai', 'obu', 'upbu'];
+                            roleOrder.forEach((role) => {
+                                roleStatsData[role] = { draft: 0, disahkan: 0, total: 0 };
+                            });
 
-                const labels = [];
-                const data = [];
-                const backgroundColors = [
-                    'rgba(59, 130, 246, 0.8)', // Blue
-                    'rgba(16, 185, 129, 0.8)', // Green
-                    'rgba(245, 158, 11, 0.8)', // Yellow
-                    'rgba(239, 68, 68, 0.8)', // Red
-                    'rgba(139, 69, 219, 0.8)', // Purple
-                ];
+                            // Process data
+                            result.data.forEach((esop) => {
+                                const userRole = esop.user?.role || 'unknown';
+                                if (roleStatsData[userRole]) {
+                                    if (esop.file_path && esop.file_name) {
+                                        roleStatsData[userRole].disahkan++;
+                                    } else {
+                                        roleStatsData[userRole].draft++;
+                                    }
+                                    roleStatsData[userRole].total++;
+                                }
+                            });
 
-                sortedRoleData.forEach((item, index) => {
-                    let roleName = item.role;
-                    switch (item.role) {
-                        case 'sekretariat':
-                            roleName = 'Sekretariat';
-                            break;
-                        case 'direktorat':
-                            roleName = 'Direktorat';
-                            break;
-                        case 'balai':
-                            roleName = 'Balai';
-                            break;
-                        case 'obu':
-                            roleName = 'OBU';
-                            break;
-                        case 'upbu':
-                            roleName = 'UPBU';
-                            break;
-                        default:
-                            roleName = item.role.charAt(0).toUpperCase() + item.role.slice(1);
-                    }
-                    labels.push(roleName);
-                    data.push(item.total_sop);
-                });
+                            const labels = [];
+                            const draftData = [];
+                            const disahkanData = [];
 
-                new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: labels,
-                        datasets: [
-                            {
-                                label: 'Jumlah SOP',
-                                data: data,
-                                backgroundColor: backgroundColors.slice(0, data.length),
-                                borderColor: backgroundColors
-                                    .slice(0, data.length)
-                                    .map((color) => color.replace('0.8', '1')),
-                                borderWidth: 1,
-                            },
-                        ],
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    stepSize: 1,
+                            roleOrder.forEach((role) => {
+                                if (roleStatsData[role]) {
+                                    let roleName = role;
+                                    switch (role) {
+                                        case 'sekretariat':
+                                            roleName = 'Sekretariat';
+                                            break;
+                                        case 'direktorat':
+                                            roleName = 'Direktorat';
+                                            break;
+                                        case 'balai':
+                                            roleName = 'Balai';
+                                            break;
+                                        case 'obu':
+                                            roleName = 'OBU';
+                                            break;
+                                        case 'upbu':
+                                            roleName = 'UPBU';
+                                            break;
+                                        default:
+                                            roleName = role.charAt(0).toUpperCase() + role.slice(1);
+                                    }
+                                    labels.push(roleName);
+                                    draftData.push(roleStatsData[role].draft);
+                                    disahkanData.push(roleStatsData[role].disahkan);
+                                }
+                            });
+
+                            new Chart(ctx, {
+                                type: 'bar',
+                                data: {
+                                    labels: labels,
+                                    datasets: [
+                                        {
+                                            label: 'Draft',
+                                            data: draftData,
+                                            backgroundColor: 'rgba(59, 130, 246, 0.8)', // Blue
+                                            borderColor: 'rgba(59, 130, 246, 1)',
+                                            borderWidth: 1,
+                                        },
+                                        {
+                                            label: 'Disahkan',
+                                            data: disahkanData,
+                                            backgroundColor: 'rgba(16, 185, 129, 0.8)', // Green
+                                            borderColor: 'rgba(16, 185, 129, 1)',
+                                            borderWidth: 1,
+                                        },
+                                    ],
                                 },
-                            },
-                        },
-                        plugins: {
-                            title: {
-                                display: true,
-                                text: 'Statistik Jumlah SOP',
-                            },
-                            legend: {
-                                display: false,
-                            },
-                        },
-                    },
-                });
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    scales: {
+                                        x: {
+                                            stacked: true,
+                                        },
+                                        y: {
+                                            stacked: true,
+                                            beginAtZero: true,
+                                            ticks: {
+                                                stepSize: 1,
+                                            },
+                                        },
+                                    },
+                                    plugins: {
+                                        title: {
+                                            display: true,
+                                            text: 'Statistik SOP',
+                                        },
+                                        legend: {
+                                            display: true,
+                                            position: 'top',
+                                        },
+                                        tooltip: {
+                                            mode: 'index',
+                                            intersect: false,
+                                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                            titleColor: 'white',
+                                            bodyColor: 'white',
+                                            borderColor: 'rgba(255, 255, 255, 0.1)',
+                                            borderWidth: 1,
+                                            cornerRadius: 8,
+                                            displayColors: true,
+                                            callbacks: {
+                                                title: function (context) {
+                                                    return context[0].label;
+                                                },
+                                                afterTitle: function (context) {
+                                                    const dataIndex = context[0].dataIndex;
+                                                    const total = draftData[dataIndex] + disahkanData[dataIndex];
+                                                    return `Total SOP: ${total}`;
+                                                },
+                                                label: function (context) {
+                                                    const label = context.dataset.label;
+                                                    const value = context.parsed.y;
+                                                    return ` ${label}: ${value}`;
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            });
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('Error fetching role stats data:', error);
+                        // Fallback to original data if fetch fails
+                        const roleData = @json($roleStats);
+                        // ... original chart code as fallback
+                    });
             }
 
             // Unit Stats search
@@ -752,7 +834,7 @@
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
                                             </svg>
-                                        </button>x
+                                        </button>
                                     </form>
                                 </div>
                             </td>
@@ -813,8 +895,155 @@
                     });
                 }
             });
+
+            // Function untuk menutup modal
+            function closeExportModal() {
+                document.getElementById('exportModal').classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+            }
+
+            // Event listener untuk tombol export
+            document.getElementById('exportButton').addEventListener('click', function () {
+                document.getElementById('exportModal').classList.remove('hidden');
+                document.body.classList.add('overflow-hidden');
+            });
+
+            // Event listener untuk menutup modal dengan tombol close
+            document.getElementById('closeExportModal').addEventListener('click', function () {
+                closeExportModal();
+            });
+
+            // Event listener untuk backdrop modal
+            document.getElementById('exportModal').addEventListener('click', function (e) {
+                if (e.target === this) {
+                    closeExportModal();
+                }
+            });
+
+            // Event listener untuk tombol ESC
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') {
+                    const modal = document.getElementById('exportModal');
+                    if (!modal.classList.contains('hidden')) {
+                        closeExportModal();
+                    }
+                }
+            });
+
+            // Event listeners untuk tombol export
+            document.getElementById('exportAllBtn').addEventListener('click', function () {
+                closeExportModal(); // Tutup modal terlebih dahulu
+                setTimeout(function () {
+                    window.location.href = '/export/sop?type=all';
+                }, 100); // Delay sedikit untuk animasi modal close
+            });
+
+            document.getElementById('exportApprovedBtn').addEventListener('click', function () {
+                closeExportModal(); // Tutup modal terlebih dahulu
+                setTimeout(function () {
+                    window.location.href = '/export/sop?type=approved';
+                }, 100); // Delay sedikit untuk animasi modal close
+            });
+
+            document.getElementById('exportDraftBtn').addEventListener('click', function () {
+                closeExportModal(); // Tutup modal terlebih dahulu
+                setTimeout(function () {
+                    window.location.href = '/export/sop?type=draft';
+                }, 100); // Delay sedikit untuk animasi modal close
+            });
         });
     </script>
+
+    <!-- Export Modal -->
+    <div id="exportModal" class="bg-opacity-80 fixed inset-0 z-50 hidden h-full w-full overflow-y-auto bg-gray-900/80">
+        <div class="relative top-72 mx-auto w-96 rounded-md border bg-white p-5 shadow-lg">
+            <div class="mt-3">
+                <!-- Modal Header -->
+                <div class="mb-4 flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-900">Pilih Jenis Export</h3>
+                    <button id="closeExportModal" class="cursor-pointer text-gray-500 hover:text-gray-700">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"
+                            ></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="space-y-4">
+                    <!-- Export All Button -->
+                    <button
+                        id="exportAllBtn"
+                        class="flex w-full cursor-pointer items-center justify-center rounded-lg bg-blue-600 px-4 py-3 font-semibold text-white transition duration-200 hover:bg-blue-700"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke-width="1.5"
+                            stroke="currentColor"
+                            class="mr-2 h-5 w-5"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m.75 12 3 3m0 0 3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"
+                            />
+                        </svg>
+                        Export Semua SOP
+                    </button>
+
+                    <!-- Export Approved Button -->
+                    <button
+                        id="exportApprovedBtn"
+                        class="flex w-full cursor-pointer items-center justify-center rounded-lg bg-green-600 px-4 py-3 font-semibold text-white transition duration-200 hover:bg-green-700"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke-width="1.5"
+                            stroke="currentColor"
+                            class="mr-2 h-5 w-5"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                            />
+                        </svg>
+                        Export SOP Disahkan
+                    </button>
+
+                    <!-- Export Draft Button -->
+                    <button
+                        id="exportDraftBtn"
+                        class="flex w-full cursor-pointer items-center justify-center rounded-lg bg-orange-600 px-4 py-3 font-semibold text-white transition duration-200 hover:bg-orange-700"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke-width="1.5"
+                            stroke="currentColor"
+                            class="mr-2 h-5 w-5"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504-1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z"
+                            />
+                        </svg>
+                        Export SOP Draft
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
         document.addEventListener('keydown', function (e) {

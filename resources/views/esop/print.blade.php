@@ -3633,6 +3633,7 @@
     <script>
         window.onload = async function () {
             await new Promise((resolve) => setTimeout(resolve, 1100)); // delay 1100ms
+            document.title = '{{ $esop->nama_sop }}';
             window.print();
         };
     </script>

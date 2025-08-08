@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\Esop;
 use App\Models\PelaksanaSop;
 use App\Models\Flow;
+use App\Exports\EsopExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class EsopController extends Controller
 {
@@ -565,41 +567,6 @@ class EsopController extends Controller
         }
     }
 
-    /**
-     * Menampilkan halaman cetak SOP yang menggabungkan data dari esop edit dan flow
-     */
-    // public function esopPrint($id)
-    // {
-    //     // Memastikan user berhak mengakses SOP ini
-    //     $user = Auth::user();
-    //     $esop = Esop::with(['pelaksanas'])->findOrFail($id);
-        
-    //     // Ambil data flow untuk SOP ini
-    //     $flows = Flow::where('esop_id', $id)
-    //                 ->orderBy('no_urutan', 'asc')
-    //                 ->get();
-                    
-    //     // Untuk setiap flow, ambil data pelaksana dan simbol
-    //     foreach ($flows as $flow) {
-    //         // Format data pelaksana
-    //         $pelaksanaValues = [];
-    //         $flowPelaksanaData = json_decode($flow->pelaksana_json, true);
-            
-    //         if ($flowPelaksanaData && is_array($flowPelaksanaData)) {
-    //             foreach ($flowPelaksanaData as $pelaksanaId => $data) {
-    //                 $pelaksanaValues[$pelaksanaId] = [
-    //                     'symbol' => $data['symbol'] ?? '',
-    //                     'symbol_number' => $data['symbol_number'] ?? '',
-    //                 ];
-    //             }
-    //         }
-            
-    //         $flow->pelaksana_values = $pelaksanaValues;
-    //     }
-        
-    //     return view('esop.print', compact('esop', 'flows'));
-    // }
-
         public function esopPrint($id)
     {
         $user = Auth::user();
@@ -680,6 +647,87 @@ class EsopController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Terjadi kesalahan saat mengupload file: ' . $e->getMessage());
         }
+    }
+
+    public function esopFolder() {
+        $user = Auth::user();
+        
+        // Base query berdasarkan role
+        $baseQuery = Esop::with('user');
+        
+        if ($user->role === 'admin') {
+            // Admin dapat melihat semua ESOP
+            // Tidak ada filter tambahan
+        } elseif ($user->role === 'sekretariat' || $user->role === 'direktorat' || $user->role === 'balai') {
+            // Sekretariat dan Direktorat dapat melihat ESOP dari role 'obu', 'upbu' dan milik sendiri
+            $baseQuery->where(function($q) use ($user) {
+                $q->where('user_id', $user->id)
+                  ->orWhereHas('user', function($userQuery) {
+                      $userQuery->where('role', 'obu')->orWhere('role', 'upbu');
+                  });
+            });
+        } elseif ($user->role === 'obu') {
+            // OBU dapat melihat ESOP dari role 'upbu'
+            $baseQuery->whereHas('user', function($userQuery) {
+                $userQuery->where('role', 'upbu');
+            });
+        } else {
+            // Role lain (termasuk upbu) hanya melihat ESOP milik sendiri
+            $baseQuery->where('user_id', $user->id);
+        }
+        
+        // 1. Semua SOP (tanpa filter status)
+        $allEsops = (clone $baseQuery)->orderBy('created_at', 'desc')
+            ->paginate(5, ['*'], 'all_page');
+        
+        // 2. SOP yang sudah disahkan (memiliki file_path dan file_name)
+        $disahkanEsops = (clone $baseQuery)
+            ->whereNotNull('file_path')
+            ->whereNotNull('file_name')
+            ->where('file_path', '!=', '')
+            ->where('file_name', '!=', '')
+            ->orderBy('created_at', 'desc')
+            ->paginate(5, ['*'], 'disahkan_page');
+        
+        // 3. SOP yang masih draft (belum memiliki file_path dan file_name)
+        $draftEsops = (clone $baseQuery)
+            ->where(function($q) {
+                $q->whereNull('file_path')
+                  ->orWhereNull('file_name')
+                  ->orWhere('file_path', '')
+                  ->orWhere('file_name', '');
+            })
+            ->orderBy('created_at', 'desc')
+            ->paginate(5, ['*'], 'draft_page');
+
+        return view('esop.folder', compact('allEsops', 'disahkanEsops', 'draftEsops', 'user'));
+    }
+
+    /**
+     * Export all SOPs to Excel
+     */
+    public function exportAll()
+    {
+        $filename = 'SOP_' . date('d-m-Y_H-i-s') . '.xlsx';
+        return Excel::download(new EsopExport('all'), $filename);
+    }
+
+    /**
+     * Export approved SOPs to Excel
+     */
+    public function exportDisahkan()
+    {
+        $filename = 'SOP_Disahkan_' . date('d-m-Y_H-i-s') . '.xlsx';
+        return Excel::download(new EsopExport('disahkan'), $filename);
+    }
+
+    /**
+     * Export draft SOPs to Excel
+     */
+    public function exportDraft()
+    {
+        $filename = 'SOP_Draft_' . date('d-m-Y_H-i-s') . '.xlsx';
+        return Excel::download(new EsopExport('draft'), $filename);
     }
     
 }

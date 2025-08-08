@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Esop;
 use Illuminate\Support\Facades\Auth;
+use App\Exports\EsopExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class DashboardController extends Controller
 {
@@ -218,6 +220,37 @@ class DashboardController extends Controller
                 'data' => [],
                 'message' => 'Error: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    /**
+     * Export SOPs to Excel from dashboard
+     */
+    public function exportSop(Request $request)
+    {
+        $type = $request->get('type', 'all');
+        
+        // Validate type
+        if (!in_array($type, ['all', 'approved', 'draft'])) {
+            return redirect()->back()->with('error', 'Tipe export tidak valid');
+        }
+        
+        // Map type for EsopExport class
+        $exportType = $type === 'approved' ? 'disahkan' : $type;
+        
+        // Generate filename based on type
+        $typeNames = [
+            'all' => 'SOP',
+            'approved' => 'SOP_Disahkan',
+            'draft' => 'SOP_Draft'
+        ];
+        
+        $filename = $typeNames[$type] . '_' . date('d-m-Y_H-i-s') . '.xlsx';
+        
+        try {
+            return Excel::download(new EsopExport($exportType), $filename);
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat mengexport data: ' . $e->getMessage());
         }
     }
 
