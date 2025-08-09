@@ -1,4 +1,25 @@
 <x-layout>
+    <div class="mb-5 w-full rounded-lg bg-blue-500 text-white">
+        <div class="container mx-auto flex items-center justify-between px-6 py-4">
+            <div class="flex items-center">
+                <svg viewBox="0 0 40 40" class="h-6 w-6 fill-current">
+                    <path
+                        d="M20 3.33331C10.8 3.33331 3.33337 10.8 3.33337 20C3.33337 29.2 10.8 36.6666 20 36.6666C29.2 36.6666 36.6667 29.2 36.6667 20C36.6667 10.8 29.2 3.33331 20 3.33331ZM21.6667 28.3333H18.3334V25H21.6667V28.3333ZM21.6667 21.6666H18.3334V11.6666H21.6667V21.6666Z"
+                    ></path>
+                </svg>
+
+                <p class="mx-7 my-auto">
+                    <span class="font-bold">Harap isi E-SOP dengan bertahap !</span>
+                    <br />
+                    <span class="text-xs">
+                        Silahkan input isian pada sebelah kiri, lalu akan muncul preview disebelah kanan, lalu klik
+                        simpan.
+                    </span>
+                </p>
+            </div>
+        </div>
+    </div>
+
     <div class="flex space-x-3">
         <div class="w-[35%] rounded-sm bg-white p-4 shadow-sm">
             <form id="esopForm" action="{{ route('esop.simpan') }}" method="POST">
@@ -7,6 +28,40 @@
                     <div class="space-y-12">
                         <div class="pb-2">
                             <div class="mt-2 grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-6">
+                                <div class="sm:col-span-6">
+                                    <label for="isian" class="block text-sm/6 font-medium text-gray-900">Isian</label>
+                                    <div class="mt-1 grid grid-cols-1">
+                                        <div class="relative mt-1">
+                                            <select
+                                                id="isian_select"
+                                                name="isian"
+                                                class="form-control col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pr-12 pl-3 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 focus:outline focus:-outline-offset-2 focus:outline-blue-600 sm:text-sm/6"
+                                            >
+                                                <option value="Srikandi">Srikandi</option>
+                                                <option value="Manual">Manual</option>
+                                            </select>
+                                            <span
+                                                class="pointer-events-none absolute inset-y-0 right-3 flex items-center"
+                                            >
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke-width="1.5"
+                                                    stroke="currentColor"
+                                                    class="h-4 w-4"
+                                                >
+                                                    <path
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        d="m19.5 8.25-7.5 7.5-7.5-7.5"
+                                                    />
+                                                </svg>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div class="sm:col-span-6">
                                     <label for="judul_sop" class="block text-sm/6 font-medium text-gray-900">
                                         Judul SOP (Unit Organisasi)
@@ -18,7 +73,7 @@
                                                 name="judul_sop"
                                                 id="judul_sop"
                                                 rows="3"
-                                                class="form-control block field-sizing-content w-full resize-none overflow-hidden rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                                                class="form-control block field-sizing-content w-full resize-none overflow-hidden rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-blue-600 sm:text-sm/6"
                                                 oninput="updateEsopPreview(); this.style.height='auto'; this.style.height=(this.scrollHeight)+'px';"
                                             ></textarea>
                                         </div>
@@ -36,7 +91,7 @@
                                                 name="no_sop"
                                                 id="no_sop"
                                                 rows="3"
-                                                class="form-control block field-sizing-content w-full resize-none overflow-hidden rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                                                class="form-control block field-sizing-content w-full resize-none overflow-hidden rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-blue-600 sm:text-sm/6"
                                                 oninput="updateEsopPreview(); this.style.height='auto'; this.style.height=(this.scrollHeight)+'px';"
                                             ></textarea>
                                         </div>
@@ -54,7 +109,7 @@
                                                 name="tgl_ditetapkan"
                                                 id="tgl_ditetapkan"
                                                 rows="3"
-                                                class="form-control block field-sizing-content w-full resize-none overflow-hidden rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                                                class="form-control block field-sizing-content w-full resize-none overflow-hidden rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-blue-600 sm:text-sm/6"
                                                 oninput="updateEsopPreview(); this.style.height='auto'; this.style.height=(this.scrollHeight)+'px';"
                                             ></textarea>
                                         </div>
@@ -72,7 +127,7 @@
                                                 name="tgl_revisi"
                                                 id="tgl_revisi"
                                                 rows="3"
-                                                class="form-control block field-sizing-content w-full resize-none overflow-hidden rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                                                class="form-control block field-sizing-content w-full resize-none overflow-hidden rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-blue-600 sm:text-sm/6"
                                                 oninput="updateEsopPreview(); this.style.height='auto'; this.style.height=(this.scrollHeight)+'px';"
                                             ></textarea>
                                         </div>
@@ -90,7 +145,7 @@
                                                 name="tgl_diberlakukan"
                                                 id="tgl_diberlakukan"
                                                 rows="3"
-                                                class="form-control block field-sizing-content w-full resize-none overflow-hidden rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                                                class="form-control block field-sizing-content w-full resize-none overflow-hidden rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-blue-600 sm:text-sm/6"
                                                 oninput="updateEsopPreview(); this.style.height='auto'; this.style.height=(this.scrollHeight)+'px';"
                                             ></textarea>
                                         </div>
@@ -104,14 +159,66 @@
                                     <div class="mt-1 grid grid-cols-1">
                                         <div class="mt-1">
                                             <textarea
-                                                type="text"
-                                                name="ditetapkan_oleh"
                                                 id="ditetapkan_oleh"
+                                                name="ditetapkan_oleh"
                                                 rows="3"
-                                                class="form-control block field-sizing-content w-full resize-none overflow-hidden rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                                                class="form-control block field-sizing-content w-full resize-none overflow-hidden rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-blue-600 sm:text-sm/6"
                                                 oninput="updateEsopPreview(); this.style.height='auto'; this.style.height=(this.scrollHeight)+'px';"
                                             ></textarea>
                                         </div>
+
+                                        <script>
+                                            function applyIsianMode(value) {
+                                                const noSopField = document.getElementById('no_sop');
+                                                const tglDitetapkanField = document.getElementById('tgl_ditetapkan');
+                                                const tglDiberlakukanField =
+                                                    document.getElementById('tgl_diberlakukan');
+                                                const ditetapkanOlehTextarea =
+                                                    document.getElementById('ditetapkan_oleh');
+
+                                                if (value === 'Srikandi') {
+                                                    // Isi literal placeholder (bukan variabel server)
+                                                    noSopField.value = '${nomor_naskah}';
+                                                    tglDitetapkanField.value = '${tanggal_naskah}';
+                                                    tglDiberlakukanField.value = '${tanggal_naskah}';
+                                                    ditetapkanOlehTextarea.value =
+                                                        '${jabatan_pengirim}\n\n\n${ttd_pengirim}\n\n\n${nama_pengirim}\n${nip_pengirim}';
+
+                                                    noSopField.readOnly = true;
+                                                    tglDitetapkanField.readOnly = true;
+                                                    tglDiberlakukanField.readOnly = true;
+                                                    ditetapkanOlehTextarea.readOnly = true;
+                                                } else {
+                                                    // Mode manual
+                                                    noSopField.readOnly = false;
+                                                    tglDitetapkanField.readOnly = false;
+                                                    tglDiberlakukanField.readOnly = false;
+                                                    ditetapkanOlehTextarea.readOnly = false;
+
+                                                    noSopField.value = '';
+                                                    tglDitetapkanField.value = '';
+                                                    tglDiberlakukanField.value = '';
+                                                    ditetapkanOlehTextarea.value = '';
+                                                }
+
+                                                // Update preview setiap perubahan
+                                                updateEsopPreview();
+                                            }
+
+                                            // Event handler untuk select
+                                            document
+                                                .getElementById('isian_select')
+                                                .addEventListener('change', function () {
+                                                    applyIsianMode(this.value);
+                                                });
+
+                                            // Set default ke Srikandi saat halaman pertama kali dimuat
+                                            document.addEventListener('DOMContentLoaded', function () {
+                                                const select = document.getElementById('isian_select');
+                                                select.value = 'Srikandi';
+                                                applyIsianMode('Srikandi');
+                                            });
+                                        </script>
                                     </div>
                                 </div>
 
@@ -126,7 +233,7 @@
                                                 name="nama_sop"
                                                 id="nama_sop"
                                                 rows="3"
-                                                class="form-control block field-sizing-content w-full resize-none overflow-hidden rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                                                class="form-control block field-sizing-content w-full resize-none overflow-hidden rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-blue-600 sm:text-sm/6"
                                                 oninput="updateEsopPreview(); this.style.height='auto'; this.style.height=(this.scrollHeight)+'px';"
                                             ></textarea>
                                         </div>
@@ -144,7 +251,7 @@
                                                 name="dasar_hukum"
                                                 id="dasar_hukum"
                                                 rows="3"
-                                                class="form-control block field-sizing-content w-full resize-none overflow-hidden rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                                                class="form-control block field-sizing-content w-full resize-none overflow-hidden rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-blue-600 sm:text-sm/6"
                                                 oninput="updateEsopPreview(); this.style.height='auto'; this.style.height=(this.scrollHeight)+'px';"
                                             ></textarea>
                                         </div>
@@ -162,7 +269,7 @@
                                                 name="cara_mengatasi"
                                                 id="cara_mengatasi"
                                                 rows="3"
-                                                class="form-control block field-sizing-content w-full resize-none overflow-hidden rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                                                class="form-control block field-sizing-content w-full resize-none overflow-hidden rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-blue-600 sm:text-sm/6"
                                                 oninput="updateEsopPreview(); this.style.height='auto'; this.style.height=(this.scrollHeight)+'px';"
                                             ></textarea>
                                         </div>
@@ -180,7 +287,7 @@
                                                 name="keterkaitan"
                                                 id="keterkaitan"
                                                 rows="3"
-                                                class="form-control block field-sizing-content w-full resize-none overflow-hidden rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                                                class="form-control block field-sizing-content w-full resize-none overflow-hidden rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-blue-600 sm:text-sm/6"
                                                 oninput="updateEsopPreview(); this.style.height='auto'; this.style.height=(this.scrollHeight)+'px';"
                                             ></textarea>
                                         </div>
@@ -201,7 +308,7 @@
                                                 name="peralatan_perlengkapan"
                                                 id="peralatan_perlengkapan"
                                                 rows="3"
-                                                class="form-control block field-sizing-content w-full resize-none overflow-hidden rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                                                class="form-control block field-sizing-content w-full resize-none overflow-hidden rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-blue-600 sm:text-sm/6"
                                                 oninput="updateEsopPreview(); this.style.height='auto'; this.style.height=(this.scrollHeight)+'px';"
                                             ></textarea>
                                         </div>
@@ -219,7 +326,7 @@
                                                 name="peringatan"
                                                 id="peringatan"
                                                 rows="3"
-                                                class="form-control block field-sizing-content w-full resize-none overflow-hidden rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                                                class="form-control block field-sizing-content w-full resize-none overflow-hidden rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-blue-600 sm:text-sm/6"
                                                 oninput="updateEsopPreview(); this.style.height='auto'; this.style.height=(this.scrollHeight)+'px';"
                                             ></textarea>
                                         </div>
@@ -300,8 +407,9 @@
                         <!-- === Ditetapkan Oleh === -->
                         <tr>
                             <td colspan="2" class="border p-2 font-bold">Ditetapkan Oleh</td>
-                            <td colspan="3" class="border p-2 text-center">
-                                <p>
+                            <td colspan="3" class="border p-2">
+                                {{--
+                                    <p>
                                     <span style="margin-left: 1rem" class="spacing">${jabatan_pengirim}</span>
                                     <br />
                                     <br />
@@ -315,7 +423,9 @@
                                     <span style="margin-left: 1rem" class="spacing">${nama_pengirim}</span>
                                     <br />
                                     <span style="margin-left: 1rem" class="spacing">${nip_pengirim}</span>
-                                </p>
+                                    </p>
+                                --}}
+                                <div id="preview_ditetapkan_oleh" class="text-left text-sm text-gray-800"></div>
                             </td>
                         </tr>
 
@@ -393,25 +503,34 @@
                 const preview = document.getElementById(previewId);
                 if (!textarea || !preview) return;
 
-                const lines = textarea.value
-                    .split('\n')
-                    .map((line) => line.trim())
-                    .filter((line) => line !== '');
+                // Pecah isi textarea menjadi array baris (termasuk baris kosong)
+                const rawLines = textarea.value.split('\n');
 
-                // ➤ Untuk "paragraf biasa" (tanpa list)
+                // Tangani khusus field 'ditetapkan_oleh' agar Enter menambah baris kosong
+                if (inputId === 'ditetapkan_oleh') {
+                    const html = rawLines
+                        .map((line) => {
+                            const trimmed = line.trim();
+                            if (trimmed === '${ttd_pengirim}') {
+                                return `<p class="mb-1" style="margin-left:2rem;">${trimmed}</p>`;
+                            }
+                            return trimmed === '' ? '<p class="mb-1">&nbsp;</p>' : `<p class="mb-1">${trimmed}</p>`;
+                        })
+                        .join('');
+                    preview.innerHTML = html || '<em class="text-gray-400">Tidak ada isian</em>';
+                    return;
+                }
+
+                // Untuk field lain, hilangkan baris kosong dan trim
+                const lines = rawLines.map((line) => line.trim()).filter((line) => line !== '');
+
+                // ➤ Tampilkan sebagai paragraf biasa
                 if (
-                    [
-                        'judul_sop',
-                        'no_sop',
-                        'tgl_ditetapkan',
-                        'tgl_revisi',
-                        'tgl_diberlakukan',
-                        'ditetapkan_oleh',
-                        'nama_sop',
-                    ].includes(inputId)
+                    ['judul_sop', 'no_sop', 'tgl_ditetapkan', 'tgl_revisi', 'tgl_diberlakukan', 'nama_sop'].includes(
+                        inputId,
+                    )
                 ) {
                     const paragraphs = lines.map((line) => `<p class="mb-1">${line}</p>`);
-
                     let customClass = '';
                     if (inputId === 'judul_sop') {
                         customClass =
@@ -420,17 +539,15 @@
                         customClass =
                             'w-full resize-none overflow-hidden border-none text-center font-bold outline-none';
                     }
-
                     preview.innerHTML = paragraphs.length
                         ? `<div class="${customClass}">${paragraphs.join('')}</div>`
                         : '<em class="text-gray-400">Tidak ada isian</em>';
                 } else {
-                    // ➤ Untuk yang lain pakai <ol><li>
+                    // ➤ Field lainnya pakai daftar bernomor
                     const listItems = lines.map((line) => {
-                        const clean = line.replace(/^\d+\.\s*/, '');
+                        const clean = line.replace(/^\d+\\.\\s*/, '');
                         return `<li>${clean}</li>`;
                     });
-
                     preview.innerHTML = listItems.length
                         ? `<ol class="list-decimal pl-4">${listItems.join('')}</ol>`
                         : '<em class="text-gray-400">Tidak ada isian</em>';

@@ -21,6 +21,7 @@ class Esop extends Model
         'tgl_ditetapkan',
         'tgl_revisi',
         'tgl_diberlakukan',
+        'ditetapkan_oleh',
         'dasar_hukum',
         'kualifikasi_pelaksana',
         'keterkaitan',

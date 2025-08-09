@@ -10,6 +10,8 @@ use App\Models\PelaksanaSop;
 use App\Models\Flow;
 use App\Exports\EsopExport;
 use Maatwebsite\Excel\Facades\Excel;
+use Maatwebsite\Excel\Concerns\FromQuery;
+use Illuminate\Contracts\Support\Responsable;
 
 class EsopController extends Controller
 {
@@ -66,6 +68,7 @@ class EsopController extends Controller
     $esop->tgl_ditetapkan = $request->tgl_ditetapkan;
     $esop->tgl_revisi = $request->tgl_revisi;
     $esop->tgl_diberlakukan = $request->tgl_diberlakukan;
+    $esop->ditetapkan_oleh = $request->ditetapkan_oleh;
     $esop->dasar_hukum = $request->dasar_hukum;
     $esop->kualifikasi_pelaksana = $request->kualifikasi_pelaksana;
     $esop->keterkaitan = $request->keterkaitan;
@@ -179,6 +182,7 @@ class EsopController extends Controller
         $esop->tgl_ditetapkan = $request->tgl_ditetapkan;
         $esop->tgl_revisi = $request->tgl_revisi;
         $esop->tgl_diberlakukan = $request->tgl_diberlakukan;
+        $esop->ditetapkan_oleh = $request->ditetapkan_oleh;
         $esop->dasar_hukum = $request->dasar_hukum;
         $esop->kualifikasi_pelaksana = $request->kualifikasi_pelaksana;
         $esop->keterkaitan = $request->keterkaitan;
@@ -649,67 +653,83 @@ class EsopController extends Controller
         }
     }
 
-    public function esopFolder() {
+    // tambahkan Request $request
+    public function esopFolder(Request $request) 
+    {
         $user = Auth::user();
-        
-        // Base query berdasarkan role
+        $search = $request->input('search');
+
         $baseQuery = Esop::with('user');
-        
-        if ($user->role === 'admin') {
-            // Admin dapat melihat semua ESOP
-            // Tidak ada filter tambahan
-        } elseif ($user->role === 'sekretariat' || $user->role === 'direktorat' || $user->role === 'balai') {
-            // Sekretariat dan Direktorat dapat melihat ESOP dari role 'obu', 'upbu' dan milik sendiri
+
+        // Filter berdasarkan role (tetap sama seperti sebelumnya)
+        if ($user->role === 'sekretariat' || $user->role === 'direktorat' || $user->role === 'balai') {
             $baseQuery->where(function($q) use ($user) {
                 $q->where('user_id', $user->id)
-                  ->orWhereHas('user', function($userQuery) {
-                      $userQuery->where('role', 'obu')->orWhere('role', 'upbu');
-                  });
+                ->orWhereHas('user', function($userQuery) {
+                    $userQuery->where('role', 'obu')
+                                ->orWhere('role', 'upbu');
+                });
             });
         } elseif ($user->role === 'obu') {
-            // OBU dapat melihat ESOP dari role 'upbu'
             $baseQuery->whereHas('user', function($userQuery) {
                 $userQuery->where('role', 'upbu');
             });
-        } else {
-            // Role lain (termasuk upbu) hanya melihat ESOP milik sendiri
+        } elseif ($user->role !== 'admin') {
             $baseQuery->where('user_id', $user->id);
         }
-        
+
+        // Tambahkan pencarian jika parameter 'search' ada
+        if (!empty($search)) {
+            $baseQuery->where(function($q) use ($search) {
+                $q->where('nama_sop', 'LIKE', "%{$search}%")
+                ->orWhere('judul_sop', 'LIKE', "%{$search}%")
+                ->orWhere('no_sop', 'LIKE', "%{$search}%")
+                ->orWhereHas('user', function($userQuery) use ($search) {
+                    $userQuery->where('name', 'LIKE', "%{$search}%");
+                });
+            });
+        }
+
         // 1. Semua SOP (tanpa filter status)
-        $allEsops = (clone $baseQuery)->orderBy('created_at', 'desc')
-            ->paginate(5, ['*'], 'all_page');
-        
-        // 2. SOP yang sudah disahkan (memiliki file_path dan file_name)
+        $allEsops = (clone $baseQuery)
+            ->orderBy('created_at', 'desc')
+            ->paginate(10, ['*'], 'all_page')
+            ->appends(['search' => $search]); // menjaga query search di pagination
+
+        // 2. SOP Disahkan
         $disahkanEsops = (clone $baseQuery)
             ->whereNotNull('file_path')
             ->whereNotNull('file_name')
             ->where('file_path', '!=', '')
             ->where('file_name', '!=', '')
             ->orderBy('created_at', 'desc')
-            ->paginate(5, ['*'], 'disahkan_page');
-        
-        // 3. SOP yang masih draft (belum memiliki file_path dan file_name)
+            ->paginate(5, ['*'], 'disahkan_page')
+            ->appends(['search' => $search]);
+
+        // 3. SOP Draft
         $draftEsops = (clone $baseQuery)
             ->where(function($q) {
                 $q->whereNull('file_path')
-                  ->orWhereNull('file_name')
-                  ->orWhere('file_path', '')
-                  ->orWhere('file_name', '');
+                ->orWhereNull('file_name')
+                ->orWhere('file_path', '')
+                ->orWhere('file_name', '');
             })
             ->orderBy('created_at', 'desc')
-            ->paginate(5, ['*'], 'draft_page');
+            ->paginate(5, ['*'], 'draft_page')
+            ->appends(['search' => $search]);
 
-        return view('esop.folder', compact('allEsops', 'disahkanEsops', 'draftEsops', 'user'));
+        return view('esop.folder', compact('allEsops', 'disahkanEsops', 'draftEsops', 'user', 'search'));
     }
 
     /**
      * Export all SOPs to Excel
      */
-    public function exportAll()
+    public function exportAll(Request $request)
     {
+        $search   = $request->input('search');
         $filename = 'SOP_' . date('d-m-Y_H-i-s') . '.xlsx';
-        return Excel::download(new EsopExport('all'), $filename);
+
+        return Excel::download(new EsopExport('all', $search), $filename);
     }
 
     /**
@@ -729,5 +749,7 @@ class EsopController extends Controller
         $filename = 'SOP_Draft_' . date('d-m-Y_H-i-s') . '.xlsx';
         return Excel::download(new EsopExport('draft'), $filename);
     }
-    
+
 }
+
+

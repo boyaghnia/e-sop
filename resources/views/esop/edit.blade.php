@@ -526,7 +526,8 @@
                         <tr>
                             <td colspan="2" class="border p-2 font-bold">Ditetapkan Oleh</td>
                             <td colspan="3" class="border p-2 text-left">
-                                <p>
+                                {{--
+                                    <p>
                                     <span style="margin-left: 1rem" class="spacing">${jabatan_pengirim}</span>
                                     <br />
                                     <br />
@@ -540,7 +541,9 @@
                                     <span style="margin-left: 1rem" class="spacing">${nama_pengirim}</span>
                                     <br />
                                     <span style="margin-left: 1rem" class="spacing">${nip_pengirim}</span>
-                                </p>
+                                    </p>
+                                --}}
+                                <div id="preview_ditetapkan_oleh" class="text-left text-sm text-gray-800"></div>
                             </td>
                         </tr>
 
@@ -930,10 +933,10 @@
                 ['ditetapkan_oleh', 'preview_ditetapkan_oleh'],
                 ['nama_sop', 'preview_nama_sop'],
                 ['dasar_hukum', 'preview_dasar_hukum'],
-                ['cara_mengatasi', 'preview_cara_mengatasi'],
                 ['keterkaitan', 'preview_keterkaitan'],
                 ['peralatan_perlengkapan', 'preview_peralatan_perlengkapan'],
                 ['peringatan', 'preview_peringatan'],
+                ['cara_mengatasi', 'preview_cara_mengatasi'],
             ];
 
             pairs.forEach(([inputId, previewId]) => {
@@ -941,25 +944,39 @@
                 const preview = document.getElementById(previewId);
                 if (!textarea || !preview) return;
 
-                const lines = textarea.value
-                    .split('\n')
-                    .map((line) => line.trim())
-                    .filter((line) => line !== '');
+                const rawLines = textarea.value.split('\n');
 
-                // ➤ Untuk "paragraf biasa" (tanpa list)
+                // Khusus untuk "Ditetapkan Oleh"
+                if (inputId === 'ditetapkan_oleh') {
+                    const html = rawLines
+                        .map((line) => {
+                            const trimmed = line.trim();
+                            // Berikan margin kiri pada baris tanda tangan
+                            if (trimmed === '${ttd_pengirim}') {
+                                return `<p class="mb-1" style="margin-left:2rem;">${trimmed}</p>`;
+                            }
+                            // Baris kosong
+                            if (trimmed === '') {
+                                return '<p class="mb-1">&nbsp;</p>';
+                            }
+                            // Baris biasa
+                            return `<p class="mb-1">${trimmed}</p>`;
+                        })
+                        .join('');
+                    preview.innerHTML = html || '<em class="text-gray-400">Tidak ada isian</em>';
+                    return;
+                }
+
+                // Hilangkan baris kosong dan spasi depan/belakang untuk field lainnya
+                const lines = rawLines.map((line) => line.trim()).filter((line) => line !== '');
+
+                // Tampilkan sebagai paragraf biasa (tanpa penomoran)
                 if (
-                    [
-                        'judul_sop',
-                        'no_sop',
-                        'tgl_ditetapkan',
-                        'tgl_revisi',
-                        'tgl_diberlakukan',
-                        'ditetapkan_oleh',
-                        'nama_sop',
-                    ].includes(inputId)
+                    ['judul_sop', 'no_sop', 'tgl_ditetapkan', 'tgl_revisi', 'tgl_diberlakukan', 'nama_sop'].includes(
+                        inputId,
+                    )
                 ) {
                     const paragraphs = lines.map((line) => `<p class="mb-1">${line}</p>`);
-
                     let customClass = '';
                     if (inputId === 'judul_sop') {
                         customClass =
@@ -968,24 +985,23 @@
                         customClass =
                             'w-full resize-none overflow-hidden border-none text-center font-bold outline-none';
                     }
-
                     preview.innerHTML = paragraphs.length
                         ? `<div class="${customClass}">${paragraphs.join('')}</div>`
-                        : '<em class="text-gray-400"></em>';
+                        : '<em class="text-gray-400">Tidak ada isian</em>';
                 } else {
-                    // ➤ Untuk yang lain pakai <ol><li>
+                    // Field lainnya tampilkan sebagai daftar bernomor
                     const listItems = lines.map((line) => {
                         const clean = line.replace(/^\d+\.\s*/, '');
                         return `<li>${clean}</li>`;
                     });
-
                     preview.innerHTML = listItems.length
                         ? `<ol class="list-decimal pl-4">${listItems.join('')}</ol>`
-                        : '<em class="text-gray-400"></em>';
+                        : '<em class="text-gray-400">Tidak ada isian</em>';
                 }
             });
         }
 
+        // Panggil fungsi ini sekali saat halaman dimuat
         document.addEventListener('DOMContentLoaded', updateEsopPreview);
     </script>
 

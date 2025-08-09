@@ -3,61 +3,63 @@
 namespace App\Exports;
 
 use App\Models\Esop;
+use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterSheet;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class EsopExport implements FromCollection, WithHeadings, WithMapping, WithStyles, WithEvents
 {
-    protected $type;
+    protected string $type;
+    protected ?string $search;
 
-    public function __construct($type = 'all')
+    /**
+     * @param string      $type   Jenis data yang akan diekspor: 'all', 'disahkan', atau 'draft'
+     * @param string|null $search Kata kunci pencarian (opsional)
+     */
+    public function __construct(string $type = 'all', ?string $search = null)
     {
-        $this->type = $type;
+        $this->type   = $type;
+        $this->search = $search;
     }
 
     /**
-    * @return \Illuminate\Support\Collection
-    */
+     * Kumpulkan data berdasarkan role user, jenis status dan kata kunci pencarian.
+     * Data diurutkan berdasarkan hierarki role dan tanggal pembuatan.
+     */
     public function collection()
     {
         $user = Auth::user();
-        
-        // Base query berdasarkan role
         $baseQuery = Esop::with('user');
-        
-        if ($user->role === 'admin') {
-            // Admin dapat melihat semua ESOP
-        } elseif ($user->role === 'sekretariat' || $user->role === 'direktorat' || $user->role === 'balai') {
-            // Sekretariat dan Direktorat dapat melihat ESOP dari role 'obu', 'upbu' dan milik sendiri
+
+        // Filter berdasarkan peran pengguna
+        if ($user->role === 'sekretariat' || $user->role === 'direktorat' || $user->role === 'balai') {
             $baseQuery->where(function($q) use ($user) {
                 $q->where('user_id', $user->id)
                   ->orWhereHas('user', function($userQuery) {
-                      $userQuery->where('role', 'obu')->orWhere('role', 'upbu');
+                      $userQuery->where('role', 'obu')
+                                ->orWhere('role', 'upbu');
                   });
             });
         } elseif ($user->role === 'obu') {
-            // OBU dapat melihat ESOP dari role 'upbu'
             $baseQuery->whereHas('user', function($userQuery) {
                 $userQuery->where('role', 'upbu');
             });
-        } else {
-            // Role lain (termasuk upbu) hanya melihat ESOP milik sendiri
+        } elseif ($user->role !== 'admin') {
             $baseQuery->where('user_id', $user->id);
         }
 
-        // Filter berdasarkan type
+        // Filter status berdasarkan tipe eksport
         switch ($this->type) {
             case 'disahkan':
                 $baseQuery->whereNotNull('file_path')
-                         ->whereNotNull('file_name')
-                         ->where('file_path', '!=', '')
-                         ->where('file_name', '!=', '');
+                          ->whereNotNull('file_name')
+                          ->where('file_path', '!=', '')
+                          ->where('file_name', '!=', '');
                 break;
             case 'draft':
                 $baseQuery->where(function($q) {
@@ -68,28 +70,44 @@ class EsopExport implements FromCollection, WithHeadings, WithMapping, WithStyle
                 });
                 break;
             default:
-                // 'all' - tidak ada filter tambahan
+                // 'all' tidak menambah filter status
                 break;
         }
 
-        // Urutkan berdasarkan role hierarchy dan tanggal
-        return $baseQuery->leftJoin('users', 'esops.user_id', '=', 'users.id')
-                        ->orderByRaw("CASE users.role 
-                            WHEN 'sekretariat' THEN 1
-                            WHEN 'direktorat' THEN 2
-                            WHEN 'balai' THEN 3
-                            WHEN 'obu' THEN 4
-                            WHEN 'upbu' THEN 5
-                            ELSE 6
-                        END")
-                        ->orderBy('esops.created_at', 'desc')
-                        ->select('esops.*')
-                        ->get();
+        // Filter berdasarkan kata kunci pencarian
+        if ($this->search) {
+            $search = $this->search;
+            $baseQuery->where(function ($q) use ($search) {
+                $q->where('nama_sop', 'LIKE', "%{$search}%")
+                  ->orWhere('judul_sop', 'LIKE', "%{$search}%")
+                  ->orWhere('no_sop', 'LIKE', "%{$search}%")
+                  ->orWhereHas('user', function($uq) use ($search) {
+                      $uq->where('name', 'LIKE', "%{$search}%");
+                  });
+            });
+        }
+
+        // Gabungkan dengan tabel users untuk sorting berdasarkan role
+        return $baseQuery
+            ->leftJoin('users', 'esops.user_id', '=', 'users.id')
+            ->orderByRaw("
+                CASE users.role
+                    WHEN 'sekretariat' THEN 1
+                    WHEN 'direktorat'  THEN 2
+                    WHEN 'balai'       THEN 3
+                    WHEN 'obu'         THEN 4
+                    WHEN 'upbu'        THEN 5
+                    ELSE 6
+                END
+            ")
+            ->orderBy('esops.created_at', 'desc')
+            ->select('esops.*')
+            ->get();
     }
 
     /**
-    * @return array
-    */
+     * Header kolom untuk file Excel.
+     */
     public function headings(): array
     {
         return [
@@ -103,16 +121,18 @@ class EsopExport implements FromCollection, WithHeadings, WithMapping, WithStyle
     }
 
     /**
-    * @param mixed $esop
-    */
+     * Pemetaan setiap baris data ke kolom Excel.
+     *
+     * @param  Esop $esop
+     * @return array
+     */
     public function map($esop): array
     {
         static $no = 1;
-        
-        // Format role dengan kapitalisasi yang sesuai
+
         $role = $esop->user->role ?? '-';
         $formattedRole = $this->formatRole($role);
-        
+
         return [
             $no++,
             $formattedRole,
@@ -124,68 +144,61 @@ class EsopExport implements FromCollection, WithHeadings, WithMapping, WithStyle
     }
 
     /**
-     * Format role sesuai dengan ketentuan kapitalisasi
+     * Format tulisan role agar kapitalisasi sesuai.
      */
     private function formatRole($role): string
     {
         switch (strtolower($role)) {
-            case 'admin':
-                return '-'; // Admin tidak perlu ditampilkan
-            case 'sekretariat':
-                return 'Sekretariat';
-            case 'direktorat':
-                return 'Direktorat';
-            case 'balai':
-                return 'Balai';
-            case 'obu':
-                return 'OBU';
-            case 'upbu':
-                return 'UPBU';
-            default:
-                return ucfirst($role);
+            case 'admin':       return '-';
+            case 'sekretariat': return 'Sekretariat';
+            case 'direktorat':  return 'Direktorat';
+            case 'balai':       return 'Balai';
+            case 'obu':         return 'OBU';
+            case 'upbu':        return 'UPBU';
+            default:            return ucfirst($role);
         }
     }
 
     /**
-    * @param Worksheet $sheet
-    */
+     * Pengaturan gaya untuk sheet Excel.
+     */
     public function styles(Worksheet $sheet)
     {
-        // Auto-size all columns
+        // Auto-size semua kolom
         foreach(range('A','F') as $columnID) {
             $sheet->getColumnDimension($columnID)->setAutoSize(true);
         }
-        
+
         return [
-            // Style the first row as bold text with background color
+            // Baris header (A1-F1) berwarna latar ungu dan teks putih tebal
             1 => [
                 'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
                 'fill' => ['fillType' => 'solid', 'color' => ['rgb' => '4F46E5']]
             ],
-            
-            // Set minimum column widths
-            'A' => ['width' => 5],   // No
-            'B' => ['width' => 15],  // Role
-            'C' => ['width' => 25],  // Unit Organisasi
-            'D' => ['width' => 35],  // Nama SOP
-            'E' => ['width' => 15],  // Tanggal Pembuatan
-            'F' => ['width' => 12],  // Status
+            // Definisi minimal lebar kolom
+            'A' => ['width' => 5],
+            'B' => ['width' => 15],
+            'C' => ['width' => 25],
+            'D' => ['width' => 35],
+            'E' => ['width' => 15],
+            'F' => ['width' => 12],
         ];
     }
 
+    /**
+     * Mendaftarkan event untuk sheet Excel, misalnya menambahkan AutoFilter.
+     */
     public function registerEvents(): array
     {
         return [
-            AfterSheet::class => function(AfterSheet $event) {
+            AfterSheet::class => function (AfterSheet $event) {
                 $sheet = $event->sheet->getDelegate();
-
-                // Ambil jumlah kolom secara otomatis
                 $lastColumn = $sheet->getHighestColumn();
-                $lastRow = $sheet->getHighestRow();
+                $lastRow    = $sheet->getHighestRow();
 
-                // Terapkan filter untuk semua kolom (baris pertama = heading)
+                // Terapkan auto filter dari A1 sampai kolom/row terakhir
                 $sheet->setAutoFilter("A1:{$lastColumn}{$lastRow}");
-            }
+            },
         ];
     }
 }

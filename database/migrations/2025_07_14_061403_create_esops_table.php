@@ -23,6 +23,7 @@ return new class extends Migration
         $table->string('tgl_ditetapkan')->nullable();
         $table->string('tgl_revisi')->nullable();
         $table->string('tgl_diberlakukan')->nullable();
+        $table->string('ditetapkan_oleh')->nullable();
         $table->text('dasar_hukum')->nullable();
         $table->text('kualifikasi_pelaksana')->nullable();
         $table->text('keterkaitan')->nullable();

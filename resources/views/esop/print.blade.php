@@ -856,21 +856,11 @@
                     <tr>
                         <td colspan="2" class="border p-2 font-bold">Ditetapkan Oleh</td>
                         <td colspan="3" class="border p-2 text-left">
-                            <p>
-                                <span style="margin-left: 1rem" class="spacing">${jabatan_pengirim}</span>
-                                <br />
-                                <br />
-                                <br />
-                                <br />
-                                <span style="margin-left: 3rem" class="ttd-spacing">${ttd_pengirim}</span>
-                                <br />
-                                <br />
-                                <br />
-                                <br />
-                                <span style="margin-left: 1rem" class="spacing">${nama_pengirim}</span>
-                                <br />
-                                <span style="margin-left: 1rem" class="spacing">${nip_pengirim}</span>
-                            </p>
+                            <div
+                                id="preview_ditetapkan_oleh"
+                                class="text-left text-sm text-gray-800"
+                                data-source="{{ e($esop->ditetapkan_oleh) }}"
+                            ></div>
                         </td>
                     </tr>
 
@@ -1012,7 +1002,7 @@
                                             name="uraian_kegiatan_{{ $i }}"
                                             id="uraian_kegiatan_{{ $i }}"
                                             placeholder="Uraian Kegiatan {{ $i }}"
-                                            class="form-control block w-full resize-none rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-indigo-600"
+                                            class="form-control block w-full resize-none rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-blue-600"
                                         >
 {{ $flow->uraian_kegiatan ?? '' }}</textarea
                                         >
@@ -1135,7 +1125,7 @@
                                             name="kelengkapan_{{ $i }}"
                                             id="kelengkapan_{{ $i }}"
                                             placeholder="Kelengkapan {{ $i }}"
-                                            class="form-control block w-full resize-none rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-indigo-600"
+                                            class="form-control block w-full resize-none rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-blue-600"
                                         >
 {{ $flow->kelengkapan ?? '' }}</textarea
                                         >
@@ -1146,7 +1136,7 @@
                                             name="waktu_{{ $i }}"
                                             id="waktu_{{ $i }}"
                                             placeholder="Waktu {{ $i }}"
-                                            class="form-control block w-full resize-none rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-indigo-600"
+                                            class="form-control block w-full resize-none rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-blue-600"
                                         >
 {{ $flow->waktu ?? '' }}</textarea
                                         >
@@ -1157,7 +1147,7 @@
                                             name="output_{{ $i }}"
                                             id="output_{{ $i }}"
                                             placeholder="Output {{ $i }}"
-                                            class="form-control block w-full resize-none rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-indigo-600"
+                                            class="form-control block w-full resize-none rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-blue-600"
                                         >
 {{ $flow->output ?? '' }}</textarea
                                         >
@@ -1168,7 +1158,7 @@
                                             name="keterangan_{{ $i }}"
                                             id="keterangan_{{ $i }}"
                                             placeholder="Keterangan {{ $i }}"
-                                            class="form-control block w-full resize-none rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-indigo-600"
+                                            class="form-control block w-full resize-none rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-blue-600"
                                         >
 {{ $flow->keterangan ?? '' }}</textarea
                                         >
@@ -1184,14 +1174,14 @@
                         <button
                             type="button"
                             onclick="removeRow()"
-                            class="rounded-md border border-blue-500 px-3 py-2 text-sm text-blue-500 hover:bg-indigo-50"
+                            class="rounded-md border border-blue-500 px-3 py-2 text-sm text-blue-500 hover:bg-blue-50"
                         >
                             - Hapus Baris
                         </button>
                         <button
                             type="button"
                             onclick="addRow()"
-                            class="rounded-md border border-blue-500 px-3 py-2 text-sm text-blue-500 hover:bg-indigo-50"
+                            class="rounded-md border border-blue-500 px-3 py-2 text-sm text-blue-500 hover:bg-blue-50"
                         >
                             + Tambah Baris
                         </button>
@@ -1271,52 +1261,84 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Process preview elements for cover page
-            const previewIds = ['dasar_hukum', 'cara_mengatasi', 'keterkaitan', 'peralatan_perlengkapan', 'peringatan'];
-            previewIds.forEach(function (id) {
-                const el = document.getElementById('preview_' + id);
-                if (!el) return;
-                const source = el.getAttribute('data-source') || '';
-                const lines = source
-                    .split(/\r?\n/)
-                    .map((line) => line.trim())
-                    .filter((line) => line !== '');
-                if (lines.length) {
-                    el.innerHTML =
-                        '<ol class="list-decimal pl-4">' +
-                        lines.map((line) => `<li>${line.replace(/^\d+\.\s*/, '')}</li>`).join('') +
-                        '</ol>';
-                } else {
-                    el.innerHTML = '<em class="text-gray-400"></em>';
-                }
+                // Daftar elemen preview yang akan diproses.
+                // Tambahkan 'ditetapkan_oleh' agar diproses di sini.
+                const previewIds = [
+                    'dasar_hukum',
+                    'cara_mengatasi',
+                    'keterkaitan',
+                    'peralatan_perlengkapan',
+                    'peringatan',
+                    'ditetapkan_oleh'
+                ];
+
+                previewIds.forEach(function (id) {
+                    const el = document.getElementById('preview_' + id);
+                    if (!el) return;
+                    const source = el.getAttribute('data-source') || '';
+
+                    // Jika elemen ini adalah 'ditetapkan_oleh', buat setiap baris sebagai paragraf,
+                    // dan pertahankan baris kosong sebagai <p>&nbsp;</p>.
+                    if (id === 'ditetapkan_oleh') {
+                        const rawLines = source.split(/\r?\n/);
+                        const html = rawLines
+                            .map((line) => {
+                                const trimmed = line.trim();
+                                if (trimmed === '${ttd_pengirim}') {
+                                    return `<p class="mb-1" style="margin-left:2rem;">${trimmed}</p>`;
+                                }
+                                return trimmed === ''
+                                    ? '<p class="mb-1">&nbsp;</p>'
+                                    : `<p class="mb-1">${trimmed}</p>`;
+                            })
+                            .join('');
+                        el.innerHTML = html || '<em class="text-gray-400"></em>';
+                        return;
+                    }
+
+                    // Untuk elemen lain, hilangkan baris kosong, lalu buat daftar bernomor.
+                    const lines = source
+                        .split(/\r?\n/)
+                        .map((line) => line.trim())
+                        .filter((line) => line !== '');
+                    if (lines.length) {
+                        el.innerHTML =
+                            '<ol class="list-decimal pl-4">' +
+                            lines
+                                .map((line) => `<li>${line.replace(/^\d+\.\s*/, '')}</li>`)
+                                .join('') +
+                            '</ol>';
+                    } else {
+                        el.innerHTML = '<em class="text-gray-400"></em>';
+                    }
+                });
+
+                // … kode lainnya tetap sama …
+                const flowData = [
+                    @foreach($flows as $flow)
+                    {
+                        id: {{ $flow->id ?? 'null' }},
+                        no_urutan: {{ $flow->no_urutan ?? 0 }},
+                        uraian_kegiatan: `{{ addslashes($flow->uraian_kegiatan ?? '') }}`,
+                        symbols: @json($flow->symbols ?? []),
+                        return_to: @json($flow->return_to ?? []),
+                        kelengkapan: `{{ addslashes($flow->kelengkapan ?? '') }}`,
+                        waktu: `{{ addslashes($flow->waktu ?? '') }}`,
+                        output: `{{ addslashes($flow->output ?? '') }}`,
+                        keterangan: `{{ addslashes($flow->keterangan ?? '') }}`
+                    },
+                    @endforeach
+                ];
+
+                const pelaksanaData = [
+                    @foreach($esop->pelaksanas as $pelaksana)
+                    {
+                        id: {{ $pelaksana->id }},
+                        isi: `{{ addslashes($pelaksana->isi) }}`
+                    },
+                    @endforeach
+                ];
             });
-
-            // Prepare flow data from PHP
-            const flowData = [
-                @foreach($flows as $flow)
-                {
-                    id: {{ $flow->id ?? 'null' }},
-                    no_urutan: {{ $flow->no_urutan ?? 0 }},
-                    uraian_kegiatan: `{{ addslashes($flow->uraian_kegiatan ?? '') }}`,
-                    symbols: @json($flow->symbols ?? []),
-                    return_to: @json($flow->return_to ?? []),
-                    kelengkapan: `{{ addslashes($flow->kelengkapan ?? '') }}`,
-                    waktu: `{{ addslashes($flow->waktu ?? '') }}`,
-                    output: `{{ addslashes($flow->output ?? '') }}`,
-                    keterangan: `{{ addslashes($flow->keterangan ?? '') }}`
-                },
-                @endforeach
-            ];
-
-            const pelaksanaData = [
-                @foreach($esop->pelaksanas as $pelaksana)
-                {
-                    id: {{ $pelaksana->id }},
-                    isi: `{{ addslashes($pelaksana->isi) }}`
-                },
-                @endforeach
-            ];
-        });
     </script>
 
     <script>
@@ -1718,7 +1740,7 @@
             let html = `
                 <td class="border border-gray-400 px-2 py-1 text-center">${rowCount}</td>
                 <td class="border border-gray-400 px-2 py-1 uraian-column">
-                    <textarea name="uraian_kegiatan_${rowCount}" placeholder="Uraian Kegiatan ${rowCount}" class="form-control block w-full resize-none rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-indigo-600"></textarea>
+                    <textarea name="uraian_kegiatan_${rowCount}" placeholder="Uraian Kegiatan ${rowCount}" class="form-control block w-full resize-none rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-blue-600"></textarea>
                 </td>
             `;
 
@@ -1738,10 +1760,10 @@
             }
 
             html += `
-                <td class="border border-gray-400 px-2 py-1"><textarea name="kelengkapan_${rowCount}" placeholder="Kelengkapan ${rowCount}" class="form-control block w-full resize-none rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-indigo-600"></textarea></td>
-                <td class="border border-gray-400 px-2 py-1"><textarea name="waktu_${rowCount}" placeholder="Waktu ${rowCount}" class="form-control block w-full resize-none rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-indigo-600"></textarea></td>
-                <td class="border border-gray-400 px-2 py-1"><textarea name="output_${rowCount}" placeholder="Output ${rowCount}" class="form-control block w-full resize-none rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-indigo-600"></textarea></td>
-                <td class="border border-gray-400 px-2 py-1"><textarea name="keterangan_${rowCount}" placeholder="Keterangan ${rowCount}" class="form-control block w-full resize-none rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-indigo-600"></textarea></td>
+                <td class="border border-gray-400 px-2 py-1"><textarea name="kelengkapan_${rowCount}" placeholder="Kelengkapan ${rowCount}" class="form-control block w-full resize-none rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-blue-600"></textarea></td>
+                <td class="border border-gray-400 px-2 py-1"><textarea name="waktu_${rowCount}" placeholder="Waktu ${rowCount}" class="form-control block w-full resize-none rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-blue-600"></textarea></td>
+                <td class="border border-gray-400 px-2 py-1"><textarea name="output_${rowCount}" placeholder="Output ${rowCount}" class="form-control block w-full resize-none rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-blue-600"></textarea></td>
+                <td class="border border-gray-400 px-2 py-1"><textarea name="keterangan_${rowCount}" placeholder="Keterangan ${rowCount}" class="form-control block w-full resize-none rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:-outline-offset-2 focus:outline-blue-600"></textarea></td>
             `;
 
             row.innerHTML = html;
