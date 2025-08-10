@@ -630,6 +630,7 @@ class EsopController extends Controller
             ]);
 
             $esop = Esop::findOrFail($id);
+            $user = Auth::user();
             
             // Hapus file lama jika ada
             if ($esop->file_path && Storage::disk('public')->exists($esop->file_path)) {
@@ -639,7 +640,7 @@ class EsopController extends Controller
             // Upload file baru
             $file = $request->file('file');
             $originalName = $file->getClientOriginalName();
-            $filename = time() . '_' . $originalName;
+            $filename = time() . '_' . $user->name . '_' . $originalName;
             $filePath = $file->storeAs('esop_files', $filename, 'public');
 
         // Update database
