@@ -3369,3 +3369,5 @@
         });
     </script>
 </x-layout>
+
+<x-back-to-top></x-back-to-top>

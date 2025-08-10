@@ -1884,6 +1884,8 @@
         </div>
     </section>
 
+    <x-back-to-top></x-back-to-top>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             // FAQ Toggle Functionality
