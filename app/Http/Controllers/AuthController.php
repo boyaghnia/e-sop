@@ -17,7 +17,7 @@ class AuthController extends Controller
     public function submitLogin(Request $request)
     {
         $credentials = $request->validate([
-            'id_unor' => ['required'],
+            'id_uker' => ['required'],
             'password' => ['required'],
         ]);
 
@@ -33,7 +33,7 @@ class AuthController extends Controller
         }
 
         return back()->withErrors([
-            'id_unor' => 'ID atau password salah.',
+            'id_uker' => 'ID atau password salah.',
         ]);
     }
 

@@ -34,7 +34,7 @@
 
         <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
             <div>
-                <p class="text-sm leading-5 text-gray-700">
+                <p class="text-xs leading-5 text-gray-700">
                     Menampilkan
 
                     @if ($paginator->firstItem())
@@ -86,41 +86,41 @@
                     @endif
 
                     {{-- Pagination Elements --}}
-                    @foreach ($elements as $element)
-                        {{-- "Three Dots" Separator --}}
-                        @if (is_string($element))
-                            <span aria-disabled="true">
-                                <span
-                                    class="relative -ml-px inline-flex cursor-default items-center border border-gray-300 bg-white px-4 py-2 text-sm leading-5 font-medium text-gray-700"
-                                >
-                                    {{ $element }}
+                    @php
+                        $current = $paginator->currentPage();
+                        $last = $paginator->lastPage();
+                        
+                        // Tentukan 3 halaman yang akan ditampilkan
+                        if ($current == 1) {
+                            $start = 1;
+                            $end = min(3, $last);
+                        } elseif ($current == $last) {
+                            $start = max(1, $last - 2);
+                            $end = $last;
+                        } else {
+                            $start = max(1, $current - 1);
+                            $end = min($last, $current + 1);
+                        }
+                    @endphp
+
+                    {{-- Tampilkan 3 halaman --}}
+                    @for ($page = $start; $page <= $end; $page++)
+                        @if ($page == $current)
+                            <span aria-current="page">
+                                <span class="relative -ml-px inline-flex cursor-default items-center border border-gray-300 bg-blue-50 px-4 py-2 text-sm leading-5 font-medium text-blue-600">
+                                    {{ $page }}
                                 </span>
                             </span>
+                        @else
+                            <a
+                                href="{{ $paginator->url($page) }}"
+                                class="relative -ml-px inline-flex items-center border border-gray-300 bg-white px-4 py-2 text-sm leading-5 font-medium text-gray-700 ring-gray-300 transition duration-150 ease-in-out hover:text-gray-500 focus:z-10 focus:border-blue-300 focus:ring focus:outline-none active:bg-gray-100 active:text-gray-700"
+                                aria-label="Halaman {{ $page }}"
+                            >
+                                {{ $page }}
+                            </a>
                         @endif
-
-                        {{-- Array Of Links --}}
-                        @if (is_array($element))
-                            @foreach ($element as $page => $url)
-                                @if ($page == $paginator->currentPage())
-                                    <span aria-current="page">
-                                        <span
-                                            class="relative -ml-px inline-flex cursor-default items-center border border-gray-300 bg-blue-50 px-4 py-2 text-sm leading-5 font-medium text-blue-600"
-                                        >
-                                            {{ $page }}
-                                        </span>
-                                    </span>
-                                @else
-                                    <a
-                                        href="{{ $url }}"
-                                        class="relative -ml-px inline-flex items-center border border-gray-300 bg-white px-4 py-2 text-sm leading-5 font-medium text-gray-700 ring-gray-300 transition duration-150 ease-in-out hover:text-gray-500 focus:z-10 focus:border-blue-300 focus:ring focus:outline-none active:bg-gray-100 active:text-gray-700"
-                                        aria-label="Halaman {{ $page }}"
-                                    >
-                                        {{ $page }}
-                                    </a>
-                                @endif
-                            @endforeach
-                        @endif
-                    @endforeach
+                    @endfor
 
                     {{-- Next Page Link --}}
 

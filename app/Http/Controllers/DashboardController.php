@@ -7,6 +7,7 @@ use App\Models\Esop;
 use Illuminate\Support\Facades\Auth;
 use App\Exports\EsopExport;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -26,7 +27,7 @@ class DashboardController extends Controller
         if ($user->role === 'admin') {
             // Admin dapat melihat semua ESOP
             // Tidak ada filter tambahan
-        } elseif ($user->role === 'sekretariat' || $user->role === 'direktorat' || $user->role === 'balai') {
+        } elseif ($user->role === 'sekretariat' || $user->role === 'direktorat') {
             // Sekretariat dan Direktorat dapat melihat ESOP dari role 'obu', 'upbu' dan milik sendiri
             // OBU dapat melihat ESOP dari role 'upbu'
             $allEsopsQuery->whereHas('user', function($userQuery) {
@@ -45,25 +46,27 @@ class DashboardController extends Controller
         $allEsops = $allEsopsQuery->orderBy('created_at', 'desc')
             ->paginate(5, ['*'], 'all_page');
 
-        // Query untuk table statistik unit organisasi
-        $unitStatsQuery = Esop::with('user')
-            ->selectRaw('user_id, COUNT(*) as total_sop, 
-                        SUM(CASE WHEN file_path IS NOT NULL AND file_name IS NOT NULL THEN 1 ELSE 0 END) as disahkan,
-                        SUM(CASE WHEN file_path IS NULL OR file_name IS NULL THEN 1 ELSE 0 END) as draft')
-            ->groupBy('user_id');
+        // Query untuk table statistik unit kerja (tampilkan juga unit yang belum punya SOP)
+        $unitStatsQuery = DB::table('users')
+            ->leftJoin('esops', 'esops.user_id', '=', 'users.id')
+            ->select(
+                'users.id as user_id',
+                'users.name as name',
+                'users.role as role'
+            )
+            ->selectRaw('COUNT(esops.id) as total_sop')
+            ->selectRaw('SUM(CASE WHEN esops.id IS NOT NULL AND esops.file_path IS NOT NULL AND esops.file_name IS NOT NULL THEN 1 ELSE 0 END) as disahkan')
+            ->selectRaw('SUM(CASE WHEN esops.id IS NOT NULL AND (esops.file_path IS NULL OR esops.file_name IS NULL) THEN 1 ELSE 0 END) as draft')
+            ->groupBy('users.id', 'users.name', 'users.role');
 
         if ($user->role === 'admin') {
             // Admin dapat melihat semua unit
-        } elseif ($user->role === 'sekretariat' || $user->role === 'direktorat' || $user->role === 'balai') {
-            $unitStatsQuery->whereHas('user', function($userQuery) {
-                $userQuery->where('role', 'obu')->orWhere('role', 'upbu');
-            });
+        } elseif ($user->role === 'sekretariat' || $user->role === 'direktorat') {
+            $unitStatsQuery->whereIn('users.role', ['obu', 'upbu']);
         } elseif ($user->role === 'obu') {
-            $unitStatsQuery->whereHas('user', function($userQuery) {
-                $userQuery->where('role', 'upbu');
-            });
+            $unitStatsQuery->where('users.role', 'upbu');
         } else {
-            $unitStatsQuery->where('user_id', $user->id);
+            $unitStatsQuery->where('users.id', $user->id);
         }
 
         $unitStats = $unitStatsQuery->paginate(5, ['*'], 'unit_page');
@@ -75,7 +78,7 @@ class DashboardController extends Controller
 
         if ($user->role === 'admin') {
             // Admin dapat melihat semua role
-        } elseif ($user->role === 'sekretariat' || $user->role === 'direktorat' || $user->role === 'balai') {
+        } elseif ($user->role === 'sekretariat' || $user->role === 'direktorat') {
             $roleStatsQuery->whereIn('users.role', ['obu', 'upbu']);
         } elseif ($user->role === 'obu') {
             $roleStatsQuery->where('users.role', 'upbu');
@@ -96,31 +99,30 @@ class DashboardController extends Controller
         
         try {
             if ($table === 'units') {
-                // Table statistik unit organisasi
-                $unitStatsQuery = Esop::with('user')
-                    ->selectRaw('user_id, COUNT(*) as total_sop, 
-                                SUM(CASE WHEN file_path IS NOT NULL AND file_name IS NOT NULL THEN 1 ELSE 0 END) as disahkan,
-                                SUM(CASE WHEN file_path IS NULL OR file_name IS NULL THEN 1 ELSE 0 END) as draft')
-                    ->groupBy('user_id');
+                $unitStatsQuery = DB::table('users')
+                    ->leftJoin('esops', 'esops.user_id', '=', 'users.id')
+                    ->select(
+                        'users.id as user_id',
+                        'users.name as name',
+                        'users.role as role'
+                    )
+                    ->selectRaw('COUNT(esops.id) as total_sop')
+                    ->selectRaw('SUM(CASE WHEN esops.id IS NOT NULL AND esops.file_path IS NOT NULL AND esops.file_name IS NOT NULL THEN 1 ELSE 0 END) as disahkan')
+                    ->selectRaw('SUM(CASE WHEN esops.id IS NOT NULL AND (esops.file_path IS NULL OR esops.file_name IS NULL) THEN 1 ELSE 0 END) as draft')
+                    ->groupBy('users.id', 'users.name', 'users.role');
 
                 if ($user->role === 'admin') {
                     // Admin dapat melihat semua unit
-                } elseif ($user->role === 'sekretariat' || $user->role === 'direktorat' || $user->role === 'balai') {
-                    $unitStatsQuery->whereHas('user', function($userQuery) {
-                        $userQuery->where('role', 'obu')->orWhere('role', 'upbu');
-                    });
+                } elseif ($user->role === 'sekretariat' || $user->role === 'direktorat') {
+                    $unitStatsQuery->whereIn('users.role', ['obu', 'upbu']);
                 } elseif ($user->role === 'obu') {
-                    $unitStatsQuery->whereHas('user', function($userQuery) {
-                        $userQuery->where('role', 'upbu');
-                    });
+                    $unitStatsQuery->where('users.role', 'upbu');
                 } else {
-                    $unitStatsQuery->where('user_id', $user->id);
+                    $unitStatsQuery->where('users.id', $user->id);
                 }
 
                 if (!empty($query)) {
-                    $unitStatsQuery->whereHas('user', function($userQuery) use ($query) {
-                        $userQuery->where('name', 'LIKE', '%' . $query . '%');
-                    });
+                    $unitStatsQuery->where('users.name', 'LIKE', '%' . $query . '%');
                 }
 
                 $units = $unitStatsQuery->get();
@@ -145,7 +147,7 @@ class DashboardController extends Controller
                     
                     if ($user->role === 'admin') {
                         // Admin dapat melihat semua ESOP
-                    } elseif ($user->role === 'sekretariat' || $user->role === 'direktorat' || $user->role === 'balai') {
+                    } elseif ($user->role === 'sekretariat' || $user->role === 'direktorat') {
                         // Sekretariat, Direktorat, dan Balai dapat melihat ESOP dari role 'obu' dan 'upbu'
                         $esopsQuery->whereHas('user', function($userQuery) {
                             $userQuery->where('role', 'obu')->orWhere('role', 'upbu');
@@ -180,7 +182,7 @@ class DashboardController extends Controller
                     
                     if ($user->role === 'admin') {
                         // Admin dapat melihat semua ESOP
-                    } elseif ($user->role === 'sekretariat' || $user->role === 'direktorat' || $user->role === 'balai') {
+                    } elseif ($user->role === 'sekretariat' || $user->role === 'direktorat') {
                         // Sekretariat, Direktorat, dan Balai dapat melihat ESOP dari role 'obu' dan 'upbu'
                         $esopsQuery->whereHas('user', function($userQuery) {
                             $userQuery->where('role', 'obu')->orWhere('role', 'upbu');

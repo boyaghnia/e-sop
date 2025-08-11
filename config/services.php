@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'hubud' => [
+    'user' => env('HUBUD_USER'),
+    'pass' => env('HUBUD_PASS'),
+    'ca_path' => env('HUBUD_CA_PATH'),
+    'ssl_verify' => env('HUBUD_SSL_VERIFY', false),
+    ],
+
 ];

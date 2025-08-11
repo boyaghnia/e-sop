@@ -73,7 +73,7 @@
                         <p class="text-sm leading-none text-slate-600">No</p>
                     </th>
                     <th class="border-b border-slate-200 bg-slate-50 p-4 text-sm font-semibold text-slate-600">
-                        <p class="text-sm leading-none text-slate-600">Unit Organisasi</p>
+                        <p class="text-sm leading-none text-slate-600">Unit Kerja</p>
                     </th>
                     <th class="border-b border-slate-200 bg-slate-50 p-4 text-sm font-semibold text-slate-600">
                         <p class="text-sm leading-none text-slate-600">Nama SOP</p>

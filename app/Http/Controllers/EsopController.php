@@ -34,7 +34,7 @@ class EsopController extends Controller
         if ($user->role === 'admin') {
             // Admin dapat melihat semua ESOP
             // Tidak ada filter tambahan
-        } elseif ($user->role === 'sekretariat' || $user->role === 'direktorat' || $user->role === 'balai') {
+        } elseif ($user->role === 'sekretariat' || $user->role === 'direktorat') {
             // Sekretariat dan Direktorat dapat melihat ESOP dari role 'obu', 'upbu' dan milik sendiri
             $allEsopsQuery->where(function($q) use ($user) {
                 $q->where('user_id', $user->id)
@@ -61,7 +61,7 @@ class EsopController extends Controller
     function esopSimpan(Request $request) {
     $esop = new Esop();
     $esop->user_id = Auth::id();
-    $esop->id_unor = Auth::user()->id_unor;
+    $esop->id_uker = Auth::user()->id_uker;
     $esop->judul_sop = $request->judul_sop;
     $esop->no_sop = $request->no_sop;
     $esop->nama_sop = $request->nama_sop;
@@ -90,12 +90,12 @@ class EsopController extends Controller
         // Filter akses berdasarkan role
         if ($user->role === 'admin') {
             // Admin dapat mengakses semua SOP
-        } elseif ($user->role === 'sekretariat' || $user->role === 'direktorat' || $user->role === 'balai') {
+        } elseif ($user->role === 'sekretariat' || $user->role === 'direktorat') {
             // Sekretariat dan Direktorat dapat mengakses SOP milik sendiri dan SOP dari role upbu
             $query->where(function($q) use ($user) {
                 $q->where('user_id', $user->id)
                   ->orWhere(function($subQuery) use ($user) {
-                      $subQuery->where('id_unor', $user->id_unor)
+                      $subQuery->where('id_uker', $user->id_uker)
                                ->whereHas('user', function($userQuery) {
                                    $userQuery->where('role', 'obu');
                                });
@@ -109,7 +109,7 @@ class EsopController extends Controller
             $query->where(function($q) use ($user) {
                 $q->where('user_id', $user->id)
                   ->orWhere(function($subQuery) use ($user) {
-                      $subQuery->where('id_unor', $user->id_unor)
+                      $subQuery->where('id_uker', $user->id_uker)
                                ->whereHas('user', function($userQuery) {
                                    $userQuery->where('role', 'upbu');
                                });
@@ -119,9 +119,9 @@ class EsopController extends Controller
                   });
             });
         } else {
-            // Role lain hanya dapat mengakses SOP milik sendiri atau yang sama id_unor
+            // Role lain hanya dapat mengakses SOP milik sendiri atau yang sama id_uker
             $query->where(function($q) use ($user) {
-                $q->where('id_unor', $user->id_unor)
+                $q->where('id_uker', $user->id_uker)
                   ->orWhere('user_id', $user->id);
             });
         }
@@ -137,12 +137,12 @@ class EsopController extends Controller
         // Filter akses berdasarkan role
         if ($user->role === 'admin') {
             // Admin dapat mengakses semua SOP
-        } elseif ($user->role === 'sekretariat' || $user->role === 'direktorat' || $user->role === 'balai') {
+        } elseif ($user->role === 'sekretariat' || $user->role === 'direktorat') {
             // Sekretariat dan Direktorat dapat mengakses SOP milik sendiri dan SOP dari role upbu
             $query->where(function($q) use ($user) {
                 $q->where('user_id', $user->id)
                   ->orWhere(function($subQuery) use ($user) {
-                      $subQuery->where('id_unor', $user->id_unor)
+                      $subQuery->where('id_uker', $user->id_uker)
                                ->whereHas('user', function($userQuery) {
                                    $userQuery->where('role', 'obu');
                                });
@@ -156,7 +156,7 @@ class EsopController extends Controller
             $query->where(function($q) use ($user) {
                 $q->where('user_id', $user->id)
                   ->orWhere(function($subQuery) use ($user) {
-                      $subQuery->where('id_unor', $user->id_unor)
+                      $subQuery->where('id_uker', $user->id_uker)
                                ->whereHas('user', function($userQuery) {
                                    $userQuery->where('role', 'upbu');
                                });
@@ -166,9 +166,9 @@ class EsopController extends Controller
                   });
             });
         } else {
-            // Role lain hanya dapat mengakses SOP milik sendiri atau yang sama id_unor
+            // Role lain hanya dapat mengakses SOP milik sendiri atau yang sama id_uker
             $query->where(function($q) use ($user) {
-                $q->where('id_unor', $user->id_unor)
+                $q->where('id_uker', $user->id_uker)
                   ->orWhere('user_id', $user->id);
             });
         }
@@ -204,12 +204,12 @@ class EsopController extends Controller
         if ($user->role === 'admin') {
             // Admin dapat mengakses semua SOP
 
-        } elseif ($user->role === 'sekretariat' || $user->role === 'direktorat' || $user->role === 'balai') {
+        } elseif ($user->role === 'sekretariat' || $user->role === 'direktorat') {
             // Sekretariat dan Direktorat dapat mengakses SOP milik sendiri dan SOP dari role upbu
             $query->where(function($q) use ($user) {
                 $q->where('user_id', $user->id)
                   ->orWhere(function($subQuery) use ($user) {
-                      $subQuery->where('id_unor', $user->id_unor)
+                      $subQuery->where('id_uker', $user->id_uker)
                                ->whereHas('user', function($userQuery) {
                                    $userQuery->where('role', 'obu');
                                });
@@ -223,7 +223,7 @@ class EsopController extends Controller
             $query->where(function($q) use ($user) {
                 $q->where('user_id', $user->id)
                   ->orWhere(function($subQuery) use ($user) {
-                      $subQuery->where('id_unor', $user->id_unor)
+                      $subQuery->where('id_uker', $user->id_uker)
                                ->whereHas('user', function($userQuery) {
                                    $userQuery->where('role', 'upbu');
                                });
@@ -233,9 +233,9 @@ class EsopController extends Controller
                   });
             });
         } else {
-            // Role lain hanya dapat mengakses SOP milik sendiri atau yang sama id_unor
+            // Role lain hanya dapat mengakses SOP milik sendiri atau yang sama id_uker
             $query->where(function($q) use ($user) {
-                $q->where('id_unor', $user->id_unor)
+                $q->where('id_uker', $user->id_uker)
                   ->orWhere('user_id', $user->id);
             });
         }
@@ -254,12 +254,12 @@ class EsopController extends Controller
         // Filter akses berdasarkan role
         if ($user->role === 'admin') {
 
-        } elseif ($user->role === 'sekretariat' || $user->role === 'direktorat' || $user->role === 'balai') {
+        } elseif ($user->role === 'sekretariat' || $user->role === 'direktorat') {
             // Sekretariat dan Direktorat dapat mengakses SOP milik sendiri dan SOP dari role upbu
             $query->where(function($q) use ($user) {
                 $q->where('user_id', $user->id)
                   ->orWhere(function($subQuery) use ($user) {
-                      $subQuery->where('id_unor', $user->id_unor)
+                      $subQuery->where('id_uker', $user->id_uker)
                                ->whereHas('user', function($userQuery) {
                                    $userQuery->where('role', 'obu');
                                });
@@ -273,7 +273,7 @@ class EsopController extends Controller
             $query->where(function($q) use ($user) {
                 $q->where('user_id', $user->id)
                   ->orWhere(function($subQuery) use ($user) {
-                      $subQuery->where('id_unor', $user->id_unor)
+                      $subQuery->where('id_uker', $user->id_uker)
                                ->whereHas('user', function($userQuery) {
                                    $userQuery->where('role', 'upbu');
                                });
@@ -283,9 +283,9 @@ class EsopController extends Controller
                   });
             });
         } else {
-            // Role lain hanya dapat mengakses SOP milik sendiri atau yang sama id_unor
+            // Role lain hanya dapat mengakses SOP milik sendiri atau yang sama id_uker
             $query->where(function($q) use ($user) {
-                $q->where('id_unor', $user->id_unor)
+                $q->where('id_uker', $user->id_uker)
                   ->orWhere('user_id', $user->id);
             });
         }
@@ -304,12 +304,12 @@ class EsopController extends Controller
         // Filter akses berdasarkan role
         if ($user->role === 'admin') {
 
-        } elseif ($user->role === 'sekretariat' || $user->role === 'direktorat' || $user->role === 'balai') {
+        } elseif ($user->role === 'sekretariat' || $user->role === 'direktorat') {
             // Sekretariat dan Direktorat dapat mengakses SOP milik sendiri dan SOP dari role upbu
             $query->where(function($q) use ($user) {
                 $q->where('user_id', $user->id)
                   ->orWhere(function($subQuery) use ($user) {
-                      $subQuery->where('id_unor', $user->id_unor)
+                      $subQuery->where('id_uker', $user->id_uker)
                                ->whereHas('user', function($userQuery) {
                                    $userQuery->where('role', 'obu');
                                });
@@ -323,7 +323,7 @@ class EsopController extends Controller
             $query->where(function($q) use ($user) {
                 $q->where('user_id', $user->id)
                   ->orWhere(function($subQuery) use ($user) {
-                      $subQuery->where('id_unor', $user->id_unor)
+                      $subQuery->where('id_uker', $user->id_uker)
                                ->whereHas('user', function($userQuery) {
                                    $userQuery->where('role', 'upbu');
                                });
@@ -333,9 +333,9 @@ class EsopController extends Controller
                   });
             });
         } else {
-            // Role lain hanya dapat mengakses SOP milik sendiri atau yang sama id_unor
+            // Role lain hanya dapat mengakses SOP milik sendiri atau yang sama id_uker
             $query->where(function($q) use ($user) {
-                $q->where('id_unor', $user->id_unor)
+                $q->where('id_uker', $user->id_uker)
                   ->orWhere('user_id', $user->id);
             });
         }
@@ -373,12 +373,12 @@ class EsopController extends Controller
         // Filter akses berdasarkan role
         if ($user->role === 'admin') {
 
-        } elseif ($user->role === 'sekretariat' || $user->role === 'direktorat' || $user->role === 'balai') {
+        } elseif ($user->role === 'sekretariat' || $user->role === 'direktorat') {
             // Sekretariat dan Direktorat dapat mengakses SOP milik sendiri dan SOP dari role upbu
             $query->where(function($q) use ($user) {
                 $q->where('user_id', $user->id)
                   ->orWhere(function($subQuery) use ($user) {
-                      $subQuery->where('id_unor', $user->id_unor)
+                      $subQuery->where('id_uker', $user->id_uker)
                                ->whereHas('user', function($userQuery) {
                                    $userQuery->where('role', 'obu');
                                });
@@ -392,7 +392,7 @@ class EsopController extends Controller
             $query->where(function($q) use ($user) {
                 $q->where('user_id', $user->id)
                   ->orWhere(function($subQuery) use ($user) {
-                      $subQuery->where('id_unor', $user->id_unor)
+                      $subQuery->where('id_uker', $user->id_uker)
                                ->whereHas('user', function($userQuery) {
                                    $userQuery->where('role', 'upbu');
                                });
@@ -402,9 +402,9 @@ class EsopController extends Controller
                   });
             });
         } else {
-            // Role lain hanya dapat mengakses SOP milik sendiri atau yang sama id_unor
+            // Role lain hanya dapat mengakses SOP milik sendiri atau yang sama id_uker
             $query->where(function($q) use ($user) {
-                $q->where('id_unor', $user->id_unor)
+                $q->where('id_uker', $user->id_uker)
                   ->orWhere('user_id', $user->id);
             });
         }
@@ -482,12 +482,12 @@ class EsopController extends Controller
                 // Filter berdasarkan role
                 if ($user->role === 'admin') {
 
-                } elseif ($user->role === 'sekretariat' || $user->role === 'direktorat' || $user->role === 'balai') {
+                } elseif ($user->role === 'sekretariat' || $user->role === 'direktorat') {
                     // Sekretariat dan Direktorat dapat melihat SOP milik sendiri dan SOP dari role upbu
                     $esopsQuery->where(function($q) use ($user) {
                         $q->where('user_id', $user->id)
                           ->orWhere(function($subQuery) use ($user) {
-                              $subQuery->where('id_unor', $user->id_unor)
+                              $subQuery->where('id_uker', $user->id_uker)
                                        ->whereHas('user', function($userQuery) {
                                            $userQuery->where('role', 'obu');
                                        });
@@ -517,12 +517,12 @@ class EsopController extends Controller
                 // Filter berdasarkan role terlebih dahulu
                 if ($user->role === 'admin') {
 
-                } elseif ($user->role === 'sekretariat' || $user->role === 'direktorat' || $user->role === 'balai') {
+                } elseif ($user->role === 'sekretariat' || $user->role === 'direktorat') {
                     // Sekretariat dan Direktorat dapat melihat SOP milik sendiri dan SOP dari role upbu
                     $esopsQuery->where(function($q) use ($user) {
                         $q->where('user_id', $user->id)
                           ->orWhere(function($subQuery) use ($user) {
-                              $subQuery->where('id_unor', $user->id_unor)
+                              $subQuery->where('id_uker', $user->id_uker)
                                        ->whereHas('user', function($userQuery) {
                                            $userQuery->where('role', 'obu');
                                        });
@@ -580,12 +580,12 @@ class EsopController extends Controller
         if ($user->role === 'admin') {
             // Admin dapat mengakses semua SOP
 
-        } elseif ($user->role === 'sekretariat' || $user->role === 'direktorat' || $user->role === 'balai') {
+        } elseif ($user->role === 'sekretariat' || $user->role === 'direktorat') {
             // Sekretariat dan Direktorat dapat mengakses SOP milik sendiri dan SOP dari role upbu
             $query->where(function($q) use ($user) {
                 $q->where('user_id', $user->id)
                   ->orWhere(function($subQuery) use ($user) {
-                      $subQuery->where('id_unor', $user->id_unor)
+                      $subQuery->where('id_uker', $user->id_uker)
                                ->whereHas('user', function($userQuery) {
                                    $userQuery->where('role', 'obu');
                                });
@@ -599,7 +599,7 @@ class EsopController extends Controller
             $query->where(function($q) use ($user) {
                 $q->where('user_id', $user->id)
                   ->orWhere(function($subQuery) use ($user) {
-                      $subQuery->where('id_unor', $user->id_unor)
+                      $subQuery->where('id_uker', $user->id_uker)
                                ->whereHas('user', function($userQuery) {
                                    $userQuery->where('role', 'upbu');
                                });
@@ -609,9 +609,9 @@ class EsopController extends Controller
                   });
             });
         } else {
-            // Role lain hanya dapat mengakses SOP milik sendiri atau yang sama id_unor
+            // Role lain hanya dapat mengakses SOP milik sendiri atau yang sama id_uker
             $query->where(function($q) use ($user) {
-                $q->where('id_unor', $user->id_unor)
+                $q->where('id_uker', $user->id_uker)
                   ->orWhere('user_id', $user->id);
             });
         }
@@ -663,7 +663,7 @@ class EsopController extends Controller
         $baseQuery = Esop::with('user');
 
         // Filter berdasarkan role (tetap sama seperti sebelumnya)
-        if ($user->role === 'sekretariat' || $user->role === 'direktorat' || $user->role === 'balai') {
+        if ($user->role === 'sekretariat' || $user->role === 'direktorat') {
             $baseQuery->where(function($q) use ($user) {
                 $q->where('user_id', $user->id)
                 ->orWhereHas('user', function($userQuery) {

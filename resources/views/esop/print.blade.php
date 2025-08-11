@@ -800,7 +800,7 @@
     </div>
 
     <div class="space-y-3">
-        <div class="rounded-sm bg-white p-4 shadow-sm">
+        <div class="w-[60%] rounded-sm bg-white p-4 shadow-sm print:w-full">
             <table class="print-area h-1 w-full table-fixed border border-black text-sm">
                 <tbody>
                     <!-- === Header === -->
@@ -3652,11 +3652,15 @@
         }
     </script>
 
-    <script>
+    {{--
+        <script>
         window.onload = async function () {
-            await new Promise((resolve) => setTimeout(resolve, 1100)); // delay 1100ms
-            document.title = '{{ $esop->nama_sop }}';
-            window.print();
+        await new Promise((resolve) => setTimeout(resolve, 1100)); // delay 1100ms
+        document.title = '{{ $esop->nama_sop }}';
+        window.print();
         };
-    </script>
+        </script>
+    --}}
 </x-layout>
+
+<x-back-to-top></x-back-to-top>

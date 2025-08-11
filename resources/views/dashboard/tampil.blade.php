@@ -37,7 +37,7 @@
             <div class="mt-1 mb-3 flex w-full items-center justify-between pl-3">
                 <div>
                     @if (Auth::user()->role == 'admin')
-                        <h3 class="text-lg font-semibold text-slate-800">Statistik Unit Organisasi</h3>
+                        <h3 class="text-lg font-semibold text-slate-800">Statistik Unit Kerja</h3>
                         <p class="text-sm text-slate-600">Direktorat Jenderal Perhubungan Udara</p>
                     @elseif (Auth::user()->role == 'obu')
                         <h3 class="text-lg font-semibold text-slate-800">Statistik SOP UPBU</h3>
@@ -53,7 +53,7 @@
                             <input
                                 id="searchInputUnitStats"
                                 class="ease h-10 w-full rounded border border-slate-200 bg-white py-2 pr-11 pl-3 text-sm text-slate-700 shadow-sm transition duration-200 placeholder:text-slate-400 hover:border-slate-400 focus:border-slate-400 focus:shadow-md focus:outline-none"
-                                placeholder="Cari unit organisasi..."
+                                placeholder="Cari unit kerja..."
                                 type="text"
                             />
                             <button
@@ -90,7 +90,7 @@
                                 <p class="text-sm leading-none text-slate-600">No</p>
                             </th>
                             <th class="border-b border-slate-200 bg-slate-50 p-4 text-sm font-semibold text-slate-600">
-                                <p class="text-sm leading-none text-slate-600">Unit Organisasi</p>
+                                <p class="text-sm leading-none text-slate-600">Unit Kerja</p>
                             </th>
                             <th class="border-b border-slate-200 bg-slate-50 p-4 text-sm font-semibold text-slate-600">
                                 <p class="text-sm leading-none text-slate-600">Jumlah SOP</p>
@@ -112,7 +112,7 @@
                                     </p>
                                 </td>
                                 <td class="p-4 py-5">
-                                    <p class="text-sm text-slate-600">{{ $unit->user->name ?? '-' }}</p>
+                                    <p class="text-sm text-slate-600">{{ $unit->name ?? '-' }}</p>
                                 </td>
                                 <td class="p-4 py-5">
                                     <p class="text-center text-sm font-semibold text-slate-600">
@@ -219,7 +219,7 @@
                         <p class="text-sm leading-none text-slate-600">No</p>
                     </th>
                     <th class="border-b border-slate-200 bg-slate-50 p-4 text-sm font-semibold text-slate-600">
-                        <p class="text-sm leading-none text-slate-600">Unit Organisasi</p>
+                        <p class="text-sm leading-none text-slate-600">Unit Kerja</p>
                     </th>
                     <th class="border-b border-slate-200 bg-slate-50 p-4 text-sm font-semibold text-slate-600">
                         <p class="text-sm leading-none text-slate-600">Nama SOP</p>
@@ -680,7 +680,12 @@
                 tableBody.innerHTML = '';
 
                 if (result.success && result.data && result.data.length > 0) {
-                    result.data.forEach((unit, index) => {
+                    // Urutkan berdasarkan total_sop (desc) lalu batasi maksimal 5 teratas
+                    const limitedUnits = [...result.data]
+                        .sort((a, b) => (b.total_sop || 0) - (a.total_sop || 0))
+                        .slice(0, 5);
+
+                    limitedUnits.forEach((unit, index) => {
                         let tr = document.createElement('tr');
                         tr.classList.add('tr_pegawai', 'border-b', 'border-slate-200', 'hover:bg-slate-50');
 
@@ -689,7 +694,7 @@
                                 <p class="block text-sm font-semibold text-slate-800">${index + 1}</p>
                             </td>
                             <td class="p-4 py-5">
-                                <p class="text-sm text-slate-600">${unit.user?.name ?? '-'}</p>
+                                <p class="text-sm text-slate-600">${unit.name ?? '-'}</p>
                             </td>
                             <td class="p-4 py-5">
                                 <p class="text-sm text-slate-600">${unit.total_sop}</p>
@@ -707,7 +712,7 @@
 
                     paginationContainer.innerHTML = `
                         <p class="text-sm text-gray-600">
-                            Menampilkan ${result.data.length} hasil pencarian unit organisasi untuk "${query}"
+                            Menampilkan ${limitedUnits.length} teratas dari ${result.data.length} hasil pencarian unit kerja untuk "${query}"
                         </p>
                     `;
                 } else {
@@ -764,7 +769,12 @@
                 tableBody.innerHTML = '';
 
                 if (result.success && result.data && result.data.length > 0) {
-                    result.data.forEach((esop, index) => {
+                    // Urutkan berdasarkan tanggal dibuat (terbaru) lalu batasi maksimal 10 teratas
+                    const limitedEsops = [...result.data]
+                        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+                        .slice(0, 10);
+
+                    limitedEsops.forEach((esop, index) => {
                         let tr = document.createElement('tr');
                         tr.classList.add('tr_pegawai', 'border-b', 'border-slate-200', 'hover:bg-slate-50');
 
@@ -828,7 +838,7 @@
                                         </button>
                                     </a>
                                     <form action="/esop/delete/${esop.id}" method="POST" class="delete-esop-form" data-nama="${esop.nama_sop}" style="display: inline">
-                                        <input type="hidden" name="_token" value="${document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''}">
+                                        <input type="hidden" name="_token" value="${document.querySelector('meta[name=\"csrf-token\"]')?.getAttribute('content') || ''}">
                                         <input type="hidden" name="_method" value="DELETE">
                                         <button type="button" class="btn-delete-esop cursor-pointer rounded-sm bg-red-500 px-2 py-2 text-xs font-semibold text-white shadow-sm hover:bg-red-400" title="Hapus SOP">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
@@ -845,7 +855,7 @@
 
                     paginationContainer.innerHTML = `
                         <p class="text-sm text-gray-600">
-                            Menampilkan ${result.data.length} hasil pencarian ${type} untuk "${query}"
+                            Menampilkan ${limitedEsops.length} teratas dari ${result.data.length} hasil pencarian ${type} untuk "${query}"
                         </p>
                     `;
                 } else {

@@ -210,7 +210,7 @@
                             <div class="mt-2 grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-6">
                                 <div class="sm:col-span-6">
                                     <label for="judul_sop" class="block text-sm/6 font-medium text-gray-900">
-                                        Judul SOP (Unit Organisasi)
+                                        Unit Kerja
                                     </label>
                                     <div class="mt-1 grid grid-cols-1">
                                         <div class="mt-1">
@@ -330,7 +330,7 @@
 
                                 <div class="sm:col-span-6">
                                     <label for="nama_sop" class="block text-sm/6 font-medium text-gray-900">
-                                        Nama SOP
+                                        Judul Naskah SOP
                                     </label>
                                     <div class="mt-1 grid grid-cols-1">
                                         <div class="mt-1">
@@ -413,7 +413,7 @@
                                         for="peralatan_perlengkapan"
                                         class="block text-sm/6 font-medium text-gray-900"
                                     >
-                                        Peralatan / Perlengkapan
+                                        Peralatan
                                     </label>
                                     <div class="mt-1 grid grid-cols-1">
                                         <div class="mt-1">
@@ -622,12 +622,12 @@
                                                 for="unit_organisasi"
                                                 class="block text-sm/6 font-medium text-gray-900"
                                             >
-                                                Unit Organisasi
+                                                Unit Kerja
                                             </label>
                                             <div class="mt-2 grid grid-cols-1">
                                                 <select
-                                                    id="unit_organisasi"
-                                                    name="unit_organisasi"
+                                                    id="unit_kerja"
+                                                    name="unit_kerja"
                                                     readonly
                                                     disabled
                                                     class="form-control pointer-events-none col-start-1 row-start-1 w-full appearance-none rounded-md bg-gray-100 py-1.5 pr-8 pl-3 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 focus:outline focus:-outline-offset-2 sm:text-sm/6"
@@ -832,6 +832,10 @@
                                     </div>
                                 </div>
 
+                                <p class="mt-4 text-center text-xs text-green-500">
+                                    *terima kasih telah mengisi semua data sekarang status SOP anda telah disahkan
+                                </p>
+
                                 <!-- Form upload yang tersembunyi -->
                                 <div id="uploadFormContainer" class="hidden">
                                     <label
@@ -914,6 +918,11 @@
                                         onchange="handleFileUpload()"
                                     />
                                 </label>
+
+                                <p class="mt-4 text-center text-xs text-gray-500">
+                                    *pastikan anda telah mengisi cover sop dan flowchart terlebih dahulu, apabila anda
+                                    belum mengisi hal tersebut silahkan klik tombol lanjut di sebelah kiri
+                                </p>
                             @endif
                         </div>
                     </form>

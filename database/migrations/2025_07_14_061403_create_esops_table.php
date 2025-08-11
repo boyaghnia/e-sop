@@ -14,8 +14,8 @@ return new class extends Migration
 
     Schema::create('esops', function (Blueprint $table) {
         $table->id();
-        $table->string('id_unor');
-        $table->foreign('id_unor')->references('id_unor')->on('users')->onDelete('cascade'); // Relasi ke users
+        $table->string('id_uker');
+        $table->foreign('id_uker')->references('id_uker')->on('users')->onDelete('cascade'); // Relasi ke users
         $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
         $table->string('judul_sop')->nullable();
         $table->string('no_sop')->nullable();

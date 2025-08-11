@@ -13,7 +13,7 @@ class Esop extends Model
     protected $table = 'esops';
 
     protected $fillable = [
-        'id_unor',
+        'id_uker',
         'user_id',
         'judul_sop',
         'no_sop',

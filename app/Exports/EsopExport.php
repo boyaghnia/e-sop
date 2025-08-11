@@ -37,7 +37,7 @@ class EsopExport implements FromCollection, WithHeadings, WithMapping, WithStyle
         $baseQuery = Esop::with('user');
 
         // Filter berdasarkan peran pengguna
-        if ($user->role === 'sekretariat' || $user->role === 'direktorat' || $user->role === 'balai') {
+        if ($user->role === 'sekretariat' || $user->role === 'direktorat') {
             $baseQuery->where(function($q) use ($user) {
                 $q->where('user_id', $user->id)
                   ->orWhereHas('user', function($userQuery) {
@@ -113,10 +113,11 @@ class EsopExport implements FromCollection, WithHeadings, WithMapping, WithStyle
         return [
             'No',
             'Role',
-            'Unit Organisasi',
+            'Unit Kerja',
             'Nama SOP',
             'Tanggal Pembuatan',
-            'Status'
+            'Status',
+            'Link E-SOP'
         ];
     }
 
@@ -133,13 +134,20 @@ class EsopExport implements FromCollection, WithHeadings, WithMapping, WithStyle
         $role = $esop->user->role ?? '-';
         $formattedRole = $this->formatRole($role);
 
+        $isApproved = ($esop->file_path && $esop->file_name);
+        $statusText = $isApproved ? 'Disahkan' : 'Draft';
+        $link = $isApproved
+            ? '=HYPERLINK("' . url('storage/' . $esop->file_path) . '", "Lihat E-SOP")'
+            : '=HYPERLINK("' . url('esop/print/' . $esop->id) . '", "Lihat Draft E-SOP")';
+
         return [
             $no++,
             $formattedRole,
             $esop->user->name ?? '-',
             $esop->nama_sop,
             $esop->created_at->format('d/m/Y'),
-            ($esop->file_path && $esop->file_name) ? 'Disahkan' : 'Draft'
+            $statusText,
+            $link
         ];
     }
 
@@ -182,6 +190,7 @@ class EsopExport implements FromCollection, WithHeadings, WithMapping, WithStyle
             'D' => ['width' => 35],
             'E' => ['width' => 15],
             'F' => ['width' => 12],
+            'G' => ['width' => 25],
         ];
     }
 

@@ -64,7 +64,7 @@
 
                                 <div class="sm:col-span-6">
                                     <label for="judul_sop" class="block text-sm/6 font-medium text-gray-900">
-                                        Judul SOP (Unit Organisasi)
+                                        Unit Kerja
                                     </label>
                                     <div class="mt-1 grid grid-cols-1">
                                         <div class="mt-1">
@@ -224,7 +224,7 @@
 
                                 <div class="sm:col-span-6">
                                     <label for="nama_sop" class="block text-sm/6 font-medium text-gray-900">
-                                        Nama SOP
+                                        Judul Naskah SOP
                                     </label>
                                     <div class="mt-1 grid grid-cols-1">
                                         <div class="mt-1">
@@ -299,7 +299,7 @@
                                         for="peralatan_perlengkapan"
                                         class="block text-sm/6 font-medium text-gray-900"
                                     >
-                                        Peralatan / Perlengkapan
+                                        Peralatan
                                     </label>
                                     <div class="mt-1 grid grid-cols-1">
                                         <div class="mt-1">
@@ -503,8 +503,17 @@
                 const preview = document.getElementById(previewId);
                 if (!textarea || !preview) return;
 
+                // Auto-prefix "SOP " untuk textarea judul_sop (hindari duplikasi)
+                let currentValue = textarea.value;
+                if (inputId === 'judul_sop') {
+                    if (currentValue.trim() !== '' && !/^\s*SOP\b/i.test(currentValue)) {
+                        currentValue = 'SOP\n' + currentValue.trimStart();
+                        textarea.value = currentValue;
+                    }
+                }
+
                 // Pecah isi textarea menjadi array baris (termasuk baris kosong)
-                const rawLines = textarea.value.split('\n');
+                const rawLines = (inputId === 'judul_sop' ? currentValue : textarea.value).split('\n');
 
                 // Tangani khusus field 'ditetapkan_oleh' agar Enter menambah baris kosong
                 if (inputId === 'ditetapkan_oleh') {
