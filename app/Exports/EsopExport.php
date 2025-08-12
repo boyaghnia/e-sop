@@ -46,8 +46,9 @@ class EsopExport implements FromCollection, WithHeadings, WithMapping, WithStyle
                   });
             });
         } elseif ($user->role === 'obu') {
-            $baseQuery->whereHas('user', function($userQuery) {
-                $userQuery->where('role', 'upbu');
+            $baseQuery->whereHas('user', function($userQuery) use ($user) {
+                $userQuery->where('role', 'upbu')
+                         ->where('otban', $user->otban);
             });
         } elseif ($user->role !== 'admin') {
             $baseQuery->where('user_id', $user->id);

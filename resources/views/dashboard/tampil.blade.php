@@ -1,4 +1,41 @@
 <x-layout>
+    <style>
+        .sortable {
+            transition: background-color 0.2s ease;
+        }
+
+        .sortable:hover {
+            background-color: #f1f5f9 !important;
+        }
+
+        .sort-arrows {
+            min-width: 12px;
+        }
+
+        .sort-up,
+        .sort-down {
+            transition: color 0.2s ease;
+        }
+
+        .sortable.active .sort-up.active,
+        .sortable.active .sort-down.active {
+            color: #1e293b;
+        }
+
+        #unitStatsInfo {
+            transition: opacity 0.2s ease;
+        }
+
+        #resetSortingBtn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        #resetSortingBtn:active {
+            transform: translateY(0);
+        }
+    </style>
+
     <div class="flex w-full space-x-3">
         {{-- 1 Kiri - Diagram Doughnut Draft/Disahkan/Total --}}
         <div class="">
@@ -11,8 +48,8 @@
             <div
                 class="relative mb-5 flex w-full flex-col items-center rounded-sm bg-white bg-clip-border p-6 text-gray-700 shadow-sm"
             >
-                <canvas id="sopDoughnutChart" width="300" height="366"></canvas>
-                <div id="sopDoughnutLegend" class="mt-4 flex h-[50px] flex-col items-center space-y-2"></div>
+                <canvas id="sopDoughnutChart" width="300" height="358"></canvas>
+                <div id="sopDoughnutLegend" class="mt-4 flex h-[42px] flex-col items-center space-y-2"></div>
             </div>
         </div>
 
@@ -21,14 +58,14 @@
             <div class="mt-1 mb-3 flex w-full items-center justify-between pl-3">
                 <div>
                     <h3 class="text-lg font-semibold text-slate-800">Statistik SOP</h3>
-                    <p class="text-sm text-slate-600">Grafik jumlah SOP per role pengguna</p>
+                    <p class="text-sm text-slate-600">Grafik jumlah SOP per unit kerja</p>
                 </div>
             </div>
 
             <div
                 class="relative mb-5 flex w-full flex-col rounded-sm bg-white bg-clip-border p-6 text-gray-700 shadow-sm"
             >
-                <canvas id="roleStatsChart" width="400" height="366"></canvas>
+                <canvas id="roleStatsChart" width="400" height="358"></canvas>
             </div>
         </div>
 
@@ -86,20 +123,145 @@
                 <table class="w-full table-auto text-left">
                     <thead>
                         <tr>
-                            <th class="border-b border-slate-200 bg-slate-50 p-4 text-sm font-semibold text-slate-600">
-                                <p class="text-sm leading-none text-slate-600">No</p>
+                            <th
+                                class="sortable cursor-pointer border-b border-slate-200 bg-slate-50 p-3 text-sm font-semibold text-slate-600 hover:bg-slate-100"
+                                data-column="no"
+                            >
+                                <div class="flex items-center justify-between">
+                                    <p class="text-sm leading-none text-slate-600">No</p>
+                                    <div class="sort-arrows ml-1 hidden flex-col">
+                                        <svg
+                                            class="sort-up h-3 w-3 text-slate-400 hover:visible"
+                                            fill="currentColor"
+                                            viewBox="0 0 20 20"
+                                        >
+                                            <path
+                                                d="M5.293 9.707a1 1 0 011.414 0L10 6.414l3.293 3.293a1 1 0 001.414-1.414l-4-4a1 1 0 00-1.414 0l-4 4a1 1 0 000 1.414z"
+                                            />
+                                        </svg>
+                                        <svg
+                                            class="sort-down -mt-1 h-3 w-3 text-slate-400"
+                                            fill="currentColor"
+                                            viewBox="0 0 20 20"
+                                        >
+                                            <path
+                                                d="M14.707 10.293a1 1 0 00-1.414 0L10 13.586 6.707 10.293a1 1 0 00-1.414 1.414l4 4a1 1 0 001.414 0l4-4a1 1 0 000-1.414z"
+                                            />
+                                        </svg>
+                                    </div>
+                                </div>
                             </th>
-                            <th class="border-b border-slate-200 bg-slate-50 p-4 text-sm font-semibold text-slate-600">
-                                <p class="text-sm leading-none text-slate-600">Unit Kerja</p>
+                            <th
+                                class="sortable cursor-pointer border-b border-slate-200 bg-slate-50 p-3 text-sm font-semibold text-slate-600 hover:bg-slate-100"
+                                data-column="unit_kerja"
+                            >
+                                <div class="flex items-center justify-between">
+                                    <p class="text-sm leading-none text-slate-600">Unit Kerja</p>
+                                    <div class="sort-arrows ml-1 hidden flex-col">
+                                        <svg
+                                            class="sort-up h-3 w-3 text-slate-400"
+                                            fill="currentColor"
+                                            viewBox="0 0 20 20"
+                                        >
+                                            <path
+                                                d="M5.293 9.707a1 1 0 011.414 0L10 6.414l3.293 3.293a1 1 0 001.414-1.414l-4-4a1 1 0 00-1.414 0l-4 4a1 1 0 000 1.414z"
+                                            />
+                                        </svg>
+                                        <svg
+                                            class="sort-down -mt-1 h-3 w-3 text-slate-400"
+                                            fill="currentColor"
+                                            viewBox="0 0 20 20"
+                                        >
+                                            <path
+                                                d="M14.707 10.293a1 1 0 00-1.414 0L10 13.586 6.707 10.293a1 1 0 00-1.414 1.414l4 4a1 1 0 001.414 0l4-4a1 1 0 000-1.414z"
+                                            />
+                                        </svg>
+                                    </div>
+                                </div>
                             </th>
-                            <th class="border-b border-slate-200 bg-slate-50 p-4 text-sm font-semibold text-slate-600">
-                                <p class="text-sm leading-none text-slate-600">Jumlah SOP</p>
+                            <th
+                                class="sortable cursor-pointer border-b border-slate-200 bg-slate-50 p-3 text-sm font-semibold text-slate-600 hover:bg-slate-100"
+                                data-column="jumlah_sop"
+                            >
+                                <div class="flex items-center justify-between">
+                                    <p class="text-sm leading-none text-slate-600">Jumlah SOP</p>
+                                    <div class="sort-arrows ml-1 flex flex-col">
+                                        <svg
+                                            class="sort-up h-2 w-2 text-slate-400"
+                                            fill="currentColor"
+                                            viewBox="0 0 20 20"
+                                        >
+                                            <path
+                                                d="M5.293 9.707a1 1 0 011.414 0L10 6.414l3.293 3.293a1 1 0 001.414-1.414l-4-4a1 1 0 00-1.414 0l-4 4a1 1 0 000 1.414z"
+                                            />
+                                        </svg>
+                                        <svg
+                                            class="sort-down -mt-1 h-2 w-2 text-slate-400"
+                                            fill="currentColor"
+                                            viewBox="0 0 20 20"
+                                        >
+                                            <path
+                                                d="M14.707 10.293a1 1 0 00-1.414 0L10 13.586 6.707 10.293a1 1 0 00-1.414 1.414l4 4a1 1 0 001.414 0l4-4a1 1 0 000-1.414z"
+                                            />
+                                        </svg>
+                                    </div>
+                                </div>
                             </th>
-                            <th class="border-b border-slate-200 bg-slate-50 p-4 text-sm font-semibold text-slate-600">
-                                <p class="text-sm leading-none text-slate-600">Draft</p>
+                            <th
+                                class="sortable cursor-pointer border-b border-slate-200 bg-slate-50 p-3 text-sm font-semibold text-slate-600 hover:bg-slate-100"
+                                data-column="draft"
+                            >
+                                <div class="flex items-center justify-between">
+                                    <p class="text-sm leading-none text-slate-600">Draft</p>
+                                    <div class="sort-arrows ml-1 flex flex-col">
+                                        <svg
+                                            class="sort-up h-2 w-2 text-slate-400"
+                                            fill="currentColor"
+                                            viewBox="0 0 20 20"
+                                        >
+                                            <path
+                                                d="M5.293 9.707a1 1 0 011.414 0L10 6.414l3.293 3.293a1 1 0 001.414-1.414l-4-4a1 1 0 00-1.414 0l-4 4a1 1 0 000 1.414z"
+                                            />
+                                        </svg>
+                                        <svg
+                                            class="sort-down -mt-1 h-2 w-2 text-slate-400"
+                                            fill="currentColor"
+                                            viewBox="0 0 20 20"
+                                        >
+                                            <path
+                                                d="M14.707 10.293a1 1 0 00-1.414 0L10 13.586 6.707 10.293a1 1 0 00-1.414 1.414l4 4a1 1 0 001.414 0l4-4a1 1 0 000-1.414z"
+                                            />
+                                        </svg>
+                                    </div>
+                                </div>
                             </th>
-                            <th class="border-b border-slate-200 bg-slate-50 p-4 text-sm font-semibold text-slate-600">
-                                <p class="text-sm leading-none text-slate-600">Disahkan</p>
+                            <th
+                                class="sortable cursor-pointer border-b border-slate-200 bg-slate-50 p-3 text-sm font-semibold text-slate-600 hover:bg-slate-100"
+                                data-column="disahkan"
+                            >
+                                <div class="flex items-center justify-between">
+                                    <p class="text-sm leading-none text-slate-600">Disahkan</p>
+                                    <div class="sort-arrows ml-1 flex flex-col">
+                                        <svg
+                                            class="sort-up h-2 w-2 text-slate-400"
+                                            fill="currentColor"
+                                            viewBox="0 0 20 20"
+                                        >
+                                            <path
+                                                d="M5.293 9.707a1 1 0 011.414 0L10 6.414l3.293 3.293a1 1 0 001.414-1.414l-4-4a1 1 0 00-1.414 0l-4 4a1 1 0 000 1.414z"
+                                            />
+                                        </svg>
+                                        <svg
+                                            class="sort-down -mt-1 h-2 w-2 text-slate-400"
+                                            fill="currentColor"
+                                            viewBox="0 0 20 20"
+                                        >
+                                            <path
+                                                d="M14.707 10.293a1 1 0 00-1.414 0L10 13.586 6.707 10.293a1 1 0 00-1.414 1.414l4 4a1 1 0 001.414 0l4-4a1 1 0 000-1.414z"
+                                            />
+                                        </svg>
+                                    </div>
+                                </div>
                             </th>
                         </tr>
                     </thead>
@@ -133,7 +295,12 @@
                 </table>
 
                 <div class="items-center justify-between px-4 py-3">
-                    {{ $unitStats->links('pagination.pagination') }}
+                    <div id="unitStatsPagination">
+                        {{ $unitStats->links('pagination.pagination') }}
+                    </div>
+                    <div id="unitStatsInfo" class="hidden w-full">
+                        <!-- Container ini sekarang tidak digunakan karena semua text dihilangkan -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -641,23 +808,34 @@
             let searchInputUnitStats = document.getElementById('searchInputUnitStats');
             let tableBodyUnitStats = document.querySelector('.tableBodyUnitStats');
             let originalUnitStatsContent = tableBodyUnitStats.innerHTML;
-            let unitStatsPaginationContainer = document
-                .querySelector('.tableBodyUnitStats')
-                .closest('.relative')
-                .querySelector('.items-center');
+            let unitStatsPaginationContainer = document.getElementById('unitStatsPagination');
+            let unitStatsInfoContainer = document.getElementById('unitStatsInfo');
             let originalUnitStatsPaginationContent = unitStatsPaginationContainer.innerHTML;
 
-            // Search for Unit Stats
-            searchInputUnitStats.addEventListener('input', function () {
-                let query = this.value.trim();
+            // Variables for sorting
+            let currentUnitData = [];
+            let allUnitData = []; // Store all unit data for sorting
+            let currentSortColumn = null;
+            let currentSortDirection = 'asc';
+            let isSearching = false;
+            let sortedData = []; // Store currently sorted data
+            let currentSortPage = 1; // Current page for sorted data
+            let sortItemsPerPage = 5; // Items per page when sorting
 
-                if (query === '') {
-                    tableBodyUnitStats.innerHTML = originalUnitStatsContent;
-                    unitStatsPaginationContainer.innerHTML = originalUnitStatsPaginationContent;
-                    return;
-                }
+            // Initialize unit data from server
+            function initializeUnitData() {
+                currentUnitData = @json($unitStats->items()).map((unit, index) => ({
+                    ...unit,
+                    original_index: index + 1 + (@json($unitStats->currentPage()) - 1) * @json($unitStats->perPage()),
+                }));
 
-                fetch(`/dashboard/search?query=${query}&table=units`, {
+                // Fetch all unit data for sorting purposes
+                fetchAllUnitData();
+            }
+
+            // Fetch all unit data without pagination
+            function fetchAllUnitData() {
+                fetch('/dashboard/search?table=units&get_all=true', {
                     method: 'GET',
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest',
@@ -667,63 +845,428 @@
                 })
                     .then((response) => response.json())
                     .then((result) => {
-                        updateUnitTable(result, tableBodyUnitStats, unitStatsPaginationContainer, query);
+                        if (result.success && result.data) {
+                            allUnitData = result.data.map((unit, index) => ({
+                                ...unit,
+                                original_index: index + 1,
+                            }));
+                            console.log(`Loaded ${allUnitData.length} unit records for sorting`);
+                        } else {
+                            throw new Error('Failed to fetch all unit data');
+                        }
                     })
                     .catch((error) => {
-                        console.error('Error:', error);
-                        showError(tableBodyUnitStats, unitStatsPaginationContainer, error);
+                        console.error('Error fetching all unit data:', error);
+                        // Fallback to current paginated data
+                        allUnitData = [...currentUnitData];
+                        console.log('Fallback to paginated data:', allUnitData.length, 'records');
                     });
-            });
+            }
 
-            // Helper function to update unit stats table
-            function updateUnitTable(result, tableBody, paginationContainer, query) {
-                tableBody.innerHTML = '';
+            // Sort functionality
+            function sortUnitTable(column) {
+                // Determine sort direction
+                if (currentSortColumn === column) {
+                    currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+                } else {
+                    currentSortColumn = column;
+                    currentSortDirection = 'asc';
+                }
 
-                if (result.success && result.data && result.data.length > 0) {
-                    // Urutkan berdasarkan total_sop (desc) lalu batasi maksimal 5 teratas
-                    const limitedUnits = [...result.data]
-                        .sort((a, b) => (b.total_sop || 0) - (a.total_sop || 0))
-                        .slice(0, 5);
+                // Update arrow indicators
+                updateSortArrows(column, currentSortDirection);
 
-                    limitedUnits.forEach((unit, index) => {
+                // Get data to sort - use all data if not searching, search results if searching
+                let dataToSort = isSearching ? getSearchResults() : [...allUnitData];
+
+                // Sort the data
+                dataToSort.sort((a, b) => {
+                    let valueA, valueB;
+
+                    switch (column) {
+                        case 'no':
+                            valueA = a.original_index;
+                            valueB = b.original_index;
+                            break;
+                        case 'unit_kerja':
+                            valueA = (a.name || '').toLowerCase();
+                            valueB = (b.name || '').toLowerCase();
+                            break;
+                        case 'jumlah_sop':
+                            valueA = parseInt(a.total_sop) || 0;
+                            valueB = parseInt(b.total_sop) || 0;
+                            break;
+                        case 'draft':
+                            valueA = parseInt(a.draft) || 0;
+                            valueB = parseInt(b.draft) || 0;
+                            break;
+                        case 'disahkan':
+                            valueA = parseInt(a.disahkan) || 0;
+                            valueB = parseInt(b.disahkan) || 0;
+                            break;
+                        default:
+                            return 0;
+                    }
+
+                    if (typeof valueA === 'string') {
+                        return currentSortDirection === 'asc'
+                            ? valueA.localeCompare(valueB)
+                            : valueB.localeCompare(valueA);
+                    } else {
+                        return currentSortDirection === 'asc' ? valueA - valueB : valueB - valueA;
+                    }
+                });
+
+                // Store sorted data and reset to page 1
+                sortedData = dataToSort;
+                currentSortPage = 1;
+
+                // Hide info container completely when sorting
+                unitStatsInfoContainer.style.display = 'none';
+                unitStatsInfoContainer.classList.add('hidden');
+
+                // Show custom pagination
+                unitStatsPaginationContainer.style.display = 'block';
+
+                // Render first page of sorted data
+                renderSortedPage();
+            }
+
+            // Generate custom pagination for sorted data (style sama seperti pagination.blade.php)
+            function generateSortPagination(totalItems, currentPage, itemsPerPage) {
+                const totalPages = Math.ceil(totalItems / itemsPerPage);
+                if (totalPages <= 1) return '';
+
+                let pagination =
+                    '<nav role="navigation" aria-label="Pagination Navigation" class="flex items-center justify-between">';
+
+                // Mobile version (hidden on desktop)
+                pagination += '<div class="flex flex-1 justify-between sm:hidden">';
+
+                // Previous button (mobile)
+                if (currentPage > 1) {
+                    pagination += `<a onclick="goToSortPage(${currentPage - 1})" class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm leading-5 font-medium text-gray-700 ring-gray-300 transition duration-150 ease-in-out hover:text-gray-500 focus:border-blue-300 focus:ring focus:outline-none active:bg-gray-100 active:text-gray-700 cursor-pointer">Sebelumnya</a>`;
+                } else {
+                    pagination +=
+                        '<span class="relative inline-flex cursor-default items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm leading-5 font-medium text-gray-500">Sebelumnya</span>';
+                }
+
+                // Next button (mobile)
+                if (currentPage < totalPages) {
+                    pagination += `<a onclick="goToSortPage(${currentPage + 1})" class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm leading-5 font-medium text-gray-700 ring-gray-300 transition duration-150 ease-in-out hover:text-gray-500 focus:border-blue-300 focus:ring focus:outline-none active:bg-gray-100 active:text-gray-700 cursor-pointer">Selanjutnya</a>`;
+                } else {
+                    pagination +=
+                        '<span class="relative ml-3 inline-flex cursor-default items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm leading-5 font-medium text-gray-500">Selanjutnya</span>';
+                }
+
+                pagination += '</div>';
+
+                // Desktop version
+                pagination += '<div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">';
+
+                // Info text (left side) - hilangkan sesuai permintaan
+                pagination += '<div></div>';
+
+                // Pagination controls (right side)
+                pagination += '<div>';
+                pagination += '<span class="relative z-0 inline-flex rounded-md shadow-sm">';
+
+                // Previous button (desktop) with icon
+                if (currentPage > 1) {
+                    pagination += `<a onclick="goToSortPage(${currentPage - 1})" class="relative inline-flex items-center rounded-l-md border border-gray-300 bg-white px-2 py-2 text-sm leading-5 font-medium text-gray-500 ring-gray-300 transition duration-150 ease-in-out hover:text-gray-400 focus:z-10 focus:border-blue-300 focus:ring focus:outline-none active:bg-gray-100 active:text-gray-500 cursor-pointer" aria-label="Sebelumnya">
+                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                    </a>`;
+                } else {
+                    pagination += `<span class="relative inline-flex cursor-default items-center rounded-l-md border border-gray-300 bg-white px-2 py-2 text-sm leading-5 font-medium text-gray-500" aria-hidden="true">
+                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                    </span>`;
+                }
+
+                // Page numbers (logic sama seperti pagination.blade.php - tampilkan 3 halaman)
+                let start, end;
+                if (currentPage === 1) {
+                    start = 1;
+                    end = Math.min(3, totalPages);
+                } else if (currentPage === totalPages) {
+                    start = Math.max(1, totalPages - 2);
+                    end = totalPages;
+                } else {
+                    start = Math.max(1, currentPage - 1);
+                    end = Math.min(totalPages, currentPage + 1);
+                }
+
+                for (let i = start; i <= end; i++) {
+                    if (i === currentPage) {
+                        pagination += `<span aria-current="page">
+                            <span class="relative -ml-px inline-flex cursor-default items-center border border-gray-300 bg-blue-50 px-4 py-2 text-sm leading-5 font-medium text-blue-600">
+                                ${i}
+                            </span>
+                        </span>`;
+                    } else {
+                        pagination += `<a onclick="goToSortPage(${i})" class="relative -ml-px inline-flex items-center border border-gray-300 bg-white px-4 py-2 text-sm leading-5 font-medium text-gray-700 ring-gray-300 transition duration-150 ease-in-out hover:text-gray-500 focus:z-10 focus:border-blue-300 focus:ring focus:outline-none active:bg-gray-100 active:text-gray-700 cursor-pointer" aria-label="Halaman ${i}">
+                            ${i}
+                        </a>`;
+                    }
+                }
+
+                // Next button (desktop) with icon
+                if (currentPage < totalPages) {
+                    pagination += `<a onclick="goToSortPage(${currentPage + 1})" class="relative -ml-px inline-flex items-center rounded-r-md border border-gray-300 bg-white px-2 py-2 text-sm leading-5 font-medium text-gray-500 ring-gray-300 transition duration-150 ease-in-out hover:text-gray-400 focus:z-10 focus:border-blue-300 focus:ring focus:outline-none active:bg-gray-100 active:text-gray-500 cursor-pointer" aria-label="Selanjutnya">
+                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                    </a>`;
+                } else {
+                    pagination += `<span class="relative -ml-px inline-flex cursor-default items-center rounded-r-md border border-gray-300 bg-white px-2 py-2 text-sm leading-5 font-medium text-gray-500" aria-hidden="true">
+                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                    </span>`;
+                }
+
+                pagination += '</span>';
+                pagination += '</div>';
+                pagination += '</div>';
+                pagination += '</nav>';
+
+                return pagination;
+            }
+
+            // Go to specific sort page
+            window.goToSortPage = function (page) {
+                currentSortPage = page;
+                renderSortedPage();
+            };
+
+            // Render current sorted page
+            function renderSortedPage() {
+                const startIndex = (currentSortPage - 1) * sortItemsPerPage;
+                const endIndex = startIndex + sortItemsPerPage;
+                const pageData = sortedData.slice(startIndex, endIndex);
+
+                renderUnitTable(pageData, startIndex);
+
+                // Update pagination
+                const paginationHtml = generateSortPagination(sortedData.length, currentSortPage, sortItemsPerPage);
+                unitStatsPaginationContainer.innerHTML = paginationHtml;
+            }
+            function getColumnDisplayName(column) {
+                const columnNames = {
+                    no: 'No',
+                    unit_kerja: 'Unit Kerja',
+                    jumlah_sop: 'Jumlah SOP',
+                    draft: 'Draft',
+                    disahkan: 'Disahkan',
+                };
+                return columnNames[column] || column;
+            }
+
+            // Update sort arrow indicators
+            function updateSortArrows(activeColumn, direction) {
+                // Reset all arrows
+                document.querySelectorAll('.sortable .sort-up, .sortable .sort-down').forEach((arrow) => {
+                    arrow.classList.remove('text-slate-700');
+                    arrow.classList.add('text-slate-400');
+                });
+
+                // Highlight active column arrows if activeColumn is provided
+                if (activeColumn) {
+                    const activeHeader = document.querySelector(`[data-column="${activeColumn}"]`);
+                    if (activeHeader) {
+                        const upArrow = activeHeader.querySelector('.sort-up');
+                        const downArrow = activeHeader.querySelector('.sort-down');
+
+                        if (direction === 'asc') {
+                            upArrow.classList.remove('text-slate-400');
+                            upArrow.classList.add('text-slate-700');
+                        } else if (direction === 'desc') {
+                            downArrow.classList.remove('text-slate-400');
+                            downArrow.classList.add('text-slate-700');
+                        }
+                    }
+                }
+            }
+
+            // Get current search results
+            function getSearchResults() {
+                const query = searchInputUnitStats.value.trim().toLowerCase();
+                return allUnitData.filter((unit) => (unit.name || '').toLowerCase().includes(query));
+            }
+
+            // Render unit table
+            function renderUnitTable(data, startIndex = 0) {
+                tableBodyUnitStats.innerHTML = '';
+
+                if (data && data.length > 0) {
+                    data.forEach((unit, index) => {
                         let tr = document.createElement('tr');
                         tr.classList.add('tr_pegawai', 'border-b', 'border-slate-200', 'hover:bg-slate-50');
 
                         tr.innerHTML = `
                             <td class="p-4 py-5">
-                                <p class="block text-sm font-semibold text-slate-800">${index + 1}</p>
+                                <p class="block text-sm font-semibold text-slate-800">${startIndex + index + 1}</p>
                             </td>
                             <td class="p-4 py-5">
                                 <p class="text-sm text-slate-600">${unit.name ?? '-'}</p>
                             </td>
                             <td class="p-4 py-5">
-                                <p class="text-sm text-slate-600">${unit.total_sop}</p>
+                                <p class="text-center text-sm font-semibold text-slate-600">${unit.total_sop}</p>
                             </td>
                             <td class="p-4 py-5">
-                                <p class="text-sm text-slate-600">${unit.draft}</p>
+                                <p class="text-center text-sm font-semibold text-slate-600">${unit.draft}</p>
                             </td>
                             <td class="p-4 py-5">
-                                <p class="text-sm text-slate-600">${unit.disahkan}</p>
+                                <p class="text-center text-sm font-semibold text-slate-600">${unit.disahkan}</p>
                             </td>
                         `;
 
-                        tableBody.appendChild(tr);
+                        tableBodyUnitStats.appendChild(tr);
                     });
-
-                    paginationContainer.innerHTML = `
-                        <p class="text-sm text-gray-600">
-                            Menampilkan ${limitedUnits.length} teratas dari ${result.data.length} hasil pencarian unit kerja untuk "${query}"
-                        </p>
-                    `;
                 } else {
-                    tableBody.innerHTML =
+                    tableBodyUnitStats.innerHTML =
                         '<tr><td colspan="5" class="p-4 text-center text-sm text-slate-600">Tidak ada data ditemukan</td></tr>';
-                    paginationContainer.innerHTML = `
-                        <p class="text-sm text-gray-600">
-                            Tidak ada hasil untuk pencarian "${query}"
-                        </p>
-                    `;
                 }
+            }
+
+            // Reset to original paginated view
+            function resetToOriginalView() {
+                tableBodyUnitStats.innerHTML = originalUnitStatsContent;
+
+                // Show original pagination and hide info
+                unitStatsPaginationContainer.style.display = 'block';
+                unitStatsPaginationContainer.innerHTML = originalUnitStatsPaginationContent;
+                unitStatsInfoContainer.style.display = 'none';
+                unitStatsInfoContainer.classList.add('hidden');
+
+                currentSortColumn = null;
+                currentSortDirection = 'asc';
+                isSearching = false;
+                sortedData = [];
+                currentSortPage = 1;
+                updateSortArrows(null, null); // Reset all arrows
+            }
+
+            // Add click event listeners to sortable headers
+            document.querySelectorAll('.sortable').forEach((header) => {
+                header.addEventListener('click', function () {
+                    const column = this.getAttribute('data-column');
+                    sortUnitTable(column);
+                });
+
+                // Double click to reset sorting
+                header.addEventListener('dblclick', function () {
+                    searchInputUnitStats.value = '';
+                    resetToOriginalView();
+                });
+            });
+
+            // Add event listener untuk pagination links (jika user klik pagination original, reset sorting)
+            document.addEventListener('click', function (event) {
+                // Check if clicked element is an original pagination link (not our custom sort pagination)
+                if (event.target.closest('#unitStatsPagination a') && !event.target.hasAttribute('onclick')) {
+                    // Reset sorting when original pagination is clicked
+                    resetToOriginalView();
+                }
+            });
+
+            // Initialize data
+            initializeUnitData();
+
+            // Search for Unit Stats
+            searchInputUnitStats.addEventListener('input', function () {
+                let query = this.value.trim();
+
+                if (query === '') {
+                    isSearching = false;
+                    // Reset to original data with current sort or show paginated data
+                    if (currentSortColumn && allUnitData.length > 0) {
+                        sortUnitTable(currentSortColumn);
+                    } else {
+                        renderUnitTable(currentUnitData);
+                        // Show original pagination and hide info
+                        unitStatsPaginationContainer.style.display = 'block';
+                        unitStatsPaginationContainer.innerHTML = originalUnitStatsPaginationContent;
+                        unitStatsInfoContainer.style.display = 'none';
+                        unitStatsInfoContainer.classList.add('hidden');
+                    }
+                    return;
+                }
+
+                isSearching = true;
+
+                // Filter data locally first for better performance
+                const searchResults = getSearchResults();
+
+                if (searchResults.length > 0) {
+                    // Apply current sort to search results if any
+                    let sortedResults = searchResults;
+                    if (currentSortColumn) {
+                        sortedResults = sortSearchData([...searchResults], currentSortColumn, currentSortDirection);
+                        // Store sorted search results
+                        sortedData = sortedResults;
+                        currentSortPage = 1;
+                        renderSortedPage();
+                    } else {
+                        // Just show first 5 search results without sorting
+                        const limitedResults = sortedResults.slice(0, 5);
+                        renderUnitTable(limitedResults);
+
+                        // Hide both pagination and info
+                        unitStatsPaginationContainer.style.display = 'none';
+                        unitStatsInfoContainer.style.display = 'none';
+                        unitStatsInfoContainer.classList.add('hidden');
+                    }
+                } else {
+                    tableBodyUnitStats.innerHTML =
+                        '<tr><td colspan="5" class="p-4 text-center text-sm text-slate-600">Tidak ada data ditemukan</td></tr>';
+
+                    // Hide both pagination and info
+                    unitStatsPaginationContainer.style.display = 'none';
+                    unitStatsInfoContainer.style.display = 'none';
+                    unitStatsInfoContainer.classList.add('hidden');
+                }
+            });
+
+            // Helper function to sort search data
+            function sortSearchData(data, column, direction) {
+                return data.sort((a, b) => {
+                    let valueA, valueB;
+
+                    switch (column) {
+                        case 'no':
+                            valueA = a.original_index;
+                            valueB = b.original_index;
+                            break;
+                        case 'unit_kerja':
+                            valueA = (a.name || '').toLowerCase();
+                            valueB = (b.name || '').toLowerCase();
+                            break;
+                        case 'jumlah_sop':
+                            valueA = parseInt(a.total_sop) || 0;
+                            valueB = parseInt(b.total_sop) || 0;
+                            break;
+                        case 'draft':
+                            valueA = parseInt(a.draft) || 0;
+                            valueB = parseInt(b.draft) || 0;
+                            break;
+                        case 'disahkan':
+                            valueA = parseInt(a.disahkan) || 0;
+                            valueB = parseInt(b.disahkan) || 0;
+                            break;
+                        default:
+                            return 0;
+                    }
+
+                    if (typeof valueA === 'string') {
+                        return direction === 'asc' ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
+                    } else {
+                        return direction === 'asc' ? valueA - valueB : valueB - valueA;
+                    }
+                });
             }
 
             // All ESOPs search

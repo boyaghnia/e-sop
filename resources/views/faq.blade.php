@@ -8,6 +8,39 @@
                 penerapan SOP di lingkungan kerja.
             </p>
 
+            <!-- Search Box -->
+            <div class="mx-auto mt-8 max-w-2xl">
+                <div class="relative">
+                    <input
+                        type="text"
+                        id="searchInput"
+                        placeholder="Cari pertanyaan atau kata kunci..."
+                        class="w-full rounded-lg border border-gray-300 py-3 pr-4 pl-10 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
+                    />
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3">
+                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                            />
+                        </svg>
+                    </div>
+                </div>
+                <!-- Search Results Counter -->
+                <div id="searchResults" class="mt-2 text-center text-sm text-gray-600" style="display: none">
+                    <span id="resultsCount">0</span>
+                    hasil ditemukan
+                </div>
+                <!-- Clear Search Button -->
+                <div class="mt-2 text-center">
+                    <button id="clearSearch" class="text-sm text-blue-600 hover:text-blue-800" style="display: none">
+                        Hapus pencarian
+                    </button>
+                </div>
+            </div>
+
             <div class="mt-8 lg:-mx-12 lg:flex xl:mt-16">
                 <div class="lg:mx-12 lg:w-1/6">
                     <h1 class="text-xl font-semibold text-gray-800">Daftar Kategori</h1>
@@ -68,6 +101,34 @@
                 </div>
 
                 <div class="mt-8 flex-1 lg:mx-12 lg:mt-0 lg:w-5/6">
+                    <!-- No Results Message -->
+                    <div id="noResults" class="hidden py-12 text-center">
+                        <div class="mx-auto max-w-md">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke-width="1.5"
+                                stroke="currentColor"
+                                class="mx-auto mb-4 h-15 w-15 text-gray-500"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 0 0-1.883 2.542l.857 6a2.25 2.25 0 0 0 2.227 1.932H19.05a2.25 2.25 0 0 0 2.227-1.932l.857-6a2.25 2.25 0 0 0-1.883-2.542m-16.5 0V6A2.25 2.25 0 0 1 6 3.75h3.879a1.5 1.5 0 0 1 1.06.44l2.122 2.12a1.5 1.5 0 0 0 1.06.44H18A2.25 2.25 0 0 1 20.25 9v.776"
+                                />
+                            </svg>
+
+                            <h3 class="mb-2 text-lg font-medium text-gray-900">Tidak ada hasil ditemukan</h3>
+                            <p class="mb-4 text-gray-600">Coba gunakan kata kunci yang berbeda atau lebih umum</p>
+                            <button
+                                id="clearSearchFromNoResults"
+                                class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                            >
+                                Tampilkan semua FAQ
+                            </button>
+                        </div>
+                    </div>
                     <!-- A. UMUM -->
                     <div id="umum" class="faq-section">
                         <div class="mb-6 rounded-sm bg-blue-50 p-4">
@@ -1884,8 +1945,6 @@
         </div>
     </section>
 
-    <x-back-to-top></x-back-to-top>
-
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             // FAQ Toggle Functionality
@@ -1972,37 +2031,199 @@
                 observer.observe(section);
             });
 
-            // Search functionality (optional enhancement)
-            function addSearchFunctionality() {
-                const searchInput = document.createElement('input');
-                searchInput.type = 'text';
-                searchInput.placeholder = 'Cari pertanyaan FAQ...';
-                searchInput.className =
-                    'w-full p-3 border border-gray-300 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-blue-500';
+            // Search Functionality
+            const searchInput = document.getElementById('searchInput');
+            const searchResults = document.getElementById('searchResults');
+            const resultsCount = document.getElementById('resultsCount');
+            const clearSearch = document.getElementById('clearSearch');
+            const clearSearchFromNoResults = document.getElementById('clearSearchFromNoResults');
+            const noResults = document.getElementById('noResults');
+            const faqSections = document.querySelectorAll('.faq-section');
+            const categoryListContainer = document.querySelector('[class*="lg:w-1/6"]');
 
-                const container = document.querySelector('.container');
-                const title = container.querySelector('h1');
-                title.insertAdjacentElement('afterend', searchInput);
+            let allQuestions = [];
+            let allSections = [];
 
-                searchInput.addEventListener('input', function () {
-                    const searchTerm = this.value.toLowerCase();
-                    const questions = document.querySelectorAll('.faq-button');
+            // Store all questions and their parent sections for searching
+            faqSections.forEach((section) => {
+                allSections.push(section);
+                const questions = section.querySelectorAll('.mb-4');
+                questions.forEach((question) => {
+                    const questionElement = question.querySelector('.faq-button h3');
+                    const answerElement = question.querySelector('.faq-answer');
 
-                    questions.forEach((question) => {
-                        const questionText = question.textContent.toLowerCase();
-                        const questionContainer = question.closest('.mb-4');
+                    if (questionElement && answerElement) {
+                        allQuestions.push({
+                            element: question,
+                            section: section,
+                            questionText: questionElement.textContent.toLowerCase(),
+                            answerText: answerElement.textContent.toLowerCase(),
+                        });
+                    }
+                });
+            });
 
-                        if (questionText.includes(searchTerm)) {
-                            questionContainer.style.display = 'block';
-                        } else {
-                            questionContainer.style.display = 'none';
-                        }
-                    });
+            function highlightText(text, searchTerm) {
+                if (!searchTerm) return text;
+                // Escape special regex characters
+                const escapedTerm = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                const regex = new RegExp(`(${escapedTerm})`, 'gi');
+                return text.replace(regex, '<mark class="bg-yellow-200 px-1 rounded">$1</mark>');
+            }
+
+            function removeHighlights() {
+                const highlights = document.querySelectorAll('mark');
+                highlights.forEach((mark) => {
+                    const parent = mark.parentNode;
+                    if (parent) {
+                        parent.replaceChild(document.createTextNode(mark.textContent), mark);
+                        parent.normalize();
+                    }
                 });
             }
 
-            // Uncomment the line below to enable search functionality
-            addSearchFunctionality();
+            function performSearch(searchTerm) {
+                removeHighlights();
+
+                if (!searchTerm.trim()) {
+                    // Show all content
+                    allSections.forEach((section) => (section.style.display = 'block'));
+                    allQuestions.forEach((q) => (q.element.style.display = 'block'));
+                    if (categoryListContainer) categoryListContainer.style.display = 'block';
+                    noResults.classList.add('hidden');
+                    searchResults.style.display = 'none';
+                    clearSearch.style.display = 'none';
+                    return;
+                }
+
+                let visibleCount = 0;
+                const visibleSections = new Set();
+
+                // Search through questions
+                allQuestions.forEach((q) => {
+                    const questionMatches = q.questionText.includes(searchTerm.toLowerCase());
+                    const answerMatches = q.answerText.includes(searchTerm.toLowerCase());
+
+                    if (questionMatches || answerMatches) {
+                        q.element.style.display = 'block';
+                        visibleSections.add(q.section);
+                        visibleCount++;
+
+                        // Highlight matching text - dengan error handling
+                        try {
+                            if (questionMatches) {
+                                const questionElement = q.element.querySelector('.faq-button h3');
+                                if (questionElement) {
+                                    const originalText = questionElement.textContent;
+                                    questionElement.innerHTML = highlightText(originalText, searchTerm);
+                                }
+                            }
+
+                            if (answerMatches) {
+                                const answerElement = q.element.querySelector('.faq-answer');
+                                if (answerElement) {
+                                    const originalText = answerElement.textContent;
+                                    answerElement.innerHTML = highlightText(originalText, searchTerm);
+                                }
+                            }
+                        } catch (error) {
+                            console.log('Error highlighting text:', error);
+                        }
+                    } else {
+                        q.element.style.display = 'none';
+                    }
+                });
+
+                // Show/hide sections based on visible questions
+                allSections.forEach((section) => {
+                    if (visibleSections.has(section)) {
+                        section.style.display = 'block';
+                    } else {
+                        section.style.display = 'none';
+                    }
+                });
+
+                // Update UI based on results
+                if (visibleCount > 0) {
+                    noResults.classList.add('hidden');
+                    searchResults.style.display = 'block';
+                    clearSearch.style.display = 'inline';
+                    resultsCount.textContent = visibleCount;
+                    if (categoryListContainer) categoryListContainer.style.display = 'none'; // Hide category list during search
+                } else {
+                    noResults.classList.remove('hidden');
+                    searchResults.style.display = 'none';
+                    clearSearch.style.display = 'inline';
+                    if (categoryListContainer) categoryListContainer.style.display = 'none';
+                }
+            }
+
+            function clearSearchFunction() {
+                searchInput.value = '';
+                performSearch('');
+            }
+
+            // Event listeners dengan error handling
+            if (searchInput) {
+                searchInput.addEventListener('input', function () {
+                    const searchTerm = this.value;
+                    performSearch(searchTerm);
+                });
+
+                searchInput.addEventListener('keydown', function (e) {
+                    if (e.key === 'Escape') {
+                        clearSearchFunction();
+                    }
+                });
+            } else {
+                console.error('Search input element not found');
+            }
+
+            if (clearSearch) {
+                clearSearch.addEventListener('click', clearSearchFunction);
+            }
+
+            if (clearSearchFromNoResults) {
+                clearSearchFromNoResults.addEventListener('click', clearSearchFunction);
+            }
+
+            // Add search shortcut (Ctrl+F or Cmd+F)
+            document.addEventListener('keydown', function (e) {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                    e.preventDefault();
+                    if (searchInput) searchInput.focus();
+                }
+            });
+
+            // Debug: Log if elements are found
+            console.log('Search elements:', {
+                searchInput: !!searchInput,
+                searchResults: !!searchResults,
+                clearSearch: !!clearSearch,
+                noResults: !!noResults,
+                faqSectionsCount: faqSections.length,
+                allQuestionsCount: allQuestions.length,
+            });
         });
     </script>
+
+    <style>
+        mark {
+            background-color: #fef3c7;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        .faq-section {
+            transition: all 0.3s ease;
+        }
+
+        .mb-4 {
+            transition: all 0.3s ease;
+        }
+
+        #searchInput:focus {
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+    </style>
 </x-layout>

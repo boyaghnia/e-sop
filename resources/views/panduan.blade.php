@@ -112,6 +112,34 @@
                         type="button"
                         class="faq-question flex w-full items-center justify-between focus:outline-none"
                     >
+                        <h1 class="font-semibold">Infografis SOP</h1>
+                        <span class="rounded-full bg-blue-500 text-white">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="h-6 w-6"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                                />
+                            </svg>
+                        </span>
+                    </button>
+                    <div class="faq-answer mt-6 hidden text-sm text-gray-900">
+                        <img class="max-w-[50%]" src="{{ asset('img/infografis-sop.jpeg') }}" alt="" />
+                    </div>
+                </div>
+
+                <div class="rounded-lg bg-blue-50 p-8">
+                    <button
+                        type="button"
+                        class="faq-question flex w-full items-center justify-between focus:outline-none"
+                    >
                         <h1 class="font-semibold">Buku Pedoman E-SOP</h1>
                         <span class="rounded-full bg-blue-500 text-white">
                             <svg

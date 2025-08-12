@@ -89,7 +89,7 @@
                     @php
                         $current = $paginator->currentPage();
                         $last = $paginator->lastPage();
-                        
+
                         // Tentukan 3 halaman yang akan ditampilkan
                         if ($current == 1) {
                             $start = 1;
@@ -107,7 +107,9 @@
                     @for ($page = $start; $page <= $end; $page++)
                         @if ($page == $current)
                             <span aria-current="page">
-                                <span class="relative -ml-px inline-flex cursor-default items-center border border-gray-300 bg-blue-50 px-4 py-2 text-sm leading-5 font-medium text-blue-600">
+                                <span
+                                    class="relative -ml-px inline-flex cursor-default items-center border border-gray-300 bg-blue-50 px-4 py-2 text-sm leading-5 font-medium text-blue-600"
+                                >
                                     {{ $page }}
                                 </span>
                             </span>

@@ -2461,36 +2461,142 @@
         }
 
         function drawDecisionLineInPage(ctx, decisionCenter, allCenters, pageNumber) {
-            // For now, only draw decision lines within the same page
-            // You can extend this to handle cross-page decision lines if needed
+            console.log(`Drawing decision line for symbol ${decisionCenter.sequentialNumber} on page ${pageNumber}`);
 
-            // Find the original input field to get return_to value
-            // This is simplified - you might need to adapt based on your data structure
+            // Find the original input field to get return_to value using symbolOrder
             const editorRows = document.querySelectorAll('#editor-tabel tbody tr');
 
-            // Calculate which editor row this decision symbol corresponds to
-            const rowsPerPage = ROWS_PER_PAGE; // Use dynamic calculation
-            const pageRows = document.querySelectorAll(
-                `.page-preview:nth-child(${pageNumber}) tbody tr:not(.buffer-row)`,
-            );
-            const rowInPage = Array.from(pageRows).indexOf(decisionCenter.element.closest('tr'));
-            const globalRowIndex = (pageNumber - 1) * rowsPerPage + rowInPage;
+            let globalRowIndex = -1;
 
-            if (globalRowIndex < editorRows.length) {
+            if (decisionCenter.sequentialNumber > 0) {
+                // Use symbolOrder to find the exact row and column
+                const symbolOrderItem = symbolOrder.find((item) => item.number === decisionCenter.sequentialNumber);
+                if (symbolOrderItem) {
+                    // Use the row number from symbolOrder (1-based, convert to 0-based)
+                    globalRowIndex = symbolOrderItem.rowNumber - 1;
+                    console.log(
+                        `Decision symbol ${decisionCenter.sequentialNumber}: Using symbolOrder row ${symbolOrderItem.rowNumber} -> globalRowIndex ${globalRowIndex}`,
+                    );
+                } else {
+                    console.log(`Decision symbol ${decisionCenter.sequentialNumber}: NOT found in symbolOrder`);
+                    return;
+                }
+            } else {
+                console.log(`Decision symbol has no sequential number, skipping`);
+                return;
+            }
+
+            console.log(
+                `Decision symbol ${decisionCenter.sequentialNumber}: finalGlobalRowIndex=${globalRowIndex}, cellIndex=${decisionCenter.cellIndex}`,
+            );
+
+            if (globalRowIndex >= 0 && globalRowIndex < editorRows.length) {
                 const originalRow = editorRows[globalRowIndex];
-                const originalCell = originalRow ? originalRow.children[decisionCenter.cellIndex] : null;
+                // Use symbolOrder to get the correct cell index
+                const symbolOrderItem = symbolOrder.find((item) => item.number === decisionCenter.sequentialNumber);
+                const actualCellIndex = symbolOrderItem ? symbolOrderItem.colIndex + 2 : decisionCenter.cellIndex;
+
+                const originalCell = originalRow ? originalRow.children[actualCellIndex] : null;
                 const returnInput = originalCell ? originalCell.querySelector('input[name^="return_to_"]') : null;
+
+                console.log(
+                    `Decision symbol ${decisionCenter.sequentialNumber}: returnInput value = ${returnInput ? returnInput.value : 'none'}`,
+                );
+                console.log(`Decision symbol ${decisionCenter.sequentialNumber}: using cellIndex = ${actualCellIndex}`);
 
                 if (returnInput && returnInput.value) {
                     const targetNumber = parseInt(returnInput.value);
-                    // Cari berdasarkan nomor berurutan, bukan globalNumber
+                    console.log(
+                        `Decision symbol ${decisionCenter.sequentialNumber}: looking for target symbol ${targetNumber}`,
+                    );
+
+                    // First try to find target symbol in current page
                     let targetSymbol = allCenters.find((center) => center.sequentialNumber === targetNumber);
 
+                    // If not found in current page, search across all pages
+                    if (!targetSymbol) {
+                        console.log(
+                            `Target symbol ${targetNumber} not found in current page, searching across all pages`,
+                        );
+
+                        // Find target in symbolOrder first
+                        const targetOrderItem = symbolOrder.find((item) => item.number === targetNumber);
+                        if (targetOrderItem) {
+                            console.log(`Found target ${targetNumber} in symbolOrder:`, targetOrderItem);
+
+                            // Calculate which page the target is on
+                            const rowsPerPage = getCurrentRowsPerPage();
+                            const targetPageNumber = Math.ceil(targetOrderItem.rowNumber / rowsPerPage);
+                            console.log(`Target symbol ${targetNumber} should be on page ${targetPageNumber}`);
+
+                            // Find the target symbol element in the target page
+                            const targetPageElement = document.querySelector(
+                                `.page-preview:nth-child(${targetPageNumber})`,
+                            );
+                            if (targetPageElement) {
+                                const targetTable = targetPageElement.querySelector('.flow-table');
+                                const targetSymbolElements = targetTable.querySelectorAll(
+                                    '.symbol-preview > div:first-child',
+                                );
+
+                                targetSymbolElements.forEach((symbolElement) => {
+                                    if (!targetSymbol) {
+                                        const symbolPreview = symbolElement.parentElement;
+                                        const symbolNumberElement = symbolPreview.querySelector('.symbol-number');
+
+                                        if (
+                                            symbolNumberElement &&
+                                            parseInt(symbolNumberElement.textContent) === targetNumber
+                                        ) {
+                                            const rect = symbolElement.getBoundingClientRect();
+                                            const currentPageTable = document.querySelector(
+                                                `.page-preview:nth-child(${pageNumber}) .flow-table`,
+                                            );
+                                            const currentTableRect = currentPageTable.getBoundingClientRect();
+
+                                            // Calculate relative coordinates to current page
+                                            const centerX = rect.left - currentTableRect.left + rect.width / 2;
+                                            const centerY = rect.top - currentTableRect.top + rect.height / 2;
+
+                                            targetSymbol = {
+                                                element: symbolElement,
+                                                x: centerX,
+                                                y: centerY,
+                                                rowIndex:
+                                                    Math.floor((targetOrderItem.rowNumber - 1) / rowsPerPage) *
+                                                        rowsPerPage +
+                                                    ((targetOrderItem.rowNumber - 1) % rowsPerPage),
+                                                cellIndex: targetOrderItem.colIndex,
+                                                sequentialNumber: targetNumber,
+                                                symbolType: getSymbolType(symbolElement),
+                                                isConnector: false,
+                                            };
+
+                                            console.log(
+                                                `Created cross-page target symbol ${targetNumber}:`,
+                                                targetSymbol,
+                                            );
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    }
+
                     if (targetSymbol) {
-                        // Draw decision line within this page with collision detection
+                        console.log(
+                            `Drawing decision line from symbol ${decisionCenter.sequentialNumber} to ${targetSymbol.sequentialNumber}`,
+                        );
+                        // Draw decision line with collision detection
                         drawDecisionLineWithCollisionDetection(ctx, decisionCenter, targetSymbol, allCenters, 1);
+                    } else {
+                        console.log(`Target symbol ${targetNumber} not found for decision line`);
                     }
                 }
+            } else {
+                console.log(
+                    `Invalid globalRowIndex ${globalRowIndex} for decision symbol ${decisionCenter.sequentialNumber} (total rows: ${editorRows.length})`,
+                );
             }
         }
 
@@ -2656,13 +2762,17 @@
 
                     if (globalRowIndex >= 0 && globalRowIndex < editorRows.length) {
                         const originalRow = editorRows[globalRowIndex];
-                        const originalCell = originalRow ? originalRow.children[center.cellIndex] : null;
+                        // Use symbolOrder to get the correct cell index
+                        const symbolOrderItem = symbolOrder.find((item) => item.number === center.sequentialNumber);
+                        const actualCellIndex = symbolOrderItem ? symbolOrderItem.colIndex + 2 : center.cellIndex;
+
+                        const originalCell = originalRow ? originalRow.children[actualCellIndex] : null;
                         const connectToInput = originalCell
                             ? originalCell.querySelector('input[name^="connect_to_"]')
                             : null;
 
                         console.log(`Connect-to input for symbol ${center.sequentialNumber}:`, connectToInput?.value);
-                        console.log(`Looking in row ${globalRowIndex}, cell ${center.cellIndex}`);
+                        console.log(`Looking in row ${globalRowIndex}, cell ${actualCellIndex}`);
                         console.log(`Original cell HTML:`, originalCell?.innerHTML.substring(0, 200));
 
                         if (connectToInput && connectToInput.value) {
@@ -3102,8 +3212,26 @@
             if (element.classList.contains('bg-blue-500')) return 'start';
             if (element.classList.contains('bg-green-500')) return 'process';
             if (element.classList.contains('bg-yellow-400')) return 'decision';
+            if (element.classList.contains('rotate-45') && element.classList.contains('bg-yellow-400'))
+                return 'decision'; // Additional check for decision symbols
             if (element.classList.contains('connector-symbol-svg')) return 'connector'; // Connector SVG symbol in buffer row
             if (element.classList.contains('border-dashed')) return 'empty';
+
+            // Additional checks for decision symbols that might have different class structure
+            if (element.tagName === 'DIV') {
+                const computedStyle = window.getComputedStyle(element);
+                const transform = computedStyle.transform;
+                const backgroundColor = computedStyle.backgroundColor;
+
+                // Check if it's rotated 45 degrees and has yellow background
+                if (
+                    transform.includes('rotate(45deg)') &&
+                    (backgroundColor.includes('255, 193, 7') || backgroundColor.includes('rgb(251, 191, 36)'))
+                ) {
+                    return 'decision';
+                }
+            }
+
             return 'unknown';
         }
 
@@ -3369,5 +3497,3 @@
         });
     </script>
 </x-layout>
-
-<x-back-to-top></x-back-to-top>

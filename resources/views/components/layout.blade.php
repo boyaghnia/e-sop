@@ -26,5 +26,7 @@
         <footer class="mt-auto mr-8 ml-80">
             {{-- <x-footer></x-footer> --}}
         </footer>
+
+        <x-back-to-top></x-back-to-top>
     </body>
 </html>

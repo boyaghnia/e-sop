@@ -34,9 +34,10 @@ class DashboardController extends Controller
                 $userQuery->where('role', 'obu')->orWhere('role', 'upbu');
             });
         } elseif ($user->role === 'obu') {
-            // OBU dapat melihat ESOP dari role 'upbu'
-            $allEsopsQuery->whereHas('user', function($userQuery) {
-                $userQuery->where('role', 'upbu');
+            // OBU dapat melihat ESOP dari role 'upbu' dengan otban yang sama
+            $allEsopsQuery->whereHas('user', function($userQuery) use ($user) {
+                $userQuery->where('role', 'upbu')
+                         ->where('otban', $user->otban);
             });
         } else {
             // Role lain (termasuk upbu) hanya melihat ESOP milik sendiri
@@ -64,12 +65,14 @@ class DashboardController extends Controller
         } elseif ($user->role === 'sekretariat' || $user->role === 'direktorat') {
             $unitStatsQuery->whereIn('users.role', ['obu', 'upbu']);
         } elseif ($user->role === 'obu') {
-            $unitStatsQuery->where('users.role', 'upbu');
+            $unitStatsQuery->where('users.role', 'upbu')
+                          ->where('users.otban', $user->otban);
         } else {
             $unitStatsQuery->where('users.id', $user->id);
         }
 
-        $unitStats = $unitStatsQuery->paginate(5, ['*'], 'unit_page');
+        // Urutkan berdasarkan nama unit kerja A-Z
+        $unitStats = $unitStatsQuery->orderBy('users.name', 'asc')->paginate(5, ['*'], 'unit_page');
 
         // Query untuk statistik berdasarkan role
         $roleStatsQuery = Esop::join('users', 'esops.user_id', '=', 'users.id')
@@ -81,7 +84,8 @@ class DashboardController extends Controller
         } elseif ($user->role === 'sekretariat' || $user->role === 'direktorat') {
             $roleStatsQuery->whereIn('users.role', ['obu', 'upbu']);
         } elseif ($user->role === 'obu') {
-            $roleStatsQuery->where('users.role', 'upbu');
+            $roleStatsQuery->where('users.role', 'upbu')
+                          ->where('users.otban', $user->otban);
         } else {
             $roleStatsQuery->where('users.role', $user->role);
         }
@@ -95,6 +99,7 @@ class DashboardController extends Controller
     {
         $query = $request->get('query');
         $table = $request->get('table', 'all'); // 'my' untuk table atas, 'all' untuk table bawah, 'units' untuk table statistik
+        $getAll = $request->get('get_all', false); // Parameter untuk mengambil semua data
         $user = Auth::user();
         
         try {
@@ -116,16 +121,18 @@ class DashboardController extends Controller
                 } elseif ($user->role === 'sekretariat' || $user->role === 'direktorat') {
                     $unitStatsQuery->whereIn('users.role', ['obu', 'upbu']);
                 } elseif ($user->role === 'obu') {
-                    $unitStatsQuery->where('users.role', 'upbu');
+                    $unitStatsQuery->where('users.role', 'upbu')
+                                  ->where('users.otban', $user->otban);
                 } else {
                     $unitStatsQuery->where('users.id', $user->id);
                 }
 
-                if (!empty($query)) {
+                // Hanya filter berdasarkan query jika bukan permintaan get_all
+                if (!$getAll && !empty($query)) {
                     $unitStatsQuery->where('users.name', 'LIKE', '%' . $query . '%');
                 }
 
-                $units = $unitStatsQuery->get();
+                $units = $unitStatsQuery->orderBy('users.name', 'asc')->get();
 
                 return response()->json([
                     'success' => true,
@@ -153,9 +160,10 @@ class DashboardController extends Controller
                             $userQuery->where('role', 'obu')->orWhere('role', 'upbu');
                         });
                     } elseif ($user->role === 'obu') {
-                        // OBU dapat melihat ESOP dari role 'upbu'
-                        $esopsQuery->whereHas('user', function($userQuery) {
-                            $userQuery->where('role', 'upbu');
+                        // OBU dapat melihat ESOP dari role 'upbu' dengan otban yang sama
+                        $esopsQuery->whereHas('user', function($userQuery) use ($user) {
+                            $userQuery->where('role', 'upbu')
+                                     ->where('otban', $user->otban);
                         });
                     } else {
                         // Role lain (termasuk upbu) hanya melihat ESOP milik sendiri
@@ -188,9 +196,10 @@ class DashboardController extends Controller
                             $userQuery->where('role', 'obu')->orWhere('role', 'upbu');
                         });
                     } elseif ($user->role === 'obu') {
-                        // OBU dapat melihat ESOP dari role 'upbu'
-                        $esopsQuery->whereHas('user', function($userQuery) {
-                            $userQuery->where('role', 'upbu');
+                        // OBU dapat melihat ESOP dari role 'upbu' dengan otban yang sama
+                        $esopsQuery->whereHas('user', function($userQuery) use ($user) {
+                            $userQuery->where('role', 'upbu')
+                                     ->where('otban', $user->otban);
                         });
                     } else {
                         // Role lain (termasuk upbu) hanya melihat ESOP milik sendiri

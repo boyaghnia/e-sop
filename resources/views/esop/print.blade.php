@@ -3652,6 +3652,10 @@
         }
     </script>
 
+    <script>
+        document.title = '{{ $esop->nama_sop }}';
+    </script>
+
     {{--
         <script>
         window.onload = async function () {
@@ -3662,5 +3666,3 @@
         </script>
     --}}
 </x-layout>
-
-<x-back-to-top></x-back-to-top>
