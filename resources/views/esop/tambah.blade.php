@@ -368,7 +368,6 @@
                                 <img class="mx-auto w-40" src="{{ asset('img/logo-kemenhub.png') }}" alt="" />
                             </td>
                             <td rowspan="5" colspan="3" class="border p-2 text-center">
-                                <img class="mx-auto w-40" src="{{ asset('img/logo-djpu.png') }}" alt="" />
                                 <div id="preview_judul_sop" class="text-center text-sm text-gray-800"></div>
                             </td>
                             <td colspan="2" class="border p-2 font-bold">Nomor SOP</td>

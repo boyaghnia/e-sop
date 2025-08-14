@@ -1133,7 +1133,7 @@
                 icon: 'success',
                 title: 'Berhasil!',
                 text: '{{ session('success') }}',
-                confirmButtonColor: '#10b981'
+                confirmButtonColor: '#10b981',
             });
         @endif
 

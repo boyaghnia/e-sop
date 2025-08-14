@@ -177,27 +177,28 @@
                                         </svg>
                                     </button>
                                 </a>
-                                <a href="{{ route('esop.edit', ['id' => $esop->id]) }}">
-                                    <button
-                                        class="cursor-pointer rounded-sm bg-blue-500 px-2 py-2 text-xs font-semibold text-white shadow-sm hover:bg-blue-400 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-                                        title="Edit SOP"
+                                <button
+                                    class="btn-edit-esop cursor-pointer rounded-sm bg-blue-500 px-2 py-2 text-xs font-semibold text-white shadow-sm hover:bg-blue-400 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                                    title="Edit SOP"
+                                    data-esop-id="{{ $esop->id }}"
+                                    data-esop-name="{{ $esop->nama_sop }}"
+                                    data-esop-status="{{ $esop->file_path && $esop->file_name ? 'disahkan' : 'draft' }}"
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke-width="1.5"
+                                        stroke="currentColor"
+                                        class="size-4"
                                     >
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke-width="1.5"
-                                            stroke="currentColor"
-                                            class="size-4"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"
-                                            />
-                                        </svg>
-                                    </button>
-                                </a>
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"
+                                        />
+                                    </svg>
+                                </button>
                                 <form
                                     action="{{ route('esop.delete', ['id' => $esop->id]) }}"
                                     method="POST"
@@ -307,5 +308,81 @@
 
         // Setup search for all tables
         setupSearch('searchInputAllEsops', '.tableBodyAllEsops');
+
+        // Event listener untuk tombol delete dan edit SOP
+        document.addEventListener('click', function (event) {
+            // Event listener untuk tombol delete SOP
+            if (event.target.closest('.btn-delete-esop')) {
+                event.preventDefault();
+
+                const button = event.target.closest('.btn-delete-esop');
+                const form = button.closest('.delete-esop-form');
+                const namaSop = form.getAttribute('data-nama');
+
+                Swal.fire({
+                    title: 'Konfirmasi Hapus',
+                    text: `Apakah Anda yakin ingin menghapus SOP "${namaSop}"?`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc2626',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: 'Ya, Hapus!',
+                    cancelButtonText: 'Batal',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            }
+
+            // Event listener untuk tombol edit SOP
+            if (event.target.closest('.btn-edit-esop')) {
+                event.preventDefault();
+
+                const button = event.target.closest('.btn-edit-esop');
+                const esopId = button.getAttribute('data-esop-id');
+                const esopName = button.getAttribute('data-esop-name');
+                const esopStatus = button.getAttribute('data-esop-status');
+
+                // Jika status ESOP adalah "disahkan", tampilkan konfirmasi
+                if (esopStatus === 'disahkan') {
+                    Swal.fire({
+                        title: 'Peringatan!',
+                        text: `SOP "${esopName}" sudah disahkan. Apakah Anda yakin ingin mengeditnya? Status akan berubah kembali menjadi draft dan file yang sudah diupload akan dihapus.`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#f59e0b',
+                        cancelButtonColor: '#6b7280',
+                        confirmButtonText: 'Ya, Edit SOP',
+                        cancelButtonText: 'Batal',
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Submit form untuk mengubah status ke draft dan hapus file
+                            const form = document.createElement('form');
+                            form.method = 'POST';
+                            form.action = `/esop/reset-to-draft/${esopId}`;
+
+                            // Tambahkan CSRF token
+                            const csrfToken = document
+                                .querySelector('meta[name="csrf-token"]')
+                                ?.getAttribute('content');
+                            if (csrfToken) {
+                                const csrfInput = document.createElement('input');
+                                csrfInput.type = 'hidden';
+                                csrfInput.name = '_token';
+                                csrfInput.value = csrfToken;
+                                form.appendChild(csrfInput);
+                            }
+
+                            document.body.appendChild(form);
+                            form.submit();
+                        }
+                    });
+                } else {
+                    // Jika status draft, langsung redirect ke halaman edit
+                    window.location.href = `/esop/edit/${esopId}`;
+                }
+            }
+        });
     });
 </script>

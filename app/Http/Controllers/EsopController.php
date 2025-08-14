@@ -201,6 +201,67 @@ class EsopController extends Controller
         return redirect()->route('esop.edit', ['id' => $id]);
     }
 
+    function resetToDraft($id) {
+        $user = Auth::user();
+        $query = Esop::where('id', $id);
+        
+        // Filter akses berdasarkan role (sama seperti esopEdit)
+        if ($user->role === 'admin') {
+            // Admin dapat mengakses semua SOP
+        } elseif ($user->role === 'sekretariat' || $user->role === 'direktorat') {
+            // Sekretariat dan Direktorat dapat mengakses SOP milik sendiri dan SOP dari role upbu
+            $query->where(function($q) use ($user) {
+                $q->where('user_id', $user->id)
+                  ->orWhere(function($subQuery) use ($user) {
+                      $subQuery->where('id_uker', $user->id_uker)
+                               ->whereHas('user', function($userQuery) {
+                                   $userQuery->where('role', 'obu');
+                               });
+                  })
+                  ->orWhereHas('user', function($userQuery) {
+                      $userQuery->where('role', 'upbu');
+                  });
+            });
+        } elseif ($user->role === 'obu') {
+            // OBU dapat mengakses SOP milik sendiri dan SOP dari role upbu dengan otban yang sama
+            $query->where(function($q) use ($user) {
+                $q->where('user_id', $user->id)
+                  ->orWhere(function($subQuery) use ($user) {
+                      $subQuery->where('id_uker', $user->id_uker)
+                               ->whereHas('user', function($userQuery) {
+                                   $userQuery->where('role', 'upbu');
+                               });
+                  })
+                  ->orWhereHas('user', function($userQuery) use ($user) {
+                      $userQuery->where('role', 'upbu')
+                               ->where('otban', $user->otban);
+                  });
+            });
+        } else {
+            // Role lain hanya dapat mengakses SOP milik sendiri atau yang sama id_uker
+            $query->where(function($q) use ($user) {
+                $q->where('id_uker', $user->id_uker)
+                  ->orWhere('user_id', $user->id);
+            });
+        }
+        
+        $esop = $query->firstOrFail();
+        
+        // Hapus file yang sudah diupload jika ada
+        if ($esop->file_path && $esop->file_name) {
+            if (Storage::disk('public')->exists($esop->file_path)) {
+                Storage::disk('public')->delete($esop->file_path);
+            }
+        }
+        
+        // Reset status ke draft (hapus file_path dan file_name)
+        $esop->file_path = null;
+        $esop->file_name = null;
+        $esop->save();
+        
+        return redirect()->route('esop.edit', ['id' => $id])->with('success', 'SOP berhasil diubah kembali ke status draft.');
+    }
+
     function esopDelete($id)
     {
         $user = Auth::user();

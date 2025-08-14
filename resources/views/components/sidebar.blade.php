@@ -2,7 +2,7 @@
     id="sidebar"
     class="fixed z-30 flex h-screen w-64 flex-col justify-between overflow-y-auto border-r bg-white px-5 py-5 rtl:border-r-0 rtl:border-l dark:border-gray-700 dark:bg-gray-900"
 >
-    <div>
+    <>
         {{-- Logo & Navigation --}}
         <a class="flex items-center align-middle" href="#">
             <img class="-ml-3 h-12 w-auto" src="{{ asset('img/logo-kemenhub.png') }}" alt="" />
@@ -68,7 +68,10 @@
                     <span class="mx-2 text-sm font-medium">Data SOP</span>
                 </x-nav-link>
 
-                <x-nav-link href="/esop/tambah" :active="request()->is('esop/tambah') || request()->is('esop/edit/*')">
+                <x-nav-link
+                    href="/esop/tambah"
+                    :active="request()->is('esop/tambah') || request()->is('esop/edit/*') || request()->is('esop/flow/*') || request()->is('esop/print/*') "
+                >
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
@@ -84,7 +87,17 @@
                         />
                     </svg>
 
-                    <span class="mx-2 text-sm font-medium">Tambah SOP</span>
+                    <span class="mx-2 text-sm font-medium">
+                        {{
+                            request()->is('esop/edit/*')
+                                ? 'Edit SOP'
+                                : (request()->is('esop/flow/*')
+                                    ? 'Flow SOP'
+                                    : (request()->is('esop/print/*')
+                                        ? 'Print SOP'
+                                        : 'Tambah SOP'))
+                        }}
+                    </span>
                 </x-nav-link>
 
                 <x-nav-link

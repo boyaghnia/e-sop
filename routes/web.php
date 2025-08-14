@@ -31,6 +31,7 @@ use App\Http\Controllers\DashboardController;
         Route::post('/esop/simpan', [EsopController::class, 'esopSimpan'])->name('esop.simpan');
         Route::get('/esop/edit/{id}', [EsopController::class, 'esopEdit'])->name('esop.edit');
         Route::post('/esop/update/{id}', [EsopController::class, 'esopUpdate'])->name('esop.update');
+        Route::post('/esop/reset-to-draft/{id}', [EsopController::class, 'resetToDraft'])->name('esop.reset.draft');
         Route::delete('/esop/{id}', [EsopController::class, 'esopDelete'])->name('esop.delete');
         Route::get('/esop/flow/{id}', [EsopController::class, 'esopFlow'])->name('esop.flow');
         Route::post('/esop/flow/{id}', [EsopController::class, 'simpanFlow'])->name('esop.flow.simpan');

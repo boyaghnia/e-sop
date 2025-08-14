@@ -408,9 +408,10 @@
             .print-area {
                 height: 100vh !important;
                 max-height: 100vh !important;
-                margin: 0 !important;
+                max-width: 99% !important;
+                margin: auto !important;
                 overflow: hidden !important;
-                padding: 0 !important;
+                padding: auto !important;
                 box-sizing: border-box;
                 page-break-inside: avoid !important;
                 page-break-after: always !important;
