@@ -140,7 +140,7 @@
                         type="button"
                         class="faq-question flex w-full items-center justify-between focus:outline-none"
                     >
-                        <h1 class="font-semibold">Buku Pedoman E-SOP</h1>
+                        <h1 class="font-semibold">Buku Panduan E-SOP</h1>
                         <span class="rounded-full bg-blue-500 text-white">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"

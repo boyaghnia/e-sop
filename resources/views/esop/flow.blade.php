@@ -911,21 +911,21 @@
                         <button
                             type="button"
                             onclick="removeRow()"
-                            class="rounded-md border border-blue-500 px-3 py-2 text-sm text-blue-500 hover:bg-blue-50"
+                            class="cursor-pointer rounded-md border border-blue-500 px-3 py-2 text-sm text-blue-500 hover:bg-blue-50"
                         >
                             - Hapus Baris
                         </button>
                         <button
                             type="button"
                             onclick="addRow()"
-                            class="rounded-md border border-blue-500 px-3 py-2 text-sm text-blue-500 hover:bg-blue-50"
+                            class="cursor-pointer rounded-md border border-blue-500 px-3 py-2 text-sm text-blue-500 hover:bg-blue-50"
                         >
                             + Tambah Baris
                         </button>
                         <button
                             type="button"
                             onclick="clearAllSymbolsWithSweetAlert()"
-                            class="rounded-md border border-red-500 px-3 py-2 text-sm text-red-500 hover:bg-red-50"
+                            class="cursor-pointer rounded-md border border-red-500 px-3 py-2 text-sm text-red-500 hover:bg-red-50"
                             title="Kosongkan semua pilihan simbol dan reset penomoran"
                         >
                             <svg
@@ -946,7 +946,7 @@
                         <button
                             type="button"
                             onclick="showMultiDirectionInfo()"
-                            class="rounded-md border border-gray-500 px-3 py-2 text-sm text-gray-500 hover:bg-gray-50"
+                            class="cursor-pointer rounded-md border border-gray-500 px-3 py-2 text-sm text-gray-500 hover:bg-gray-50"
                             title="Info Multi Direction"
                         >
                             <svg
@@ -976,7 +976,7 @@
                             type="submit"
                             id="simpanButton"
                             onclick="showSuccessAlert()"
-                            class="rounded-sm bg-blue-500 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-400"
+                            class="cursor-pointer rounded-sm bg-blue-500 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-400"
                         >
                             Simpan
                         </button>
@@ -3460,23 +3460,53 @@
         // Function to show multi direction info
         function showMultiDirectionInfo() {
             Swal.fire({
-                title: 'Multi Direction untuk Symbol Proses',
+                title: 'Panduan Garis Penghubung',
                 html: `
-                    <div class="text-left space-y-3">
-                        <p><strong>Cara Menggunakan:</strong></p>
-                        <ol class="list-decimal list-inside space-y-2">
-                            <li>Pilih symbol <span class="bg-green-500 text-white px-2 py-1 rounded">Proses</span> (hijau)</li>
-                            <li>Akan muncul input "Hubungkan ke nomor"</li>
-                            <li>Masukkan nomor target yang dipisahkan koma</li>
-                            <li>Contoh: <code class="bg-gray-100 px-1 rounded">2,3</code> akan menghubungkan ke symbol nomor 2 dan 3</li>
-                            <li>Garis akan muncul dengan warna berbeda untuk setiap koneksi</li>
-                        </ol>
-                        <div class="mt-4 p-3 bg-blue-50 rounded">
-                            <p><strong>Catatan:</strong></p>
-                            <ul class="list-disc list-inside space-y-1 text-sm">
-                                <li>Warna garis akan berbeda untuk setiap koneksi</li>
-                                <li>Garis pertama: hijau, kedua: biru, dst.</li>
-                                <li>Nomor mengacu pada urutan penomoran symbol</li>
+                    <div class="text-left space-y-4">
+                        <p class="text-sm">Panduan ini menjelaskan <strong>semua jenis garis</strong> di flowchart: urutan normal, multi direction, keputusan (return), dan lintas halaman.</p>
+
+                        <div class="space-y-2">
+                            <h3 class="font-semibold">1) Urutan Normal (Hitam)</h3>
+                            <ol class="list-decimal list-inside space-y-1 text-sm">
+                                <li>Pilih symbol <span class="bg-blue-500 text-white px-2 py-0.5 rounded">Start</span> / <span class="bg-green-500 text-white px-2 py-0.5 rounded">Proses</span> / <span class="bg-yellow-400 px-2 py-0.5 rounded">Decision</span>.</li>
+                                <li>Nomor symbol akan <em>berurutan otomatis</em> sesuai urutan pilihan.</li>
+                                <li>Garis <strong>hitam</strong> menghubungkan nomor <code class="bg-gray-100 px-1 rounded">n → n+1</code>.</li>
+                            </ol>
+                        </div>
+
+                        <div class="space-y-2">
+                            <h3 class="font-semibold">2) Multi Direction (Merah)</h3>
+                            <ol class="list-decimal list-inside space-y-1 text-sm">
+                                <li>Pada symbol <span class="bg-green-500 text-white px-2 py-0.5 rounded">Proses</span> / <span class="bg-blue-500 text-white px-2 py-0.5 rounded">Start</span> / <span class="bg-yellow-400 px-2 py-0.5 rounded">Decision</span> akan muncul input <em>"Hubungkan ke nomor"</em>.</li>
+                                <li>Masukkan nomor target dipisahkan koma, misal <code class="bg-gray-100 px-1 rounded">2,3</code> untuk menghubungkan ke symbol nomor 2 dan 3.</li>
+                                <li>Setiap koneksi digambar <strong>garis merah</strong> (dibedakan/ditumpuk agar tidak bentrok).</li>
+                                <li>Jika sebuah target sudah terhubung dari multi direction, garis hitam urutan normal ke target tersebut akan <em>diabaikan</em>.</li>
+                            </ol>
+                        </div>
+
+                        <div class="space-y-2">
+                            <h3 class="font-semibold">3) Keputusan / Return (Merah)</h3>
+                            <ol class="list-decimal list-inside space-y-1 text-sm">
+                                <li>Pada symbol <span class="bg-yellow-400 px-2 py-0.5 rounded">Decision</span> isikan <em>"Kembalikan ke nomor"</em> (mis. <code class="bg-gray-100 px-1 rounded">4</code>).</li>
+                                <li>Garis <strong>merah</strong> akan keluar dari sisi kiri/kanan diamond sesuai posisi target untuk menghindari tabrakan.</li>
+                                <li>Label <code class="bg-gray-100 px-1 rounded">Tidak</code> ditempatkan otomatis pada jalur return.</li>
+                            </ol>
+                        </div>
+
+                        <div class="space-y-2">
+                            <h3 class="font-semibold">4) Lintas Halaman</h3>
+                            <ol class="list-decimal list-inside space-y-1 text-sm">
+                                <li>Jika alur berlanjut ke halaman berikutnya, sistem menambahkan baris <em>connector</em> dan menggambar panah putus-hubung antar halaman.</li>
+                                <li>Di batas bawah/atas halaman, ditambahkan <strong>polygon penanda</strong> agar sambungan terlihat jelas.</li>
+                            </ol>
+                        </div>
+
+                        <div class="space-y-1 text-sm mt-2 p-3 bg-blue-50 rounded">
+                            <p class="font-semibold">Tips:</p>
+                            <ul class="list-disc list-inside space-y-1">
+                                <li>Nomor mengacu pada urutan pemilihan symbol, bukan posisi.</li>
+                                <li>Gunakan koma untuk banyak target (contoh: <code class="bg-gray-100 px-1 rounded">5,8,12</code>).</li>
+                                <li>Garis otomatis menyesuaikan saat Anda memindah/menambah/menghapus baris.</li>
                             </ul>
                         </div>
                     </div>
@@ -3484,7 +3514,7 @@
                 icon: 'info',
                 confirmButtonText: 'Mengerti',
                 confirmButtonColor: '#10b981',
-                width: '600px',
+                width: '650px',
             });
         }
     </script>

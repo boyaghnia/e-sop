@@ -700,7 +700,7 @@
                                                 <button
                                                     type="button"
                                                     onclick="addPelaksanaField()"
-                                                    class="inline-flex items-center gap-1 rounded-md border border-blue-500 px-3 py-2 text-sm font-medium text-blue-500 hover:bg-blue-50"
+                                                    class="inline-flex cursor-pointer items-center gap-1 rounded-md border border-blue-500 px-3 py-2 text-sm font-medium text-blue-500 hover:bg-blue-50"
                                                 >
                                                     <svg
                                                         xmlns="http://www.w3.org/2000/svg"

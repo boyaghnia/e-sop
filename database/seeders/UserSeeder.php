@@ -120,57 +120,37 @@ class UserSeeder extends Seeder
                 'name' => 'Super Admin',
                 'password' => Hash::make('password'),
             ],
-            // [
-            //     'role' => 'obu',
-            //     'id_uker' => 'otbanx',
-            //     'name' => 'Otoritas Bandar Udara Wilayah X',
-            //     'password' => Hash::make('password'),
-            // ],
-            // [
-            //     'role' => 'obu',
-            //     'id_uker' => 'otban9',
-            //     'name' => 'Otoritas Bandar Udara Wilayah IX',
-            //     'password' => Hash::make('password'),
-            // ],
-            // [
-            //     'role' => 'sekretariat',
-            //     'id_uker' => 'ortala',
-            //     'name' => 'Bagian Organisasi & Tata Laksana',
-            //     'password' => Hash::make('password'),
-            // ],
-            // [
-            //     'role' => 'sekretariat',
-            //     'id_uker' => 'sdm',
-            //     'name' => 'Bagian Sumber Daya Manusia',
-            //     'password' => Hash::make('password'),
-            // ],
-            // [
-            //     'role' => 'direktorat',
-            //     'id_uker' => 'dbu',
-            //     'name' => 'Direktorat Bandar Udara',
-            //     'password' => Hash::make('password'),
-            // ],
-            // [
-            //     'role' => 'direktorat',
-            //     'id_uker' => 'dau',
-            //     'name' => 'Direktorat Angkutan Udara',
-            //     'password' => Hash::make('password'),
-            // ],
-            // [
-            //     'role' => 'balai',
-            //     'id_uker' => 'hatpen',
-            //     'name' => 'Balai Kesehatan Penerbangan',
-            //     'password' => Hash::make('password'),
-            // ],
-            // [
-            //     'role' => 'balai',
-            //     'id_uker' => 'btp',
-            //     'name' => 'Balai Teknik Penerbangan',
-            //     'password' => Hash::make('password'),
-            // ],
+            [
+                'role' => 'sekretariat',
+                'id_uker' => 'trial1',
+                'name' => 'Trial User 1',
+                'password' => Hash::make('trial1'),
+            ],
+            [
+                'role' => 'direktorat',
+                'id_uker' => 'trial2',
+                'name' => 'Trial User 2',
+                'password' => Hash::make('trial2'),
+            ],
+            [
+                'role' => 'balai',
+                'id_uker' => 'trial3',
+                'name' => 'Trial User 3',
+                'password' => Hash::make('trial3'),
+            ],
+            [
+                'role' => 'obu',
+                'id_uker' => 'trial4',
+                'name' => 'Trial User 4',
+                'password' => Hash::make('trial4'),
+            ],
+            [
+                'role' => 'upbu',
+                'id_uker' => 'trial5',
+                'name' => 'Trial User 5',
+                'password' => Hash::make('trial5'),
+            ],
         ];
-
-        
 
         foreach ($users as $user) {
             DB::table('users')->updateOrInsert(
